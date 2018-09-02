@@ -11,6 +11,21 @@
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
+//Route::get("/", "Intranet");
+Route::middleware("auth")->namespace("Intranet")->group(function() {
+	Route::get("/", "Main@home");
+	//modulo de registros
+	Route::prefix("intranet")->group(function() {
+		Route::prefix("registros")->group(function() {
+			Route::get("usuarios", "Registros@usuarios");
+		});
+	});
+});
+//autenticacion de usuarios
+Route::group(["prefix" => "login"], function() {
+	Route::get("/", ["as" => "login", "uses" => "Autenticacion@form_login"]);
+	Route::post("verificar", "Autenticacion@post_login");
+	Route::get("logout", "Autenticacion@logout");
+	Route::get("start", "Autenticacion@start");
+	Route::post("start", "Autenticacion@post_start");
 });
