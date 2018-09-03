@@ -60,7 +60,7 @@ class Registros extends Controller {
             "usuario" => $usuario,
             "menu" => $menu
         ];
-        return view("intranet.home")->with($arr_data);
+        return view("intranet.registro_usuarios")->with($arr_data);
     }
 
 }

@@ -21,6 +21,13 @@ Route::middleware("auth")->namespace("Intranet")->group(function() {
 		});
 	});
 });
+//ajax
+Route::middleware("auth")->namespace("Ajax")->prefix("ajax")->group(function() {
+	//modulo de registros
+	Route::prefix("registros")->group(function() {
+		Route::post("sv-usuario", "Registros@sv_usuario");
+	});
+});
 //autenticacion de usuarios
 Route::group(["prefix" => "login"], function() {
 	Route::get("/", ["as" => "login", "uses" => "Autenticacion@form_login"]);
