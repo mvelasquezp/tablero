@@ -61,4 +61,31 @@ class Registros extends Controller {
         ]);
     }
 
+    public function ls_puestos() {
+        $usuario = Auth::user();
+        $puestos = DB::table("ma_puesto as mp")
+            ->leftJoin("us_usuario_puesto as uup", function($join) {
+                $join->on("mp.id_puesto", "=", "uup.id_puesto")
+                    ->on("mp.id_empresa", "=", "uup.id_empresa")
+                    ->on("uup.st_vigente", "=", DB::raw("'Vigente'"));
+            })
+            ->leftJoin("ma_usuarios as mu", function($join) {
+                $join->on("uup.id_usuario", "=", "mu.id_usuario")
+                    ->on("uup.id_empresa", "=", "mu.id_empresa");
+            })
+            ->leftJoin("ma_entidad as me", "mu.cod_entidad", "=", "me.cod_entidad")
+            ->where("mp.st_vigente", "Vigente")
+            ->where("mp.id_empresa", $usuario->id_empresa)
+            ->select(
+                "mp.id_puesto as id",
+                "mp.id_superior as parentId",
+                "mp.des_puesto as name",
+                DB::raw("ifnull(concat(me.des_nombre_1, ' ', me.des_nombre_2, ' ', me.des_nombre_3),'(sin asignar)') as title"),
+                DB::raw("ifnull(mu.des_telefono,'-') as phone"),
+                DB::raw("ifnull(mu.des_email,'-') as mail")
+            )
+            ->get();
+        return Response::json($puestos);
+    }
+
 }

@@ -18,6 +18,7 @@ Route::middleware("auth")->namespace("Intranet")->group(function() {
 	Route::prefix("intranet")->group(function() {
 		Route::prefix("registros")->group(function() {
 			Route::get("usuarios", "Registros@usuarios");
+			Route::get("organigrama", "Registros@organigrama");
 		});
 	});
 });
@@ -26,6 +27,7 @@ Route::middleware("auth")->namespace("Ajax")->prefix("ajax")->group(function() {
 	//modulo de registros
 	Route::prefix("registros")->group(function() {
 		Route::post("sv-usuario", "Registros@sv_usuario");
+		Route::any("ls-puestos", "Registros@ls_puestos");
 	});
 });
 //autenticacion de usuarios

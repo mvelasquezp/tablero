@@ -60,7 +60,18 @@ class Registros extends Controller {
             "usuario" => $usuario,
             "menu" => $menu
         ];
-        return view("intranet.registro_usuarios")->with($arr_data);
+        return view("registro.usuarios")->with($arr_data);
+    }
+
+    public function organigrama() {
+        $usuario = Auth::user();
+        $menu = $this->ObtenerMenu($usuario);
+        //
+        $arr_data = [
+            "usuario" => $usuario,
+            "menu" => $menu
+        ];
+        return view("registro.organigrama")->with($arr_data);
     }
 
 }
