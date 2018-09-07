@@ -28,6 +28,7 @@ Route::middleware("auth")->namespace("Ajax")->prefix("ajax")->group(function() {
 	Route::prefix("registros")->group(function() {
 		Route::post("sv-usuario", "Registros@sv_usuario");
 		Route::any("ls-puestos", "Registros@ls_puestos");
+		Route::any("sv-puesto", "Registros@sv_puesto");
 	});
 });
 //autenticacion de usuarios

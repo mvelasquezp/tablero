@@ -73,6 +73,10 @@ class Registros extends Controller {
                 $join->on("uup.id_usuario", "=", "mu.id_usuario")
                     ->on("uup.id_empresa", "=", "mu.id_empresa");
             })
+            ->leftJoin("ma_oficina as mo", function($join) {
+                $join->on("mp.id_oficina", "=", "mo.id_oficina")
+                    ->on("mp.id_empresa", "=", "mo.id_empresa");
+            })
             ->leftJoin("ma_entidad as me", "mu.cod_entidad", "=", "me.cod_entidad")
             ->where("mp.st_vigente", "Vigente")
             ->where("mp.id_empresa", $usuario->id_empresa)
@@ -82,10 +86,35 @@ class Registros extends Controller {
                 "mp.des_puesto as name",
                 DB::raw("ifnull(concat(me.des_nombre_1, ' ', me.des_nombre_2, ' ', me.des_nombre_3),'(sin asignar)') as title"),
                 DB::raw("ifnull(mu.des_telefono,'-') as phone"),
-                DB::raw("ifnull(mu.des_email,'-') as mail")
+                DB::raw("ifnull(mu.des_email,'-') as mail"),
+                DB::raw("ifnull(mo.des_oficina, '(sin asignar)') as oficina"),
+                "mp.st_vigente as vigencia"
             )
             ->get();
         return Response::json($puestos);
+    }
+
+    public function sv_puesto() {
+        extract(Request::input());
+        if(isset($xxx)) {
+            $usuario = Auth::user();
+            $nuevoPuesto = [
+                "des_puesto" => $nombre,
+                "num_jerarquia" => 1,
+                "id_empresa" => $usuario->id_empresa
+            ];
+            if(isset($ancestro)) {
+                //
+            }
+            if(isset($oficina)) {
+                //
+            }
+            //hacer la insercion
+        }
+        return Response::json([
+            "state" => "error",
+            "msg" => "Parámetros incorrectos"
+        ]);
     }
 
 }
