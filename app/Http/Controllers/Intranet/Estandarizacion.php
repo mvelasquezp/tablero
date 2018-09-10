@@ -74,4 +74,14 @@ class Estandarizacion extends Controller {
         return view("estandarizacion.maestros")->with($arr_data);
     }
 
+    public function procesos() {
+        $usuario = Auth::user();
+        $menu = $this->ObtenerMenu($usuario);
+        $arr_data = [
+            "usuario" => $usuario,
+            "menu" => $menu,
+        ];
+        return view("estandarizacion.procesos")->with($arr_data);
+    }
+
 }

@@ -23,6 +23,7 @@ Route::middleware("auth")->namespace("Intranet")->group(function() {
 		//modulo de estandarizacion de procesos
 		Route::prefix("estandarizacion")->group(function() {
 			Route::get("maestros", "Estandarizacion@maestros");
+			Route::get("procesos", "Estandarizacion@procesos");
 		});
 	});
 });
