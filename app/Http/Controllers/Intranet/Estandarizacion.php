@@ -77,9 +77,19 @@ class Estandarizacion extends Controller {
     public function procesos() {
         $usuario = Auth::user();
         $menu = $this->ObtenerMenu($usuario);
+        $tipos_proyecto = DB::table("pr_catalogo_proyecto")
+            ->where("id_empresa", $usuario->id_empresa)
+            ->where("st_vigente", "Vigente")
+            ->select(
+                "id_catalogo as value",
+                "des_catalogo as text"
+            )
+            ->orderBy("text", "asc")
+            ->get();
         $arr_data = [
             "usuario" => $usuario,
             "menu" => $menu,
+            "tipos" => $tipos_proyecto,
         ];
         return view("estandarizacion.procesos")->with($arr_data);
     }

@@ -13,12 +13,58 @@
             <div id="content">
                 <div class="container-fluid">
                     <div class="row">
-                        <div class="col-4">
-                            <div class="alert alert-success">
-                                <!-- -->
-                            </div>
+                        <div class="col-3">
+                            <form id="form-tipo" class="alert alert-success mb-4">
+                                <div class="row mb-2">
+                                    <div class="col">
+                                        <label for="reg-tipo">Tipo de proyecto</label>
+                                        <select class="form-control form-control-sm" id="reg-tipo">
+                                            <option value="0">- Seleccione -</option>
+                                            @foreach($tipos as $tipo)
+                                            <option value="{{ $tipo->value }}">{{ $tipo->text }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row mb-2 mt-4">
+                                    <div class="col">
+                                        <button class="btn btn-light"><i class="fas fa-chevron-right"></i> Seleccionar</button>
+                                    </div>
+                                </div>
+                            </form>
+                            <form id="form-hitos" class="alert alert-warning">
+                                <div class="row mb-2">
+                                    <div class="col">
+                                        <label for="reg-hito">Seleccione un hito</label>
+                                        <select class="form-control form-control-sm" id="reg-hito">
+                                            <option value="0">- Seleccione -</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row mb-2 mt-4">
+                                    <div class="col">
+                                        <button class="btn btn-primary"><i class="fas fa-plus"></i> Agregar hito</button>
+                                    </div>
+                                </div>
+                            </form>
                         </div>
-                        <div class="col-8"></div>
+                        <div class="col-9">
+                            <tag id="dv-table">
+                                <table class="table table-sm table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Proyecto</th>
+                                            <th>Peso</th>
+                                            <th>Responsable</th>
+                                            <th>% Avance</th>
+                                            <th>% Acumulado</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </tag>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -65,6 +111,13 @@
         <!-- scripts -->
         @include('common.scripts')
         <script type="text/javascript">
+            function FormTipoOnSubmit(event) {
+                event.preventDefault();
+                alert("select!");
+            }
+            //
+            $("#reg-tipo option[value=0]").prop("selected", true);
+            $("#form-tipo").on("submit", FormTipoOnSubmit);
         </script>
     </body>
 </html>

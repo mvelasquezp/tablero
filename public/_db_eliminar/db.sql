@@ -160,7 +160,7 @@ create table ma_campos (
     id_empresa			 int not null,
     id_tipo				 int not null,
     des_campo			 varchar(50) not null,
-	st_vigente           VARCHAR(10) NULL DEFAULT 'Vigente',
+    st_vigente           VARCHAR(10) NOT NULL DEFAULT 'Vigente',
 	created_at           DATETIME NOT NULL DEFAULT current_timestamp,
 	updated_at           DATETIME NULL,
     foreign key (id_tipo) references sys_tipos_dato (id_tipo),
@@ -173,7 +173,7 @@ create table ma_hitos_control (
     id_empresa			 int not null,
     id_responsable		 int not null,
     des_hito			 varchar(50) not null,
-	st_vigente           VARCHAR(10) NULL DEFAULT 'Vigente',
+    st_vigente          VARCHAR(10) NOT NULL DEFAULT 'Vigente',
 	created_at           DATETIME NOT NULL DEFAULT current_timestamp,
 	updated_at           DATETIME NULL,
     foreign key (id_responsable, id_empresa) references ma_puesto (id_puesto, id_empresa),
@@ -197,11 +197,21 @@ create table pr_hitos_campo(
     id_empresa			int not null,
     id_campo			int not null,
     id_usuario_asigna	int not null,
-    st_vigente          VARCHAR(10) NULL DEFAULT 'Vigente',
+    st_vigente          VARCHAR(10) NOT NULL DEFAULT 'Vigente',
 	created_at          DATETIME NOT NULL DEFAULT current_timestamp,
 	updated_at          DATETIME NULL,
     foreign key (id_hito, id_empresa) references ma_hitos_control (id_hito, id_empresa),
     foreign key (id_campo, id_empresa) references ma_campos (id_campo, id_empresa),
     foreign key (id_usuario_asigna,id_empresa) references ma_usuarios (id_usuario,id_empresa),
     primary key (id_hito, id_empresa, id_campo)
+);
+
+
+-- 10-09-2018
+
+create table pr_catalogo_proyecto(
+	id_catalogo			int auto_increment,
+    id_empresa			int not null,
+    des_catalogo		varchar(30) not null,
+    st_vigente			varchar(10) not null default 'Vigente'
 );
