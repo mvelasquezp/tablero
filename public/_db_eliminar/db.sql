@@ -138,3 +138,70 @@ ADD FOREIGN KEY R_11 (id_empresa) REFERENCES ma_empresa (id_empresa);
 
 ALTER TABLE ma_puesto
 ADD FOREIGN KEY R_13 (id_oficina, id_empresa) REFERENCES ma_oficina (id_oficina, id_empresa);
+
+
+-- 08-09-2018
+
+create table sys_tipos_dato (
+	id_tipo				 int auto_increment primary key,
+    des_tipo			 varchar(30),
+	created_at           DATETIME NOT NULL DEFAULT current_timestamp,
+	updated_at           DATETIME NULL
+);
+insert into sys_tipos_dato(des_tipo) values ('Número entero');
+insert into sys_tipos_dato(des_tipo) values ('Número decimal');
+insert into sys_tipos_dato(des_tipo) values ('Texto');
+insert into sys_tipos_dato(des_tipo) values ('Fecha');
+insert into sys_tipos_dato(des_tipo) values ('Caracter');
+insert into sys_tipos_dato(des_tipo) values ('Lógico');
+
+create table ma_campos (
+	id_campo			 int auto_increment,
+    id_empresa			 int not null,
+    id_tipo				 int not null,
+    des_campo			 varchar(50) not null,
+	st_vigente           VARCHAR(10) NULL DEFAULT 'Vigente',
+	created_at           DATETIME NOT NULL DEFAULT current_timestamp,
+	updated_at           DATETIME NULL,
+    foreign key (id_tipo) references sys_tipos_dato (id_tipo),
+    foreign key (id_empresa) references ma_empresa (id_empresa),
+    primary key (id_campo, id_empresa)
+);
+
+create table ma_hitos_control (
+	id_hito				 int auto_increment,
+    id_empresa			 int not null,
+    id_responsable		 int not null,
+    des_hito			 varchar(50) not null,
+	st_vigente           VARCHAR(10) NULL DEFAULT 'Vigente',
+	created_at           DATETIME NOT NULL DEFAULT current_timestamp,
+	updated_at           DATETIME NULL,
+    foreign key (id_responsable, id_empresa) references ma_puesto (id_puesto, id_empresa),
+    primary key (id_hito, id_empresa)
+);
+
+
+-- 09-09-2018
+
+create table sys_estados (
+	id_estado			int auto_increment primary key,
+    cod_estado			varchar(30) not null,
+    des_estado			varchar(30) not null,
+    tp_estado			char not null,
+	created_at          DATETIME NOT NULL DEFAULT current_timestamp,
+	updated_at          DATETIME NULL
+);
+
+create table pr_hitos_campo(
+	id_hito				int not null,
+    id_empresa			int not null,
+    id_campo			int not null,
+    id_usuario_asigna	int not null,
+    st_vigente          VARCHAR(10) NULL DEFAULT 'Vigente',
+	created_at          DATETIME NOT NULL DEFAULT current_timestamp,
+	updated_at          DATETIME NULL,
+    foreign key (id_hito, id_empresa) references ma_hitos_control (id_hito, id_empresa),
+    foreign key (id_campo, id_empresa) references ma_campos (id_campo, id_empresa),
+    foreign key (id_usuario_asigna,id_empresa) references ma_usuarios (id_usuario,id_empresa),
+    primary key (id_hito, id_empresa, id_campo)
+);

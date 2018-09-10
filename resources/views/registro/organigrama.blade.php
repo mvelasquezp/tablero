@@ -5,11 +5,6 @@
         @include('common.head')
         <link rel="stylesheet" type="text/css" href="{{ asset('vendor/getorgchart/getorgchart.css') }}">
         <style type="text/css">
-            .table th, .table td { vertical-align:middle; }
-            .table-sm { font-size:0.8rem; }
-            .table-sm td { font-size:0.75rem; }
-            .btn-xs { font-size:0.75rem;padding:0.125rem 0.5rem; }
-            .alert-xs { font-size:0.75rem }
         </style>
     </head>
     <body>
@@ -59,18 +54,22 @@
                             <form id="form-registro">
                                 <div class="row mb-2">
                                     <div class="col">
-                                        <label for="reg-puesto">Nombre del puesto</label>
-                                        <input type="text" class="form-control form-control-sm" id="reg-puesto" name="puesto" placeholder="Ingrese el nombre">
+                                        <label for="reg-nombre">Nombre del puesto</label>
+                                        <input type="text" class="form-control form-control-sm" id="reg-nombre" name="puesto" placeholder="Ingrese el nombre">
                                     </div>
                                 </div>
                                 <div class="row">
                                     <div class="col">
                                         <label for="reg-superior">Cargo superior</label>
-                                        <select id="reg-superior" class="form-control form-control-sm"></select>
+                                        <select id="reg-superior" class="form-control form-control-sm">
+                                            <option value="0">- Seleccione -</option>
+                                        </select>
                                     </div>
                                     <div class="col">
                                         <label for="reg-oficina">Oficina</label>
-                                        <select id="reg-oficina" class="form-control form-control-sm"></select>
+                                        <select id="reg-oficina" class="form-control form-control-sm">
+                                            <option value="0">- Seleccione -</option>
+                                        </select>
                                     </div>
                                 </div>
                             </form>
@@ -87,6 +86,8 @@
         <script type="text/javascript" src="{{ asset('vendor/getorgchart/getorgchart.js') }}"></script>
         <script type="text/javascript">
             var ls_puestos;
+            var ls_ancestros = {!! json_encode($ancestros) !!};
+            var ls_oficinas = {!! json_encode($oficinas) !!};
             var dataset = [
                 { id: 1, parentId: null, name: "Amber McKenzie", title: "CEO", phone: "678-772-470", mail: "lemmons@jourrapide.com", adress: "Atlanta, GA 30303", image: "images/f-1.jpg" },
                 { id: 2, parentId: 1, name: "Ava Field", title: "Paper goods machine setter", phone: "937-912-4971", mail: "anderson@jourrapide.com", image: "images/f-2.jpg" },
@@ -120,6 +121,8 @@
 
             ];
 
+            CargarAncestros();
+            CargarOficinas();
             CargarDatosPuestos();
             
             function CargarDatosPuestos() {
@@ -164,6 +167,64 @@
                     );
                 }
             }
+
+            function CargarAncestros() {
+                $("#reg-superior").empty().append(
+                    $("<option/>").val(0).html("- Seleccione -")
+                );
+                for(var i in ls_ancestros) {
+                    var iancestro = ls_ancestros[i];
+                    $("#reg-superior").append(
+                        $("<option/>").val(iancestro.value).html(iancestro.text)
+                    );
+                }
+                $("#reg-superior option[value=0]").prop("selected", true);
+            }
+
+            function CargarOficinas() {
+                $("#reg-oficina").empty().append(
+                    $("<option/>").val(0).html("- Seleccione -")
+                );
+                for(var i in ls_oficinas) {
+                    var ioficina = ls_oficinas[i];
+                    $("#reg-oficina").append(
+                        $("<option/>").val(ioficina.value).html(ioficina.text)
+                    );
+                }
+                $("#reg-oficina option[value=0]").prop("selected", true);
+            }
+
+            $("#modal-registro").on("show.bs.modal", function(args) {
+                document.getElementById("reg-nombre").value = "";
+                $("#reg-superior option[value=0]").prop("selected", true);
+                $("#reg-oficina option[value=0]").prop("selected", true);
+            });
+
+            $("#form-registro").on("submit", function(event) {
+                event.preventDefault();
+                $("#btn-sv-registro").hide();
+                var isuperior = document.getElementById("reg-superior").value;
+                var ioficina = document.getElementById("reg-oficina").value;
+                var p = {
+                    _token: "{{ csrf_token() }}",
+                    nombre: document.getElementById("reg-nombre").value
+                };
+                if(isuperior != 0) p.ancestro = isuperior;
+                if(ioficina != 0) p.oficina = ioficina;
+                $.post("{{ url('ajax/registros/sv-puesto') }}", p, function(response) {
+                    if(response.state == "success") {
+                        ls_puestos = response.data.puestos;
+                        ls_ancestros = response.data.ancestros;
+                        ls_oficinas = response.data.oficinas;
+                        CargarDatosPuestos();
+                        CargarAncestros();
+                        CargarOficinas();
+                        $("#modal-registro").modal("hide");
+                    }
+                    else alert(response.msg);
+                    $("#btn-sv-registro").show();
+                }, "json");
+            });
         </script>
     </body>
 </html>

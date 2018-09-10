@@ -9,7 +9,7 @@ use Request;
 use Response;
 use App\User as User;
 
-class Registros extends Controller {
+class Estandarizacion extends Controller {
     /**
      * Show the profile for the given user.
      *
@@ -52,38 +52,26 @@ class Registros extends Controller {
         return $menu;
     }
 
-    public function usuarios() {
+    public function maestros() {
         $usuario = Auth::user();
         $menu = $this->ObtenerMenu($usuario);
-        //
-        $arr_data = [
-            "usuario" => $usuario,
-            "menu" => $menu
-        ];
-        return view("registro.usuarios")->with($arr_data);
-    }
-
-    public function organigrama() {
-        $usuario = Auth::user();
-        $menu = $this->ObtenerMenu($usuario);
-        $ancestros = DB::table("ma_puesto")
-            ->where("id_empresa", $usuario->id_empresa)
-            ->select("id_puesto as value", "des_puesto as text")
+        $tipos = DB::table("sys_tipos_dato")
+            ->select("id_tipo as value", "des_tipo as text")
             ->orderBy("text", "asc")
             ->get();
-        $oficinas = DB::table("ma_oficina")
+        $puestos = DB::table("ma_puesto")
             ->where("id_empresa", $usuario->id_empresa)
-            ->select("id_oficina as value", "des_oficina as text")
+            ->select("id_puesto as value", "des_puesto as text")
             ->orderBy("text", "asc")
             ->get();
         //
         $arr_data = [
             "usuario" => $usuario,
             "menu" => $menu,
-            "ancestros" => $ancestros,
-            "oficinas" => $oficinas
+            "tipos" => $tipos,
+            "puestos" => $puestos
         ];
-        return view("registro.organigrama")->with($arr_data);
+        return view("estandarizacion.maestros")->with($arr_data);
     }
 
 }

@@ -96,7 +96,7 @@ class Registros extends Controller {
 
     public function sv_puesto() {
         extract(Request::input());
-        if(isset($xxx)) {
+        if(isset($nombre)) {
             $usuario = Auth::user();
             $nuevoPuesto = [
                 "des_puesto" => $nombre,
@@ -104,12 +104,65 @@ class Registros extends Controller {
                 "id_empresa" => $usuario->id_empresa
             ];
             if(isset($ancestro)) {
-                //
+                $jerarquia = DB::table("ma_puesto")
+                    ->where("id_empresa", $usuario->id_empresa)
+                    ->where("id_puesto", $ancestro)
+                    ->select("num_jerarquia as value")
+                    ->first();
+                $nuevoPuesto["num_jerarquia"] = $jerarquia->value + 1;
+                $nuevoPuesto["id_superior"] = $ancestro;
             }
             if(isset($oficina)) {
-                //
+                $nuevoPuesto["id_oficina"] = $oficina;
             }
-            //hacer la insercion
+            DB::table("ma_puesto")->insert($nuevoPuesto);
+            //carga datos
+            $puestos = DB::table("ma_puesto as mp")
+                ->leftJoin("us_usuario_puesto as uup", function($join) {
+                    $join->on("mp.id_puesto", "=", "uup.id_puesto")
+                        ->on("mp.id_empresa", "=", "uup.id_empresa")
+                        ->on("uup.st_vigente", "=", DB::raw("'Vigente'"));
+                })
+                ->leftJoin("ma_usuarios as mu", function($join) {
+                    $join->on("uup.id_usuario", "=", "mu.id_usuario")
+                        ->on("uup.id_empresa", "=", "mu.id_empresa");
+                })
+                ->leftJoin("ma_oficina as mo", function($join) {
+                    $join->on("mp.id_oficina", "=", "mo.id_oficina")
+                        ->on("mp.id_empresa", "=", "mo.id_empresa");
+                })
+                ->leftJoin("ma_entidad as me", "mu.cod_entidad", "=", "me.cod_entidad")
+                ->where("mp.st_vigente", "Vigente")
+                ->where("mp.id_empresa", $usuario->id_empresa)
+                ->select(
+                    "mp.id_puesto as id",
+                    "mp.id_superior as parentId",
+                    "mp.des_puesto as name",
+                    DB::raw("ifnull(concat(me.des_nombre_1, ' ', me.des_nombre_2, ' ', me.des_nombre_3),'(sin asignar)') as title"),
+                    DB::raw("ifnull(mu.des_telefono,'-') as phone"),
+                    DB::raw("ifnull(mu.des_email,'-') as mail"),
+                    DB::raw("ifnull(mo.des_oficina, '(sin asignar)') as oficina"),
+                    "mp.st_vigente as vigencia"
+                )
+                ->get();
+            $ancestros = DB::table("ma_puesto")
+                ->where("id_empresa", $usuario->id_empresa)
+                ->select("id_puesto as value", "des_puesto as text")
+                ->orderBy("text", "asc")
+                ->get();
+            $oficinas = DB::table("ma_oficina")
+                ->where("id_empresa", $usuario->id_empresa)
+                ->select("id_oficina as value", "des_oficina as text")
+                ->orderBy("text", "asc")
+                ->get();
+            return Response::json([
+                "state" => "success",
+                "data" => [
+                    "puestos" => $puestos,
+                    "ancestros" => $ancestros,
+                    "oficinas" => $oficinas
+                ]
+            ]);
         }
         return Response::json([
             "state" => "error",

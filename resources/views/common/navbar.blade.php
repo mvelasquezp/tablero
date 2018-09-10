@@ -1,4 +1,4 @@
-<nav class="navbar navbar-expand-lg fixed-top navbar-light bg-light">
+<nav class="navbar navbar-expand-lg fixed-top navbar-light" style="background-color:#c3d6f5;">
     <div class="container-fluid">
         <a href="javascript:void(0)" id="sidebarCollapse" class="btn btn-link">
             <i class="fas fa-ellipsis-v text-dark"></i>
