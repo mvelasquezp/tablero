@@ -94,4 +94,38 @@ class Estandarizacion extends Controller {
         return view("estandarizacion.procesos")->with($arr_data);
     }
 
+    public function valoracion() {
+        $usuario = Auth::user();
+        $menu = $this->ObtenerMenu($usuario);
+        $cestados = DB::table("sys_estados")
+            ->where("tp_estado", "C")
+            ->select(
+                "id_estado as id",
+                "des_estado as estado",
+                "tp_estado as tipo"
+            )
+            ->orderBy("id_estado", "asc")
+            ->get();
+        $pestados = DB::table("sys_estados")
+            ->where("tp_estado", "P")
+            ->select(
+                "id_estado as id",
+                "des_estado as estado",
+                "tp_estado as tipo"
+            )
+            ->orderBy("id_estado", "asc")
+            ->get();
+        $puntajes = DB::table("pr_valoracion")
+            ->select("id_estado_p as pest", "id_estado_c as cest", "num_puntaje as puntaje")
+            ->get();
+        $arr_data = [
+            "usuario" => $usuario,
+            "menu" => $menu,
+            "cestados" => $cestados,
+            "pestados" => $pestados,
+            "puntajes" => $puntajes,
+        ];
+        return view("estandarizacion.matrizvaloracion")->with($arr_data);
+    }
+
 }

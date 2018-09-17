@@ -24,6 +24,11 @@ Route::middleware("auth")->namespace("Intranet")->group(function() {
 		Route::prefix("estandarizacion")->group(function() {
 			Route::get("maestros", "Estandarizacion@maestros");
 			Route::get("procesos", "Estandarizacion@procesos");
+			Route::get("valoracion", "Estandarizacion@valoracion");
+		});
+		//modulo de control y seguimiento
+		Route::prefix("seguimiento")->group(function() {
+			Route::get("resumen", "Control@resumen");
 		});
 	});
 });
@@ -46,6 +51,11 @@ Route::middleware("auth")->namespace("Ajax")->prefix("ajax")->group(function() {
 		Route::post("ls-detalle-campos", "Estandarizacion@ls_detalle_campos");
 		Route::post("sv-agrega-campo", "Estandarizacion@sv_agrega_campo");
 		Route::post("sv-retira-campo", "Estandarizacion@sv_retira_campo");
+		Route::post("ls-hitos-proyecto", "Estandarizacion@ls_hitos_proyecto");
+		Route::post("sv-hito-proyecto", "Estandarizacion@sv_hito_proyecto");
+		Route::post("upd-hito-proyecto", "Estandarizacion@upd_hito_proyecto");
+		//
+		Route::post("sv-matriz-valoracion", "Estandarizacion@sv_matriz_valoracion");
 	});
 });
 //autenticacion de usuarios

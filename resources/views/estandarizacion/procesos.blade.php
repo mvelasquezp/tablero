@@ -4,6 +4,8 @@
         <title>{{ env('APP_TITLE') }}</title>
         @include('common.head')
         <style type="text/css">
+            #form-hitos {display:none;}
+            #dv-table {display:none;}
         </style>
     </head>
     <body>
@@ -41,6 +43,12 @@
                                         </select>
                                     </div>
                                 </div>
+                                <div class="row mb-2">
+                                    <div class="col">
+                                        <label for="reg-peso">Ingresa el peso</label>
+                                        <input type="text" id="reg-peso" class="form-control form-control-sm" placeholder="Ingrese el peso">
+                                    </div>
+                                </div>
                                 <div class="row mb-2 mt-4">
                                     <div class="col">
                                         <button class="btn btn-primary"><i class="fas fa-plus"></i> Agregar hito</button>
@@ -53,15 +61,15 @@
                                 <table class="table table-sm table-striped">
                                     <thead>
                                         <tr>
-                                            <th>ID</th>
-                                            <th>Proyecto</th>
-                                            <th>Peso</th>
-                                            <th>Responsable</th>
-                                            <th>% Avance</th>
-                                            <th>% Acumulado</th>
+                                            <th width="5%">ID</th>
+                                            <th width="35%">Proceso</th>
+                                            <th width="10%">Peso</th>
+                                            <th width="30%">Usu.Registra</th>
+                                            <th width="15%">Fe.Registro</th>
+                                            <th width="5%"></th>
                                         </tr>
                                     </thead>
-                                    <tbody></tbody>
+                                    <tbody id="procesos-tbody"></tbody>
                                 </table>
                             </tag>
                         </div>
@@ -111,13 +119,109 @@
         <!-- scripts -->
         @include('common.scripts')
         <script type="text/javascript">
+            var ls_procesos;
+            function CargarProcesos() {
+                var combo = $("#reg-hito");
+                var tbody = $("#procesos-tbody");
+                combo.empty().append(
+                    $("<option/>").val(0).html("- Seleccione -")
+                );
+                tbody.empty();
+                for(var i in ls_procesos) {
+                    var iproceso = ls_procesos[i];
+                    if(iproceso.peso) {
+                        tbody.append(
+                            $("<tr/>").append(
+                                $("<td/>").html(iproceso.id)
+                            ).append(
+                                $("<td/>").html(iproceso.proceso)
+                            ).append(
+                                $("<td/>").append(
+                                    $("<input/>").attr({
+                                        type: "text",
+                                        placeholder: "Ingresa el peso",
+                                        id: "ip-" + iproceso.id,
+                                    }).addClass("form-control form-control-sm text-right").val(iproceso.peso)
+                                )
+                            ).append(
+                                $("<td/>").html(iproceso.agrega)
+                            ).append(
+                                $("<td/>").html(iproceso.fregistro)
+                            ).append(
+                                $("<td/>").append(
+                                    $("<a/>").attr({
+                                        "href": "#",
+                                        "data-hito": iproceso.id,
+                                        "data-tipo": iproceso.tipo
+                                    }).append(
+                                        $("<i/>").addClass("far fa-save")
+                                    ).addClass("btn btn-primary btn-xs").on("click", ActualizaPesoProceso)
+                                )
+                            )
+                        );
+                    }
+                    else {
+                        combo.append(
+                            $("<option/>").val(iproceso.id).html(iproceso.proceso)
+                        );
+                    }
+                }
+                $("#form-hitos").fadeIn(150);
+                $("#dv-table").fadeIn(150);
+            }
+            //
+            function ActualizaPesoProceso(event) {
+                event.preventDefault();
+                var a = $(this);
+                var input = $("#ip-" + a.data("hito"));
+                a.hide();
+                input.prop("readonly", true);
+                var p = {
+                    _token: "{{ csrf_token() }}",
+                    hito: a.data("hito"),
+                    tipo: a.data("tipo"),
+                    peso: input.val()
+                }
+                $.post("{{ url('ajax/estandarizacion/upd-hito-proyecto') }}", p, function(response) {
+                    if(response.state == "success") {
+                        a.show();
+                        input.prop("readonly", false);
+                    }
+                }, "json");
+            }
             function FormTipoOnSubmit(event) {
                 event.preventDefault();
-                alert("select!");
+                var p = {
+                    _token: "{{ csrf_token() }}",
+                    tipo: document.getElementById("reg-tipo").value
+                };
+                $.post("{{ url('ajax/estandarizacion/ls-hitos-proyecto') }}", p, function(response) {
+                    if(response.state == "success") {
+                        ls_procesos = response.data.procesos;
+                        CargarProcesos();
+                    }
+                }, "json");
+            }
+            function FormHitosOnSubmit(event) {
+                event.preventDefault();
+                var p = {
+                    _token: "{{ csrf_token() }}",
+                    tipo: document.getElementById("reg-tipo").value,
+                    hito: document.getElementById("reg-hito").value,
+                    peso: document.getElementById("reg-peso").value
+                };
+                $.post("{{ url('ajax/estandarizacion/sv-hito-proyecto') }}", p, function(response) {
+                    if(response.state == "success") {
+                        ls_procesos = response.data.procesos;
+                        CargarProcesos();
+                        document.getElementById("reg-peso").value = "";
+                    }
+                }, "json");
             }
             //
             $("#reg-tipo option[value=0]").prop("selected", true);
             $("#form-tipo").on("submit", FormTipoOnSubmit);
+            $("#form-hitos").on("submit", FormHitosOnSubmit);
         </script>
     </body>
 </html>

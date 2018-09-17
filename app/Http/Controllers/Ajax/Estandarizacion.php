@@ -312,4 +312,149 @@ class Estandarizacion extends Controller {
         ]);
     }
 
+    public function ls_hitos_proyecto() {
+        extract(Request::input());
+        if(isset($tipo)) {
+            $usuario = Auth::user();
+            $procesos = DB::table("ma_hitos_control as mhc")
+                ->leftJoin("pr_catalogo_hitos as pch", function($join) use($tipo) {
+                    $join->on("mhc.id_hito", "=", "pch.id_hito")
+                        ->on("mhc.id_empresa", "=", "pch.id_empresa")
+                        ->on("pch.id_catalogo", "=", DB::raw($tipo));
+                })
+                ->leftJoin("ma_usuarios as mu", function($join) {
+                    $join->on("pch.id_usuario_registra", "=", "mu.id_usuario")
+                        ->on("pch.id_empresa", "=", "mu.id_empresa");
+                })
+                ->leftJoin("ma_entidad as me", "mu.cod_entidad", "=", "me.cod_entidad")
+                ->where("mhc.id_empresa", $usuario->id_empresa)
+                ->select(
+                    "mhc.id_hito as id",
+                    "pch.id_catalogo as tipo",
+                    "mhc.des_hito as proceso",
+                    "pch.nu_peso as peso",
+                    "me.des_nombre_1 as agrega",
+                    "pch.created_at as fregistro"
+                )
+                ->orderBy("mhc.id_hito", "asc")
+                ->get();
+            return Response::json([
+                "state" => "success",
+                "data" => [
+                    "procesos" => $procesos
+                ]
+            ]);
+        }
+        return Response::json([
+            "state" => "error",
+            "msg" => "Parámetros incorrectos"
+        ]);
+    }
+
+    public function sv_hito_proyecto() {
+        extract(Request::input());
+        if(isset($tipo, $hito, $peso)) {
+            $usuario = Auth::user();
+            DB::table("pr_catalogo_hitos")->insert([
+                "id_hito" => $hito,
+                "id_empresa" => $usuario->id_empresa,
+                "id_catalogo" => $tipo,
+                "id_usuario_registra" => $usuario->id_usuario,
+                "nu_peso" => $peso
+            ]);
+            $procesos = DB::table("ma_hitos_control as mhc")
+                ->leftJoin("pr_catalogo_hitos as pch", function($join) use($tipo) {
+                    $join->on("mhc.id_hito", "=", "pch.id_hito")
+                        ->on("mhc.id_empresa", "=", "pch.id_empresa")
+                        ->on("pch.id_catalogo", "=", DB::raw($tipo));
+                })
+                ->leftJoin("ma_usuarios as mu", function($join) {
+                    $join->on("pch.id_usuario_registra", "=", "mu.id_usuario")
+                        ->on("pch.id_empresa", "=", "mu.id_empresa");
+                })
+                ->leftJoin("ma_entidad as me", "mu.cod_entidad", "=", "me.cod_entidad")
+                ->where("mhc.id_empresa", $usuario->id_empresa)
+                ->select(
+                    "mhc.id_hito as id",
+                    "pch.id_catalogo as tipo",
+                    "mhc.des_hito as proceso",
+                    "pch.nu_peso as peso",
+                    "me.des_nombre_1 as agrega",
+                    "pch.created_at as fregistro"
+                )
+                ->orderBy("mhc.id_hito", "asc")
+                ->get();
+            return Response::json([
+                "state" => "success",
+                "data" => [
+                    "procesos" => $procesos
+                ]
+            ]);
+        }
+        return Response::json([
+            "state" => "error",
+            "msg" => "Parámetros incorrectos"
+        ]);
+    }
+
+    public function upd_hito_proyecto() {
+        extract(Request::input());
+        if(isset($tipo, $hito, $peso)) {
+            $usuario = Auth::user();
+            DB::table("pr_catalogo_hitos")
+                ->where("id_hito", $hito)
+                ->where("id_catalogo", $tipo)
+                ->where("id_empresa", $usuario->id_empresa)
+                ->update([
+                    "nu_peso" => $peso,
+                    "updated_at" => date("Y-m-d H:i:s")
+                ]);
+            return Response::json([
+                "state" => "success"
+            ]);
+        }
+        return Response::json([
+            "state" => "error",
+            "msg" => "Parámetros incorrectos"
+        ]);
+    }
+
+    public function sv_matriz_valoracion() {
+        extract(Request::input());
+        if(isset($pesos)) {
+            $usuario = Auth::user();
+            foreach ($pesos as $peso) {
+                extract($peso);
+                $count = DB::table("pr_valoracion")
+                    ->where("id_estado_p", $catp)
+                    ->where("id_estado_c", $catc)
+                    ->update([
+                        "num_puntaje" => $peso,
+                        "updated_at" => date("Y-m-d H:i:s")
+                    ]);
+                if($count == 0) {
+                    DB::table("pr_valoracion")->insert([
+                        "id_estado_p" => $catp,
+                        "id_estado_c" => $catc,
+                        "num_puntaje" => $peso,
+                        "id_usuario_registra" => $usuario->id_usuario
+                    ]);
+                }
+            }
+            $puntajes = DB::table("pr_valoracion")
+                ->select("id_estado_p as pest", "id_estado_c as cest", "num_puntaje as puntaje")
+                ->get();
+            return Response::json([
+                "state" => "success",
+                "data" => [
+                    "puntajes" => $puntajes
+                ]
+            ]);
+        }
+        return Response::json([
+            "state" => "error",
+            "msg" => "Parámetros incorrectos"
+        ]);
+    }
+
 }
