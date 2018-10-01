@@ -154,6 +154,7 @@ insert into sys_tipos_dato(des_tipo) values ('Texto');
 insert into sys_tipos_dato(des_tipo) values ('Fecha');
 insert into sys_tipos_dato(des_tipo) values ('Caracter');
 insert into sys_tipos_dato(des_tipo) values ('Lógico');
+insert into sys_tipos_dato(des_tipo) values ('Indicador');
 
 create table ma_campos (
 	id_campo			 int auto_increment,
@@ -161,6 +162,7 @@ create table ma_campos (
     id_tipo				 int not null,
     des_campo			 varchar(50) not null,
     st_vigente           VARCHAR(10) NOT NULL DEFAULT 'Vigente',
+    st_obligatorio		 char not null default 'N',
 	created_at           DATETIME NOT NULL DEFAULT current_timestamp,
 	updated_at           DATETIME NULL,
     foreign key (id_tipo) references sys_tipos_dato (id_tipo),
@@ -230,6 +232,7 @@ create table pr_catalogo_hitos (
     id_empresa			int not null,
     id_catalogo			int not null,
     id_usuario_registra	int not null,
+    nu_orden			int not null,
     nu_peso				decimal(4,2) not null,
     st_vigente			varchar(10) not null default 'Vigente',
 	created_at          DATETIME NOT NULL DEFAULT current_timestamp,
@@ -260,6 +263,7 @@ create table pr_proyecto (
     id_empresa			int not null,
     id_oficina			int not null,
     id_catalogo			int not null,
+    tp_orden			varchar(10) not null default 'Servicios',
     des_codigo			varchar(15) not null,
     des_proyecto		varchar(100) not null,
     des_descripcion		varchar(150),
@@ -273,6 +277,7 @@ create table pr_proyecto (
     st_vigente			varchar(10) not null default 'Vigente',
 	created_at          DATETIME NOT NULL DEFAULT current_timestamp,
 	updated_at          DATETIME NULL,
+    check (tp_orden in ('Compras','Servicios')),
     foreign key (id_empresa) references ma_empresa (id_empresa),
     foreign key (id_catalogo, id_empresa) references pr_catalogo_proyecto (id_catalogo, id_empresa),
     foreign key (id_oficina, id_empresa) references ma_oficina (id_oficina, id_empresa),
@@ -300,4 +305,43 @@ create table pr_proyecto_hitos (
 	foreign key (id_estado_proceso) references sys_estados (id_estado),
 	foreign key (id_estado_documentacion) references sys_estados (id_estado),
     primary key (id_detalle, id_proyecto, id_empresa, id_hito, id_catalogo)
+);
+
+create table ma_organo_control (
+	id_organo			int not null auto_increment,
+    id_empresa			int not null,
+    des_organo			varchar(100) not null,
+    des_abreviatura		varchar(10) not null,
+    st_vigente			varchar(10) not null default 'Vigente',
+	created_at          datetime not null default current_timestamp,
+	updated_at          datetime null,
+    foreign key (id_empresa) references ma_empresa (id_empresa),
+    primary key (id_organo, id_empresa)
+);
+
+create table ma_direccion_central (
+	id_direccion		int not null auto_increment,
+	id_organo			int not null,
+    id_empresa			int not null,
+    des_direccion		varchar(100) not null,
+    des_abreviatura		varchar(10) not null,
+    st_vigente			varchar(10) not null default 'Vigente',
+	created_at          datetime not null default current_timestamp,
+	updated_at          datetime null,
+    foreign key (id_organo, id_empresa) references ma_organo_control (id_organo, id_empresa),
+    primary key (id_direccion, id_organo, id_empresa)
+);
+
+create table ma_area_usuaria (
+	id_area				int not null auto_increment,
+	id_direccion		int not null,
+	id_organo			int not null,
+    id_empresa			int not null,
+    des_area			varchar(100) not null,
+    des_abreviatura		varchar(10) not null,
+    st_vigente			varchar(10) not null default 'Vigente',
+	created_at          datetime not null default current_timestamp,
+	updated_at          datetime null,
+    foreign key (id_direccion, id_organo, id_empresa) references ma_direccion_central (id_direccion, id_organo, id_empresa),
+    primary key (id_area, id_direccion, id_organo, id_empresa)
 );

@@ -25,10 +25,12 @@ Route::middleware("auth")->namespace("Intranet")->group(function() {
 			Route::get("maestros", "Estandarizacion@maestros");
 			Route::get("procesos", "Estandarizacion@procesos");
 			Route::get("valoracion", "Estandarizacion@valoracion");
+			Route::get("usuarios", "Estandarizacion@usuarios");
 		});
 		//modulo de control y seguimiento
 		Route::prefix("seguimiento")->group(function() {
 			Route::get("resumen", "Control@resumen");
+			Route::get("crea-proyecto", "Control@crear");
 		});
 	});
 });
@@ -45,17 +47,32 @@ Route::middleware("auth")->namespace("Ajax")->prefix("ajax")->group(function() {
 		Route::any("ls-interfaz", "Estandarizacion@ls_interfaz");
 		Route::post("ls-campos-hito", "Estandarizacion@ls_campos_hito");
 		Route::post("sv-campo", "Estandarizacion@sv_campo");
+		Route::post("upd-obligat-campo", "Estandarizacion@upd_obligat_campo");
 		Route::post("sv-hito", "Estandarizacion@sv_hito");
 		Route::post("sv-eproceso", "Estandarizacion@sv_eproceso");
 		Route::post("sv-econtrol", "Estandarizacion@sv_econtrol");
 		Route::post("ls-detalle-campos", "Estandarizacion@ls_detalle_campos");
 		Route::post("sv-agrega-campo", "Estandarizacion@sv_agrega_campo");
 		Route::post("sv-retira-campo", "Estandarizacion@sv_retira_campo");
+		//
 		Route::post("ls-hitos-proyecto", "Estandarizacion@ls_hitos_proyecto");
 		Route::post("sv-hito-proyecto", "Estandarizacion@sv_hito_proyecto");
 		Route::post("upd-hito-proyecto", "Estandarizacion@upd_hito_proyecto");
+		Route::post("upd-sube-hito", "Estandarizacion@upd_sube_hito");
+		Route::post("upd-baja-hito", "Estandarizacion@upd_baja_hito");
 		//
 		Route::post("sv-matriz-valoracion", "Estandarizacion@sv_matriz_valoracion");
+		//
+		Route::post("sv-organo", "Estandarizacion@sv_organo");
+		Route::post("sv-direccion", "Estandarizacion@sv_direccion");
+		Route::post("ls-combo-direcciones", "Estandarizacion@ls_combo_direcciones");
+		Route::post("sv-area", "Estandarizacion@sv_area");
+		Route::post("ls-combo-areas", "Estandarizacion@ls_combo_areas");
+	});
+	//modulo de control de proyectos
+	Route::prefix("control")->group(function() {
+		Route::post("ls-hitos-control", "Control@ls_hitos_control");
+		Route::post("sv-proyecto", "Control@sv_proyecto");
 	});
 });
 //autenticacion de usuarios

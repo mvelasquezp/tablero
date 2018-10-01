@@ -26,6 +26,7 @@ class Registros extends Controller {
             ->join("ma_menu as mm", "sp.id_item", "=", "mm.id_item")
             ->where("sp.id_empresa", $usuario->id_empresa)
             ->where("sp.id_usuario", $usuario->id_usuario)
+            ->where("mm.st_vigente", "Vigente")
             ->whereNull("mm.id_ancestro")
             ->select(
                 "sp.id_item as id",
@@ -40,6 +41,7 @@ class Registros extends Controller {
                 ->where("sp.id_empresa", $usuario->id_empresa)
                 ->where("sp.id_usuario", $usuario->id_usuario)
                 ->where("mm.id_ancestro", $item->id)
+                ->where("mm.st_vigente", "Vigente")
                 ->select(
                     "sp.id_item as id",
                     "mm.des_nombre as nombre",

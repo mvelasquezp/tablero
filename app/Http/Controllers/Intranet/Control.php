@@ -26,6 +26,7 @@ class Control extends Controller {
             ->join("ma_menu as mm", "sp.id_item", "=", "mm.id_item")
             ->where("sp.id_empresa", $usuario->id_empresa)
             ->where("sp.id_usuario", $usuario->id_usuario)
+            ->where("mm.st_vigente", "Vigente")
             ->whereNull("mm.id_ancestro")
             ->select(
                 "sp.id_item as id",
@@ -40,6 +41,7 @@ class Control extends Controller {
                 ->where("sp.id_empresa", $usuario->id_empresa)
                 ->where("sp.id_usuario", $usuario->id_usuario)
                 ->where("mm.id_ancestro", $item->id)
+                ->where("mm.st_vigente", "Vigente")
                 ->select(
                     "sp.id_item as id",
                     "mm.des_nombre as nombre",
@@ -57,19 +59,24 @@ class Control extends Controller {
         $menu = $this->ObtenerMenu($usuario);
         $proyectos = DB::table("pr_proyecto as pp")
             ->join("pr_catalogo_proyecto as pcp", "pp.id_catalogo", "=", "pcp.id_catalogo")
-            ->join("ma_oficina as mo", function($join) {
-                $join->on("pp.id_oficina", "=", "mo.id_oficina")
-                    ->on("pp.id_empresa", "=", "mo.id_empresa");
+            ->join("ma_area_usuaria as mau", function($join) {
+                $join->on("pp.id_area", "=", "mau.id_area")
+                    ->on("pp.id_direccion", "=", "mau.id_direccion")
+                    ->on("pp.id_organo", "=", "mau.id_organo")
+                    ->on("pp.id_empresa", "=", "mau.id_empresa");
             })
             ->select(
                 "pp.id_proyecto as id",
                 "pcp.des_catalogo as tipo",
-                "pp.created_at as fregistro",
-                "pp.des_proyecto as proyecto",
+                DB::raw("if(pp.tp_orden = 'C','Compras','Servicios') as orden"),
                 "pp.des_expediente as expediente",
-                "pp.des_hoja_tramite as hojatramite",
-                "mo.des_oficina as areausr",
+                "pp.created_at as femision",
+                "mau.des_area as areausr",
+                "pp.des_proyecto as proyecto",
+                "pp.fe_fin as fentrega",
                 "pp.num_valor as valor",
+                "pp.num_armadas as armadas",
+                DB::raw("if(datediff(current_timestamp,pp.fe_fin) < 0,0,datediff(current_timestamp,pp.fe_fin)) as diasvence"),
                 "pp.des_observaciones as observaciones"
             )
             ->where("pp.id_empresa", $usuario->id_empresa)
@@ -82,6 +89,43 @@ class Control extends Controller {
             "proyectos" => $proyectos,
         ];
         return view("control.resumen")->with($arr_data);
+    }
+
+    public function crear() {
+        $usuario = Auth::user();
+        $menu = $this->ObtenerMenu($usuario);
+        $tipos = DB::table("pr_catalogo_proyecto")
+            ->where("id_empresa", $usuario->id_empresa)
+            ->where("st_vigente", "Vigente")
+            ->select(
+                "id_catalogo as value",
+                "des_catalogo as text"
+            )
+            ->orderBy("text", "asc")
+            ->get();
+        $organos = DB::table("ma_organo_control")
+            ->where("id_empresa", $usuario->id_empresa)
+            ->select(
+                "id_organo as value",
+                "des_organo as text"
+            )
+            ->orderBy("des_organo", "asc")
+            ->get();
+        $id_pago = DB::table("ma_hitos_control")
+            ->select("id_hito as id")
+            ->where("des_hito", "Pago")
+            ->where("id_empresa", $usuario->id_empresa)
+            ->where("st_vigente", "Vigente")
+            ->first();
+        //
+        $arr_data = [
+            "usuario" => $usuario,
+            "menu" => $menu,
+            "tipos" => $tipos,
+            "organos" => $organos,
+            "id_pago" => $id_pago->id,
+        ];
+        return view("control.crear")->with($arr_data);
     }
 
 }

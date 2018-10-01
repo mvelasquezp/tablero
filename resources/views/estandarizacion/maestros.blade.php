@@ -5,6 +5,7 @@
         @include('common.head')
         <style type="text/css">
             .tr-hidden{display:none;}
+            #rcampo-obligat{display: none;}
         </style>
     </head>
     <body>
@@ -52,6 +53,12 @@
                                                             </select>
                                                         </div>
                                                     </div>
+                                                    <div class="row mb-2">
+                                                        <div class="col">
+                                                            <label class="mr-3">El campo es obligatorio</label>
+                                                            <label for="rcampo-obligat" class="btn btn-sm btn-danger"><tag>No</tag><input type="checkbox" id="rcampo-obligat"></label>
+                                                        </div>
+                                                    </div>
                                                     <div class="row mt-4">
                                                         <div class="col">
                                                             <button id="btn-sv-campos" class="btn btn-sm btn-primary"><i class="fas fa-plus"></i> Agregar</button>
@@ -67,6 +74,7 @@
                                                             <th>ID</th>
                                                             <th>Campo</th>
                                                             <th>Tipo</th>
+                                                            <th>Clase</th>
                                                             <th>Fecha Registro</th>
                                                             <th></th>
                                                         </tr>
@@ -88,17 +96,6 @@
                                                             <input type="text" class="form-control form-control-sm" id="rhito-nombre" placeholder="Ingrese el nombre">
                                                         </div>
                                                     </div>
-                                                    <div class="row mb-2">
-                                                        <div class="col">
-                                                            <label for="rhito-responsable">Responsable del hito</label>
-                                                            <select id="rhito-responsable" class="form-control form-control-sm">
-                                                                <option value="0">- Seleccione -</option>
-                                                                @foreach($puestos as $puesto)
-                                                                <option value="{{ $puesto->value }}">{{ $puesto->text }}</option>
-                                                                @endforeach
-                                                            </select>
-                                                        </div>
-                                                    </div>
                                                     <div class="row mt-4">
                                                         <div class="col">
                                                             <button id="btn-sv-hitos" class="btn btn-sm btn-primary"><i class="fas fa-plus"></i> Agregar</button>
@@ -113,7 +110,6 @@
                                                         <tr>
                                                             <th>ID</th>
                                                             <th>Descripción</th>
-                                                            <th>Responsable</th>
                                                             <th>Fecha Registro</th>
                                                             <th></th>
                                                         </tr>
@@ -273,7 +269,8 @@
                 var p = {
                     _token: "{{ csrf_token() }}",
                     nombre: sNombre,
-                    tipo: sTipo
+                    tipo: sTipo,
+                    obligatorio: $("#rcampo-obligat").prop("checked") ? "S" : "N"
                 };
                 $.post("{{ url('ajax/estandarizacion/sv-campo') }}", p, function(response) {
                     if(response.state == "success") {
@@ -288,19 +285,13 @@
             function FormHitosSubmit(event) {
                 event.preventDefault();
                 var sHito = document.getElementById("rhito-nombre").value;
-                var sResponsable = document.getElementById("rhito-responsable").value;
                 if(sHito == "") {
                     alert("Debe ingresar el nombre del hito");
                     return false;
                 }
-                if(sResponsable == 0) {
-                    alert("Debe seleccionar el responsable");
-                    return false;
-                }
                 var p = {
                     _token: "{{ csrf_token() }}",
-                    nombre: sHito,
-                    responsable: sResponsable
+                    nombre: sHito
                 };
                 $.post("{{ url('ajax/estandarizacion/sv-hito') }}", p, function(response) {
                     if(response.state == "success") {
@@ -452,12 +443,43 @@
                     else alert(response.msg);
                 }, "json");
             }
+            function CambiaObligatorio(event) {
+                event.preventDefault();
+                var a = $(this);
+                a.hide();
+                var p = {
+                    _token: "{{ csrf_token() }}",
+                    hito: a.data("id"),
+                    tipo: a.data("obligat")
+                }
+                $.post("{{ url('ajax/estandarizacion/upd-obligat-campo') }}", p, function(response) {
+                    if(response.state == "success") {
+                        ls_campos = response.data.campos;
+                        EscribirListaCampos();
+                    }
+                    else alert(response.msg);
+                }, "json").error(function(err) {
+                    a.show();
+                });
+            }
             //
             function EscribirListaCampos() {
+                $("#rcampo-obligat").prop("checked", false).trigger("change");
                 var tbody = $("#campos-tbody");
                 tbody.empty();
                 for(var i in ls_campos) {
                     var icampo = ls_campos[i];
+                    var btnTipo = $("<a/>").attr({
+                        "href": "#",
+                        "data-id": icampo.id,
+                        "data-obligat": icampo.obligatorio
+                    }).addClass("btn btn-xs").on("click", CambiaObligatorio);
+                    if(icampo.obligatorio == 'S') {
+                        btnTipo.addClass("btn-success").html("Obligatorio");
+                    }
+                    else {
+                        btnTipo.addClass("btn-warning").html("Personalizado");
+                    }
                     tbody.append(
                         $("<tr/>").append(
                             $("<td/>").html(icampo.id)
@@ -465,6 +487,8 @@
                             $("<td/>").html(icampo.campo)
                         ).append(
                             $("<td/>").html(icampo.tipo)
+                        ).append(
+                            $("<td/>").append(btnTipo)
                         ).append(
                             $("<td/>").html(icampo.registro)
                         ).append(
@@ -489,8 +513,6 @@
                             )
                         ).append(
                             $("<td/>").html(ihito.hito)
-                        ).append(
-                            $("<td/>").html(ihito.puesto)
                         ).append(
                             $("<td/>").html(ihito.fecha)
                         ).append(
@@ -520,7 +542,7 @@
                                         "data-desc": ihito.hito
                                     }).addClass("btn btn-xs btn-success").append(
                                         $("<i/>").addClass("fas fa-plus")
-                                    ).append("&nbsp;Agregar nuevo campo")
+                                    ).append("&nbsp;Agregar campo opcional")
                                 ).attr("id","dv-" + ihito.id).addClass("mb-2")
                             ).attr("colspan", 4)
                         ).addClass("tr-hidden")
@@ -625,6 +647,15 @@
                     else alert(response.msg);
                 }, "json");
             }
+            function rcampoObligatChange(event) {
+                var rbox = $(this);
+                if(rbox.prop("checked")) {
+                    rbox.parent().removeClass("btn-danger").addClass("btn-success").children("tag").html("Si");
+                }
+                else {
+                    rbox.parent().removeClass("btn-success").addClass("btn-danger").children("tag").html("No");
+                }
+            }
             function IniciarInterfaz() {
                 var p = { _token: "{{ csrf_token() }}" };
                 $.post("{{ url('ajax/estandarizacion/ls-interfaz') }}", p, function(response) {
@@ -637,12 +668,12 @@
                     EscribirListaProcesos();
                     EscribirListaControl();
                 }, "json");
-console.log("go pto!");
                 $("#form-campos").on("submit", FormCamposOnSubmit);
                 $("#form-hitos").on("submit", FormHitosSubmit);
                 $("#form-eproceso").on("submit", FormProcesoSubmit);
                 $("#form-econtrol").on("submit", FormControlSubmit);
                 $("#modal-hito-campo").on("show.bs.modal", ModalHitoCampoOnShow);
+                $("#rcampo-obligat").prop("checked", false).change(rcampoObligatChange);
             }
             //
             $(IniciarInterfaz);

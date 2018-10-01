@@ -26,6 +26,7 @@ class Estandarizacion extends Controller {
             ->join("ma_menu as mm", "sp.id_item", "=", "mm.id_item")
             ->where("sp.id_empresa", $usuario->id_empresa)
             ->where("sp.id_usuario", $usuario->id_usuario)
+            ->where("mm.st_vigente", "Vigente")
             ->whereNull("mm.id_ancestro")
             ->select(
                 "sp.id_item as id",
@@ -40,6 +41,7 @@ class Estandarizacion extends Controller {
                 ->where("sp.id_empresa", $usuario->id_empresa)
                 ->where("sp.id_usuario", $usuario->id_usuario)
                 ->where("mm.id_ancestro", $item->id)
+                ->where("mm.st_vigente", "Vigente")
                 ->select(
                     "sp.id_item as id",
                     "mm.des_nombre as nombre",
@@ -126,6 +128,65 @@ class Estandarizacion extends Controller {
             "puntajes" => $puntajes,
         ];
         return view("estandarizacion.matrizvaloracion")->with($arr_data);
+    }
+
+    public function usuarios() {
+        $usuario = Auth::user();
+        $menu = $this->ObtenerMenu($usuario);
+        $organos = DB::table("ma_organo_control")
+            ->where("id_empresa", $usuario->id_empresa)
+            ->select(
+                "id_organo as id",
+                "des_organo as organo",
+                "des_abreviatura as abrev"
+            )
+            ->orderBy("des_organo", "asc")
+            ->get();
+        $direcciones = DB::table("ma_direccion_central as mdc")
+            ->join("ma_organo_control as moc", function($join) {
+                $join->on("mdc.id_empresa", "=", "moc.id_empresa")
+                    ->on("mdc.id_organo", "=", "moc.id_organo");
+            })
+            ->select(
+                "mdc.id_direccion as id",
+                "moc.des_organo as organo",
+                "mdc.des_direccion as direccion",
+                "mdc.des_abreviatura as abrev"
+            )
+            ->where("mdc.id_empresa", $usuario->id_empresa)
+            ->orderBy("moc.des_organo", "asc")
+            ->orderBy("mdc.des_direccion", "asc")
+            ->get();
+        $areas = DB::table("ma_area_usuaria as mau")
+            ->join("ma_direccion_central as mdc", function($join) {
+                $join->on("mau.id_empresa", "=", "mdc.id_empresa")
+                    ->on("mau.id_direccion", "=", "mdc.id_direccion")
+                    ->on("mau.id_organo", "=", "mdc.id_organo");
+            })
+            ->join("ma_organo_control as moc", function($join) {
+                $join->on("mdc.id_empresa", "=", "moc.id_empresa")
+                    ->on("mdc.id_organo", "=", "moc.id_organo");
+            })
+            ->select(
+                "mau.id_area as id",
+                "moc.des_organo as organo",
+                "mdc.des_direccion as direccion",
+                "mau.des_area as area",
+                "mau.des_abreviatura as abrev"
+            )
+            ->where("mau.id_empresa", $usuario->id_empresa)
+            ->orderBy("moc.des_organo", "asc")
+            ->orderBy("mdc.des_direccion", "asc")
+            ->orderBy("mau.des_area", "asc")
+            ->get();
+        $arr_data = [
+            "usuario" => $usuario,
+            "menu" => $menu,
+            "organos" => $organos,
+            "direcciones" => $direcciones,
+            "areas" => $areas,
+        ];
+        return view("estandarizacion.usuarios")->with($arr_data);
     }
 
 }

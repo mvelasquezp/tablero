@@ -61,7 +61,9 @@
                                 <table class="table table-sm table-striped">
                                     <thead>
                                         <tr>
-                                            <th width="5%">ID</th>
+                                            <th width="1%"></th>
+                                            <th width="3%">ID</th>
+                                            <th width="1%"></th>
                                             <th width="35%">Proceso</th>
                                             <th width="10%">Peso</th>
                                             <th width="30%">Usu.Registra</th>
@@ -120,6 +122,8 @@
         @include('common.scripts')
         <script type="text/javascript">
             var ls_procesos;
+            var nprocesos;
+            //
             function CargarProcesos() {
                 var combo = $("#reg-hito");
                 var tbody = $("#procesos-tbody");
@@ -127,12 +131,36 @@
                     $("<option/>").val(0).html("- Seleccione -")
                 );
                 tbody.empty();
+                nprocesos = 0;
                 for(var i in ls_procesos) {
                     var iproceso = ls_procesos[i];
                     if(iproceso.peso) {
+                        nprocesos++;
                         tbody.append(
                             $("<tr/>").append(
-                                $("<td/>").html(iproceso.id)
+                                $("<td/>").append(
+                                    $("<a/>").attr({
+                                        "href": "#",
+                                        "data-id": iproceso.id,
+                                        "data-tipo": iproceso.tipo,
+                                        "data-orden": iproceso.orden
+                                    }).addClass("btn btn-xs btn-danger").append(
+                                        $("<i/>").addClass("fas fa-arrow-up")
+                                    ).on("click", SubirHito)
+                                )
+                            ).append(
+                                $("<td/>").addClass("text-right").html(iproceso.orden)
+                            ).append(
+                                $("<td/>").append(
+                                    $("<a/>").attr({
+                                        "href": "#",
+                                        "data-id": iproceso.id,
+                                        "data-tipo": iproceso.tipo,
+                                        "data-orden": iproceso.orden
+                                    }).addClass("btn btn-xs btn-success").append(
+                                        $("<i/>").addClass("fas fa-arrow-down")
+                                    ).on("click", BajarHito)
+                                )
                             ).append(
                                 $("<td/>").html(iproceso.proceso)
                             ).append(
@@ -170,6 +198,46 @@
                 $("#dv-table").fadeIn(150);
             }
             //
+            function SubirHito(event) {
+                event.preventDefault();
+                var a = $(this);
+                if(parseInt(a.data("orden")) > 1) {
+                    var p = {
+                        _token: "{{ csrf_token() }}",
+                        hito: a.data("id"),
+                        tipo: a.data("tipo"),
+                        orden: a.data("orden")
+                    };
+                    $.post("{{ url('ajax/estandarizacion/upd-sube-hito') }}", p, function(response) {
+                        if(response.state == "success") {
+                            ls_procesos = response.data.procesos;
+                            CargarProcesos();
+                        }
+                        else alert(response.msg);
+                    }, "json");
+                }
+                else console.log("seas pendejo...");
+            }
+            function BajarHito(event) {
+                event.preventDefault();
+                var a = $(this);
+                if(parseInt(a.data("orden")) < nprocesos) {
+                    var p = {
+                        _token: "{{ csrf_token() }}",
+                        hito: a.data("id"),
+                        tipo: a.data("tipo"),
+                        orden: a.data("orden")
+                    };
+                    $.post("{{ url('ajax/estandarizacion/upd-baja-hito') }}", p, function(response) {
+                        if(response.state == "success") {
+                            ls_procesos = response.data.procesos;
+                            CargarProcesos();
+                        }
+                        else alert(response.msg);
+                    }, "json");
+                }
+                else console.log("seas pendejo...");
+            }
             function ActualizaPesoProceso(event) {
                 event.preventDefault();
                 var a = $(this);

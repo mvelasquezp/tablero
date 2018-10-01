@@ -19,14 +19,22 @@
                             <table id="grid-proyectos" class="table table-sm table-striped">
                                 <thead>
                                     <tr>
-                                        <th>ID</th>
-                                        <th>Tipo</th>
-                                        <th>Fecha registro</th>
-                                        <th>Descripción</th>
+                                        <th width="1%"></th>
+                                        <th width="2%">ID</th>
+                                        <th>Tipo proyecto</th>
+                                        <th>Tipo orden</th>
                                         <th>N° Expediente</th>
-                                        <th>Hoja trámite</th>
+                                        <th>Fecha emisión</th>
                                         <th>Área usuaria</th>
+                                        <th>Descripción</th>
+                                        <th>Fecha entrega</th>
                                         <th>Valor</th>
+                                        <th>N° pagos</th>
+                                        <th>% Avance</th>
+                                        <th>Indicador</th>
+                                        <th>Días vencimiento</th>
+                                        <th>Estado actual</th>
+                                        <th>Responsable</th>
                                         <th>Observaciones</th>
                                     </tr>
                                 </thead>
@@ -45,7 +53,7 @@
                                         <a class="page-link" href="#">Next</a>
                                     </li>
                                     <li class="page-item" style="margin-left:20px;">
-                                        <a class="page-link bg-success text-light" data-toggle="modal" data-target="#modal-proyecto" href="#"><i class="fas fa-plus"></i> Nuevo proyecto</a>
+                                        <a class="page-link bg-success text-light" href="{{ url('intranet/seguimiento/crea-proyecto') }}"><i class="fas fa-plus"></i> Nuevo proyecto</a>
                                     </li>
                                 </ul>
                             </nav>
@@ -122,6 +130,13 @@
         <script type="text/javascript">
             var ls_proyectos = {!! json_encode($proyectos) !!};
             //
+            function MuestraHitos(event) {
+                event.preventDefault();
+                var a = $(this);
+                $("#dv-" + a.data("id")).empty().append(
+                    $("<p/>").html("aqui el detalle del proyecto")
+                ).parent().parent().toggle()
+            }
             function ListarProyectos() {
                 var tbody = $("#grid-proyectos tbody");
                 tbody.empty();
@@ -131,26 +146,55 @@
                         $("<tr/>").append(
                             $("<td/>").append(
                                 $("<a/>").attr({
+                                    "href": "#",
                                     "data-id": iproyecto.id
-                                }).addClass("btn btn-xs btn-primary").html(iproyecto.id)
+                                }).addClass("btn btn-xs btn-primary text-light").append(
+                                    $("<i/>").addClass("fas fa-list-ul")
+                                ).on("click", MuestraHitos)
                             )
+                        ).append(
+                            $("<td/>").addClass("text-right").html(iproyecto.id)
                         ).append(
                             $("<td/>").html(iproyecto.tipo)
                         ).append(
-                            $("<td/>").html(iproyecto.fregistro)
-                        ).append(
-                            $("<td/>").html(iproyecto.proyecto)
+                            $("<td/>").html(iproyecto.orden)
                         ).append(
                             $("<td/>").html(iproyecto.expediente)
                         ).append(
-                            $("<td/>").html(iproyecto.hojatramite)
+                            $("<td/>").html(iproyecto.femision)
                         ).append(
                             $("<td/>").html(iproyecto.areausr)
                         ).append(
-                            $("<td/>").html(iproyecto.valor)
+                            $("<td/>").html(iproyecto.proyecto)
+                        ).append(
+                            $("<td/>").html(iproyecto.fentrega)
+                        ).append(
+                            $("<td/>").html(parseFloat(iproyecto.valor).toLocaleString("en-US", { minimumFractionDigits:2, maximumFractionDigits:2 }))
+                        ).append(
+                            $("<td/>").html(iproyecto.armadas)
+                        ).append(
+                            $("<td/>").html("")
+                        ).append(
+                            $("<td/>").html("")
+                        ).append(
+                            $("<td/>").html(iproyecto.diasvence)
+                        ).append(
+                            $("<td/>").html("")
+                        ).append(
+                            $("<td/>").html("")
                         ).append(
                             $("<td/>").html(iproyecto.observaciones)
                         )
+                    ).append(
+                        $("<tr/>").hide()
+                    ).append(
+                        $("<tr/>").append(
+                            $("<td/>")
+                        ).append(
+                            $("<td/>").attr("colspan", 16).append(
+                                $("<div/>").attr("id", "dv-" + iproyecto.id)
+                            )
+                        ).hide()
                     );
                 }
             }
