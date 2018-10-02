@@ -70,10 +70,10 @@ class Control extends Controller {
                 "pcp.des_catalogo as tipo",
                 DB::raw("if(pp.tp_orden = 'C','Compras','Servicios') as orden"),
                 "pp.des_expediente as expediente",
-                "pp.created_at as femision",
+                DB::raw("date_format(pp.created_at,'%Y-%m-%d') as femision"),
                 "mau.des_area as areausr",
                 "pp.des_proyecto as proyecto",
-                "pp.fe_fin as fentrega",
+                DB::raw("date_format(pp.fe_fin,'%Y-%m-%d') as fentrega"),
                 "pp.num_valor as valor",
                 "pp.num_armadas as armadas",
                 DB::raw("if(datediff(current_timestamp,pp.fe_fin) < 0,0,datediff(current_timestamp,pp.fe_fin)) as diasvence"),
@@ -82,11 +82,17 @@ class Control extends Controller {
             ->where("pp.id_empresa", $usuario->id_empresa)
             ->orderBy("pp.id_proyecto", "asc")
             ->get();
+        $estados = DB::table("sys_estados")
+            ->select("id_estado as value", "des_estado as text", "tp_estado as tipo")
+            ->orderBy("tp_estado", "asc")
+            ->orderBy("id_estado", "asc")
+            ->get();
         //
         $arr_data = [
             "usuario" => $usuario,
             "menu" => $menu,
             "proyectos" => $proyectos,
+            "estados" => $estados,
         ];
         return view("control.resumen")->with($arr_data);
     }

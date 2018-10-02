@@ -73,6 +73,9 @@ Route::middleware("auth")->namespace("Ajax")->prefix("ajax")->group(function() {
 	Route::prefix("control")->group(function() {
 		Route::post("ls-hitos-control", "Control@ls_hitos_control");
 		Route::post("sv-proyecto", "Control@sv_proyecto");
+		Route::post("ls-hitos-proyecto", "Control@ls_hitos_proyecto");
+		Route::post("ls-estado-hito", "Control@ls_estado_hito");
+		Route::post("upd-estado-hito", "Control@upd_estado_hito");
 	});
 });
 //autenticacion de usuarios
