@@ -250,7 +250,7 @@
                                 ).append(
                                     $("<td/>").html(iHito.hito)
                                 ).append(
-                                    $("<td/>")
+                                    $("<td/>").html(iHito.avance + "%").addClass("text-right")
                                 ).append(
                                     $("<td/>")
                                 ).append(
@@ -350,11 +350,11 @@
                         ).append(
                             $("<td/>").html(iproyecto.diasvence)
                         ).append(
-                            $("<td/>").html("")
+                            $("<td/>").html(iproyecto.estado)
                         ).append(
-                            $("<td/>").html("")
+                            $("<td/>").html(iproyecto.responsable)
                         ).append(
-                            $("<td/>").html(iproyecto.observaciones)
+                            $("<td/>").html(iproyecto.hobservaciones)
                         )
                     ).append(
                         $("<tr/>").hide()

@@ -39,7 +39,8 @@ class Estandarizacion extends Controller {
         	->select(
         		"mhc.id_hito as id",
         		"mhc.des_hito as hito",
-        		"mhc.created_at as fecha"
+                "mhc.nu_dias_disparador as dias",
+        		DB::raw("date_format(mhc.created_at,'%Y-%m-%d') as fecha")
         	)
         	->orderBy("id", "asc")
         	->get();
@@ -179,11 +180,12 @@ class Estandarizacion extends Controller {
 
     public function sv_hito() {
     	extract(Request::input());
-    	if(isset($nombre)) {
+    	if(isset($nombre, $dias)) {
     		$usuario = Auth::user();
     		DB::table("ma_hitos_control")->insert([
     			"id_empresa" => $usuario->id_empresa,
-    			"des_hito" => $nombre
+    			"des_hito" => $nombre,
+                "nu_dias_disparador" => $dias
     		]);
 		    $hitos = DB::table("ma_hitos_control as mhc")
 		    	->where("mhc.id_empresa", $usuario->id_empresa)
@@ -191,7 +193,8 @@ class Estandarizacion extends Controller {
 		    	->select(
 		    		"mhc.id_hito as id",
 		    		"mhc.des_hito as hito",
-		    		"mhc.created_at as fecha"
+		    		"mhc.created_at as fecha",
+                    DB::raw("date_format(mhc.created_at,'%Y-%m-%d') as fecha")
 		    	)
 		    	->orderBy("id", "asc")
 		    	->get();

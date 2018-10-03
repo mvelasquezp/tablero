@@ -69,7 +69,7 @@
                             <div class="row mb-3">
                                 <div class="col">
                                     <label class="mb-1" for="np-expediente">Número de expediente</label>
-                                    <input type="text" id="np-expediente" class="form-control form-control-sm" placeholder="Ingresar el nro. de expediente">
+                                    <input type="text" id="np-expediente" class="form-control form-control-sm" placeholder="##-#######-###">
                                 </div>
                             </div>
                             <div class="row mb-3">
@@ -116,7 +116,7 @@
                             <div class="row mb-3">
                                 <div class="col-6">
                                     <label class="mb-1" for="np-plazo">Plazo de ejecución</label>
-                                    <input type="text" id="np-plazo" class="form-control form-control-sm datepicker" placeholder="yyyy-mm-dd">
+                                    <input type="text" id="np-plazo" class="form-control form-control-sm" placeholder="Ingrese nro. de días">
                                 </div>
                             </div>
                             <div class="row mb-3">
@@ -359,7 +359,7 @@
                     direccion: document.getElementById("np-direccion").value,
                     area: document.getElementById("np-area").value,
                     descripcion: document.getElementById("np-descripcion").value,
-                    fin: document.getElementById("np-plazo").value,
+                    ndias: document.getElementById("np-plazo").value,
                     contratista: document.getElementById("np-contratista").value,
                     valor: document.getElementById("np-valor").value,
                     armadas: document.getElementById("np-armadas").value
@@ -396,8 +396,8 @@
                     alert("Ingrese un nombre de proyecto válido");
                     return false;
                 }
-                if(p.fin == "") {
-                    alert("Seleccione la fecha de entrega del proyecto");
+                if(p.ndias == "") {
+                    alert("Ingrese el plazo de ejecución");
                     return false;
                 }
                 if(p.contratista == "") {

@@ -92,6 +92,7 @@
                     if(response.state == "success") {
                         ls_puntajes = response.data.puntajes;
                         MuestraPuntajes();
+                        alert("Se actualizó la matriz de valoración");
                     }
                 }, "json");
             }

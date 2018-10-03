@@ -96,6 +96,12 @@
                                                             <input type="text" class="form-control form-control-sm" id="rhito-nombre" placeholder="Ingrese el nombre">
                                                         </div>
                                                     </div>
+                                                    <div class="row mb-2">
+                                                        <div class="col-8">
+                                                            <label for="rhito-dias">Disparador del hito</label>
+                                                            <input type="text" class="form-control form-control-sm" id="rhito-dias" placeholder="Ingrese el nro. de días">
+                                                        </div>
+                                                    </div>
                                                     <div class="row mt-4">
                                                         <div class="col">
                                                             <button id="btn-sv-hitos" class="btn btn-sm btn-primary"><i class="fas fa-plus"></i> Agregar</button>
@@ -109,7 +115,8 @@
                                                     <thead>
                                                         <tr>
                                                             <th>ID</th>
-                                                            <th>Descripción</th>
+                                                            <th>Hito</th>
+                                                            <th>Disparador</th>
                                                             <th>Fecha Registro</th>
                                                             <th></th>
                                                         </tr>
@@ -285,13 +292,19 @@
             function FormHitosSubmit(event) {
                 event.preventDefault();
                 var sHito = document.getElementById("rhito-nombre").value;
+                var sDias = document.getElementById("rhito-dias").value;
                 if(sHito == "") {
                     alert("Debe ingresar el nombre del hito");
                     return false;
                 }
+                if(sDias == "") {
+                    alert("Debe ingresar el número de días");
+                    return false;
+                }
                 var p = {
                     _token: "{{ csrf_token() }}",
-                    nombre: sHito
+                    nombre: sHito,
+                    dias: sDias
                 };
                 $.post("{{ url('ajax/estandarizacion/sv-hito') }}", p, function(response) {
                     if(response.state == "success") {
@@ -513,6 +526,8 @@
                             )
                         ).append(
                             $("<td/>").html(ihito.hito)
+                        ).append(
+                            $("<td/>").html(ihito.dias + " días").addClass("text-right")
                         ).append(
                             $("<td/>").html(ihito.fecha)
                         ).append(

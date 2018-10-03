@@ -82,6 +82,50 @@ class Control extends Controller {
             ->where("pp.id_empresa", $usuario->id_empresa)
             ->orderBy("pp.id_proyecto", "asc")
             ->get();
+        //busca los ultimos hitos por proyecto
+        foreach($proyectos as $idx => $proyecto) {
+            $detalle = DB::table("pr_proyecto_hitos as pph")
+                ->join("ma_hitos_control as mhc", function($join) {
+                    $join->on("pph.id_hito", "=", "mhc.id_hito")
+                        ->on("pph.id_empresa", "=", "mhc.id_empresa");
+                })
+                ->join("ma_puesto as mp", function($join) {
+                    $join->on("pph.id_responsable", "=", "mp.id_puesto")
+                        ->on("pph.id_empresa", "=", "mp.id_empresa");
+                })
+                ->leftJoin("us_usuario_puesto as uup", function($join) {
+                    $join->on("mp.id_puesto", "=", "uup.id_puesto")
+                        ->on("mp.id_empresa", "=", "uup.id_empresa")
+                        ->on("uup.st_vigente", "=", DB::raw("'Vigente'"));
+                })
+                ->leftJoin("ma_usuarios as mu", function($join) {
+                    $join->on("uup.id_usuario", "=", "mu.id_usuario")
+                        ->on("uup.id_empresa", "=", "mu.id_empresa");
+                })
+                ->leftJoin("ma_entidad as me", "mu.cod_entidad", "=", "me.cod_entidad")
+                ->select(
+                    DB::raw("ifnull(pph.des_hito, mhc.des_hito) as hito"),
+                    DB::raw("if(me.cod_entidad is null, mp.des_puesto, concat(me.des_nombre_1,' ',me.des_nombre_2,' ',me.des_nombre_3)) as responsable"),
+                    "pph.des_observaciones as observaciones"
+                )
+                ->where("pph.id_estado_proceso", 3)
+                ->where("pph.id_proyecto", $proyecto->id)
+                ->where("pph.id_empresa", $usuario->id_empresa)
+                ->orderBy("pph.id_detalle", "desc")
+                ->get();
+            if(count($detalle) > 0) {
+                $detalle = $detalle[0];
+                $proyectos[$idx]->estado = $detalle->hito;
+                $proyectos[$idx]->responsable = $detalle->responsable;
+                $proyectos[$idx]->hobservaciones = $detalle->observaciones;
+            }
+            else {
+                $proyectos[$idx]->estado = "";
+                $proyectos[$idx]->responsable = "";
+                $proyectos[$idx]->hobservaciones = "";
+            }
+        }
+        //listo
         $estados = DB::table("sys_estados")
             ->select("id_estado as value", "des_estado as text", "tp_estado as tipo")
             ->orderBy("tp_estado", "asc")

@@ -63,9 +63,9 @@ class Control extends Controller {
 
     public function sv_proyecto() {
         extract(Request::input());
-        if(isset($tpcateg, $tporden, $expediente, $inicio, $organo, $direccion, $area, $descripcion, $fin, $contratista, $valor, $armadas, $hitos)) {
+        if(isset($tpcateg, $tporden, $expediente, $inicio, $organo, $direccion, $area, $descripcion, $ndias, $contratista, $valor, $armadas, $hitos)) {
             $usuario = Auth::user();
-            $ndias = round((strtotime($fin) - strtotime($inicio)) / (24 * 3600));
+            $fin = date("Y-m-d", strtotime($inicio . " + " . $ndias . " days"));
             $id = DB::table("pr_proyecto")->insertGetId([
                 "id_empresa" => $usuario->id_empresa,
                 "id_catalogo" => $tpcateg,
@@ -189,6 +189,10 @@ class Control extends Controller {
                     $join->on("pph.id_responsable", "=", "mp.id_puesto")
                         ->on("pph.id_empresa", "=", "mp.id_empresa");
                 })
+                ->join("pr_valoracion as pv", function($join) {
+                    $join->on("pph.id_estado_proceso", "=", "pv.id_estado_p")
+                        ->on("pph.id_estado_documentacion", "=", "pv.id_estado_c");
+                })
                 ->leftJoin("us_usuario_puesto as uup", function($join) {
                     $join->on("mp.id_puesto", "=", "uup.id_puesto")
                         ->on("mp.id_empresa", "=", "uup.id_empresa")
@@ -205,6 +209,7 @@ class Control extends Controller {
                     "pph.id_detalle as id",
                     "pph.id_hito as hid",
                     DB::raw("ifnull(pph.des_hito, mhc.des_hito) as hito"),
+                    DB::raw("100 * pv.num_puntaje as avance"),
                     DB::raw("date_format(pph.fe_inicio,'%Y-%m-%d') as inicio"),
                     DB::raw("date_format(pph.fe_fin,'%Y-%m-%d') as fin"),
                     DB::raw("if(datediff(current_timestamp,pph.fe_fin) < 0,0,datediff(current_timestamp,pph.fe_fin)) as diasvcto"),
@@ -301,6 +306,50 @@ class Control extends Controller {
                 ->where("pp.id_empresa", $usuario->id_empresa)
                 ->orderBy("pp.id_proyecto", "asc")
                 ->get();
+            //busca los ultimos hitos por proyecto
+            foreach($proyectos as $idx => $proyecto) {
+                $detalle = DB::table("pr_proyecto_hitos as pph")
+                    ->join("ma_hitos_control as mhc", function($join) {
+                        $join->on("pph.id_hito", "=", "mhc.id_hito")
+                            ->on("pph.id_empresa", "=", "mhc.id_empresa");
+                    })
+                    ->join("ma_puesto as mp", function($join) {
+                        $join->on("pph.id_responsable", "=", "mp.id_puesto")
+                            ->on("pph.id_empresa", "=", "mp.id_empresa");
+                    })
+                    ->leftJoin("us_usuario_puesto as uup", function($join) {
+                        $join->on("mp.id_puesto", "=", "uup.id_puesto")
+                            ->on("mp.id_empresa", "=", "uup.id_empresa")
+                            ->on("uup.st_vigente", "=", DB::raw("'Vigente'"));
+                    })
+                    ->leftJoin("ma_usuarios as mu", function($join) {
+                        $join->on("uup.id_usuario", "=", "mu.id_usuario")
+                            ->on("uup.id_empresa", "=", "mu.id_empresa");
+                    })
+                    ->leftJoin("ma_entidad as me", "mu.cod_entidad", "=", "me.cod_entidad")
+                    ->select(
+                        DB::raw("ifnull(pph.des_hito, mhc.des_hito) as hito"),
+                        DB::raw("if(me.cod_entidad is null, mp.des_puesto, concat(me.des_nombre_1,' ',me.des_nombre_2,' ',me.des_nombre_3)) as responsable"),
+                        "pph.des_observaciones as observaciones"
+                    )
+                    ->where("pph.id_estado_proceso", 3)
+                    ->where("pph.id_proyecto", $proyecto->id)
+                    ->where("pph.id_empresa", $usuario->id_empresa)
+                    ->orderBy("pph.id_detalle", "desc")
+                    ->get();
+                if(count($detalle) > 0) {
+                    $detalle = $detalle[0];
+                    $proyectos[$idx]->estado = $detalle->hito;
+                    $proyectos[$idx]->responsable = $detalle->responsable;
+                    $proyectos[$idx]->hobservaciones = $detalle->observaciones;
+                }
+                else {
+                    $proyectos[$idx]->estado = "";
+                    $proyectos[$idx]->responsable = "";
+                    $proyectos[$idx]->hobservaciones = "";
+                }
+            }
+            //listo
             return Response::json([
                 "state" => "success",
                 "data" => [
