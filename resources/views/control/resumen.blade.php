@@ -9,7 +9,7 @@
             #dv-table {display:none;}
             .table th, .table td{vertical-align:middle !important;}
             #grid-proyectos thead tr th {text-align:center}
-            .btn-indicador{text-align:center;width:32px !important;}
+            .btn-indicador{border-radius:32px;height:32px;text-align:center;width:32px !important;}
         </style>
     </head>
     <body>
@@ -230,7 +230,6 @@
                         var ls_hitos = response.data.hitos;
                         for(var i in ls_hitos) {
                             var iHito = ls_hitos[i];
-                            var vIndicador = iHito.indicador.split("|");
                             tbody.append(
                                 $("<tr/>").append(
                                     $("<td/>").append(
@@ -249,12 +248,10 @@
                                 ).append(
                                     $("<td/>").html(iHito.hito)
                                 ).append(
-                                    $("<td/>").html(iHito.avance + "%").addClass("text-right")
+                                    $("<td/>").html(iHito.avance + "%").addClass("text-right text-danger").css("font-size","1.1em").css("font-weight","bold")
                                 ).append(
                                     $("<td/>").append(
-                                        $("<a/>").append(
-                                            $("<i/>").addClass("fas fa-" + vIndicador[1])
-                                        ).attr("href","javascript:void(0)").addClass("btn btn-indicador btn-xs btn-" + vIndicador[0])
+                                        $("<a/>").attr("href","javascript:void(0)").addClass("btn btn-indicador btn-xs btn-" + iHito.indicador)
                                     ).addClass("text-center")
                                 ).append(
                                     $("<td/>").html(iHito.fin).addClass("text-right")
@@ -265,11 +262,11 @@
                                 ).append(
                                     $("<td/>").html(iHito.nombre)
                                 ).append(
-                                    $("<td/>").html(iHito.edocumentacion)
+                                    $("<td/>").html(iHito.edocumentacion).css("font-weight","bold")
                                 ).append(
-                                    $("<td/>").html(iHito.eproceso)
+                                    $("<td/>").html(iHito.eproceso).css("font-weight","bold")
                                 ).append(
-                                    $("<td/>").html(iHito.observaciones)
+                                    $("<td/>").html(iHito.observaciones).css("font-weight","bold")
                                 )
                             );
                         }
@@ -312,7 +309,6 @@
                 tbody.empty();
                 for(var i in ls_proyectos) {
                     var iproyecto = ls_proyectos[i];
-                    var vIndicador = iproyecto.indicador.split("|");
                     tbody.append(
                         $("<tr/>").append(
                             $("<td/>").append(
@@ -345,15 +341,13 @@
                         ).append(
                             $("<td/>").html(iproyecto.armadas).addClass("text-right")
                         ).append(
-                            $("<td/>").html(parseFloat(iproyecto.avance).toFixed(2) + "%").addClass("text-right")
+                            $("<td/>").html(parseFloat(iproyecto.avance).toFixed(2) + "%").addClass("text-right text-danger").css("font-size","1.1em").css("font-weight","bold")
                         ).append(
                             $("<td/>").append(
-                                $("<a/>").append(
-                                    $("<i/>").addClass("fas fa-" + vIndicador[1])
-                                ).attr("href","javascript:void(0)").addClass("btn btn-indicador btn-xs btn-" + vIndicador[0])
+                                $("<a/>").attr("href","javascript:void(0)").addClass("btn btn-indicador btn-xs btn-" + iproyecto.indicador)
                             ).addClass("text-center")
                         ).append(
-                            $("<td/>").html(iproyecto.diasvence).addClass("text-center")
+                            $("<td/>").html(iproyecto.diasvence).addClass("text-center text-danger").css("font-size","1.1em").css("font-weight","bold")
                         ).append(
                             $("<td/>").html(iproyecto.estado)
                         ).append(
