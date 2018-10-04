@@ -1,0 +1,4 @@
+alter table ma_campos add st_vigente varchar(10) default 'Vigente';
+
+
+alter table sys_estados add st_vigente varchar(10) default 'Vigente';

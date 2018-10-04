@@ -23,7 +23,7 @@ class Registros extends Controller {
 
     public function sv_usuario() {
         extract(Request::input());
-        if(isset($apemat, $apepat, $dni, $mail, $nombres, $tpdoc)) {
+        if(isset($apemat, $apepat, $dni, $mail, $nombres, $tpdoc, $cargo)) {
             $usuario = Auth::user();
             $telefono = isset($telefono) ? $telefono : "";
             //genera la entidad
@@ -36,8 +36,8 @@ class Registros extends Controller {
             ]);
             //genera el usuario
             $password = substr($apepat,0,2) . substr($apemat,0,2) . $dni;
-            DB::table("ma_usuarios")->insert([
-                "des_alias" => substr($nombres,0,1) . $apepat . substr($apemat,0,1),
+            $id = DB::table("ma_usuarios")->insertGetId([
+                "des_alias" => strtolower(substr($nombres,0,1) . $apepat . substr($apemat,0,1)),
                 "des_email" => $mail,
                 "des_telefono" => $telefono,
                 "tp_usuario" => "U",
@@ -48,8 +48,18 @@ class Registros extends Controller {
             ]);
             if(isset($_FILES["foto"])) {
                 $sourcePath = $_FILES["foto"]["tmp_name"];
-                $targetPath = env("APP_STORAGE_PATH") . DIRECTORY_SEPARATOR . $_FILES["foto"]["name"];
+                $ext = pathinfo($_FILES["foto"]["name"], PATHINFO_EXTENSION);
+                $targetPath = env("APP_STORAGE_PATH") . DIRECTORY_SEPARATOR . $dni . "." . $ext;
                 move_uploaded_file($sourcePath, $targetPath);
+            }
+            //asigna puesto
+            if($cargo != 0) {
+                DB::table("us_usuario_puesto")->insert([
+                    "id_usuario" => $id,
+                    "id_empresa" => $usuario->id_empresa,
+                    "id_puesto" => $cargo,
+                    "st_vigente" => "Vigente"
+                ]);
             }
             return Response::json([
                 "state" => "success"
@@ -90,6 +100,7 @@ class Registros extends Controller {
                 DB::raw("ifnull(mo.des_oficina, '(sin asignar)') as oficina"),
                 "mp.st_vigente as vigencia"
             )
+            ->orderBy("mp.des_puesto", "asc")
             ->get();
         return Response::json($puestos);
     }

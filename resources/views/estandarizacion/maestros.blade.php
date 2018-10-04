@@ -56,11 +56,11 @@
                                                     <div class="row mb-2">
                                                         <div class="col">
                                                             <label class="mr-3">El campo es obligatorio</label>
-                                                            <label for="rcampo-obligat" class="btn btn-sm btn-danger"><tag>No</tag><input type="checkbox" id="rcampo-obligat"></label>
+                                                            <label for="rcampo-obligat" class="btn btn-sm btn-danger text-light"><tag>No</tag><input type="checkbox" id="rcampo-obligat"></label>
                                                         </div>
                                                     </div>
                                                     <div class="row mt-4">
-                                                        <div class="col">
+                                                        <div class="col text-light">
                                                             <button id="btn-sv-campos" class="btn btn-sm btn-primary"><i class="fas fa-plus"></i> Agregar</button>
                                                         </div>
                                                     </div>
@@ -103,7 +103,7 @@
                                                         </div>
                                                     </div>
                                                     <div class="row mt-4">
-                                                        <div class="col">
+                                                        <div class="col text-light">
                                                             <button id="btn-sv-hitos" class="btn btn-sm btn-primary"><i class="fas fa-plus"></i> Agregar</button>
                                                         </div>
                                                     </div>
@@ -145,7 +145,7 @@
                                                         </div>
                                                     </div>
                                                     <div class="row mt-4">
-                                                        <div class="col">
+                                                        <div class="col text-light">
                                                             <button id="btn-sv-eproceso" class="btn btn-sm btn-primary"><i class="fas fa-plus"></i> Agregar</button>
                                                         </div>
                                                     </div>
@@ -187,7 +187,7 @@
                                                         </div>
                                                     </div>
                                                     <div class="row mt-4">
-                                                        <div class="col">
+                                                        <div class="col text-light">
                                                             <button id="btn-sv-econtrol" class="btn btn-sm btn-primary"><i class="fas fa-plus"></i> Agregar</button>
                                                         </div>
                                                     </div>
@@ -250,7 +250,7 @@
                                 </div>
                             </div>
                         </div>
-                    <div class="modal-footer">
+                    <div class="modal-footer text-light">
                         <button type="button" class="btn btn-light" data-dismiss="modal"><i class="fas fa-chevron-left"></i> Cerrar</button>
                     </div>
                 </div>
@@ -385,13 +385,13 @@
                     if(response.state == "success") {
                         a.removeClass("btn-success").empty().off("click").addClass("btn-danger").append(
                             $("<i/>").addClass("fas fa-trash")
-                        ).append("&nbsp;Retirar campo").on("click", RetiraCampo);
+                        ).append("&nbsp;Retirar campo").on("click", QuitarCampo);
                     }
                     else alert(response.msg);
                     a.show();
                 }, "json");
             }
-            function RetiraCampo(event) {
+            function QuitarCampo(event) {
                 event.preventDefault();
                 var a = $(this);
                 var hito = a.data("hito");
@@ -438,7 +438,7 @@
                             else {
                                 iBoton.addClass("btn-danger").append(
                                     $("<i/>").addClass("fas fa-trash")
-                                ).append("&nbsp;Retirar campo").on("click", RetiraCampo);
+                                ).append("&nbsp;Retirar campo").on("click", QuitarCampo);
                             }
                             $("#modal-tbody").append(
                                 $("<tr/>").append(
@@ -448,7 +448,7 @@
                                 ).append(
                                     $("<td/>").html(iCampo.tipo)
                                 ).append(
-                                    $("<td/>").append(iBoton)
+                                    $("<td/>").addClass("text-light").append(iBoton)
                                 )
                             );
                         }
@@ -474,6 +474,62 @@
                 }, "json").error(function(err) {
                     a.show();
                 });
+            }
+            function RetirarCampo(event) {
+                event.preventDefault();
+                var a = $(this);
+                if(window.confirm("¿Retirar el hito?")) {
+                    var p = {
+                        _token: "{{ csrf_token() }}",
+                        id: a.data("id")
+                    };
+                    $.post("{{ url('ajax/estandarizacion/sv-elimina-campo') }}", p, function(response) {
+                        if(response.state == "success") {
+                            ls_campos = response.data.campos;
+                            EscribirListaCampos();
+                            alert("Campo retirado");
+                        }
+                        else alert(response.msg);
+                    }, "json");
+                }
+            }
+            function RetirarHito(event) {
+                event.preventDefault();
+                var a = $(this);
+                if(window.confirm("¿Retirar el hito?")) {
+                    var p = {
+                        _token: "{{ csrf_token() }}",
+                        id: a.data("id")
+                    };
+                    $.post("{{ url('ajax/estandarizacion/sv-elimina-hito') }}", p, function(response) {
+                        if(response.state == "success") {
+                            ls_hitos = response.data.hitos;
+                            EscribirListaHitos();
+                            alert("Hito retirado");
+                        }
+                        else alert(response.msg);
+                    }, "json")
+                }
+            }
+            function RetirarEstado(event) {
+                event.preventDefault();
+                var a = $(this);
+                if(window.confirm("¿Retirar el estado?")) {
+                    var p = {
+                        _token: "{{ csrf_token() }}",
+                        id: a.data("id")
+                    };
+                    $.post("{{ url('ajax/estandarizacion/sv-elimina-estado') }}", p, function(response) {
+                        if(response.state == "success") {
+                            ls_eprocesos = response.data.eprocesos;
+                            ls_econtrol = response.data.econtrol;
+                            EscribirListaProcesos();
+                            EscribirListaControl();
+                            alert("Estado retirado");
+                        }
+                        else alert(response.msg);
+                    }, "json");
+                }
             }
             //
             function EscribirListaCampos() {
@@ -501,15 +557,18 @@
                         ).append(
                             $("<td/>").html(icampo.tipo)
                         ).append(
-                            $("<td/>").append(btnTipo)
+                            $("<td/>").addClass("text-light").append(btnTipo)
                         ).append(
                             $("<td/>").html(icampo.registro)
                         ).append(
                             $("<td/>").append(
-                                $("<a/>").attr("href", "#").addClass("btn btn-xs btn-danger").append(
+                                $("<a/>").attr({
+                                    "href": "#",
+                                    "data-id": icampo.id
+                                }).addClass("btn btn-xs btn-danger").append(
                                     $("<i/>").addClass("fas fa-trash")
-                                ).append(" Eliminar")
-                            )
+                                ).append(" Eliminar").on("click", RetirarCampo)
+                            ).addClass("text-light")
                         )
                     );
                 }
@@ -523,7 +582,7 @@
                         $("<tr/>").append(
                             $("<td/>").append(
                                 $("<a/>").html(ihito.id).data("hid",ihito.id).attr("href","#").addClass("btn btn-xs btn-primary").on("click", MuestraCampos)
-                            )
+                            ).addClass("text-light")
                         ).append(
                             $("<td/>").html(ihito.hito)
                         ).append(
@@ -532,10 +591,13 @@
                             $("<td/>").html(ihito.fecha)
                         ).append(
                             $("<td/>").append(
-                                $("<a/>").attr("href", "#").addClass("btn btn-xs btn-danger").append(
+                                $("<a/>").attr({
+                                    "href": "#",
+                                    "data-id": ihito.id
+                                }).addClass("btn btn-xs btn-danger").append(
                                     $("<i/>").addClass("fas fa-trash")
-                                ).append(" Eliminar")
-                            )
+                                ).append(" Eliminar").on("click", RetirarHito)
+                            ).addClass("text-light")
                         )
                     ).append(
                         $("<tr/>").addClass("tr-hidden")
@@ -580,9 +642,12 @@
                             $("<td/>").html(ieproceso.fecha)
                         ).append(
                             $("<td/>").append(
-                                $("<a/>").attr("href", "#").addClass("btn btn-xs btn-danger").append(
+                                $("<a/>").attr({
+                                    "href": "#",
+                                    "data-id": ieproceso.id
+                                }).addClass("btn btn-xs btn-danger").append(
                                     $("<i/>").addClass("fas fa-trash")
-                                ).append(" Eliminar")
+                                ).append(" Eliminar").on("click", RetirarEstado)
                             )
                         )
                     );
@@ -604,9 +669,12 @@
                             $("<td/>").html(icontrol.fecha)
                         ).append(
                             $("<td/>").append(
-                                $("<a/>").attr("href", "#").addClass("btn btn-xs btn-danger").append(
+                                $("<a/>").attr({
+                                    "href": "#",
+                                    "data-id": icontrol.id
+                                }).addClass("btn btn-xs btn-danger").append(
                                     $("<i/>").addClass("fas fa-trash")
-                                ).append(" Eliminar")
+                                ).append(" Eliminar").on("click", RetirarEstado)
                             )
                         )
                     );

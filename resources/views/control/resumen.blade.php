@@ -34,12 +34,12 @@
                                         <th>Fecha entrega</th>
                                         <th>Valor</th>
                                         <th>N° pagos</th>
-                                        <th>% Avance</th>
-                                        <th>Indicador</th>
-                                        <th>Días vencimiento</th>
-                                        <th>Estado actual</th>
-                                        <th>Responsable</th>
-                                        <th>Observaciones</th>
+                                        <th class="text-danger">% Avance</th>
+                                        <th class="text-danger">Indicador</th>
+                                        <th class="text-danger">Días vencimiento</th>
+                                        <th class="text-danger">Estado actual</th>
+                                        <th class="text-danger">Responsable</th>
+                                        <th class="text-danger">Observaciones</th>
                                     </tr>
                                 </thead>
                                 <tbody></tbody>

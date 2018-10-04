@@ -22,7 +22,7 @@ class Main extends Controller {
     }
 
     public function home() {
-        $usuario = Auth::user();
+        /*$usuario = Auth::user();
         $menu = DB::table("sys_permisos as sp")
             ->join("ma_menu as mm", "sp.id_item", "=", "mm.id_item")
             ->where("sp.id_empresa", $usuario->id_empresa)
@@ -54,7 +54,8 @@ class Main extends Controller {
             "usuario" => $usuario,
             "menu" => $menu
         ];
-        return view("intranet.home")->with($arr_data);
+        return view("intranet.home")->with($arr_data);*/
+        return redirect("intranet/seguimiento/resumen");
     }
 
 }

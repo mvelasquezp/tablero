@@ -32,6 +32,7 @@ class Estandarizacion extends Controller {
         		"mc.created_at as registro",
                 "mc.st_obligatorio as obligatorio"
         	)
+            ->where("mc.st_vigente", "Vigente")
             ->get();
         $hitos = DB::table("ma_hitos_control as mhc")
         	->where("mhc.id_empresa", $usuario->id_empresa)
@@ -46,6 +47,7 @@ class Estandarizacion extends Controller {
         	->get();
     	$eprocesos = DB::table("sys_estados")
     		->where("tp_estado", "P")
+            ->where("st_vigente", "Vigente")
     		->select(
     			"id_estado as id",
     			"cod_estado as codigo",
@@ -56,6 +58,7 @@ class Estandarizacion extends Controller {
     		->get();
 		$econtrol = DB::table("sys_estados")
     		->where("tp_estado", "C")
+            ->where("st_vigente", "Vigente")
     		->select(
     			"id_estado as id",
     			"cod_estado as codigo",
@@ -758,6 +761,117 @@ class Estandarizacion extends Controller {
                 "state" => "success",
                 "data" => [
                     "areas" => $areas
+                ]
+            ]);
+        }
+        return Response::json([
+            "state" => "error",
+            "msg" => "Parámetros incorrectos"
+        ]);
+    }
+
+    public function sv_elimina_campo() {
+        extract(Request::input());
+        if(isset($id)) {
+            DB::table("ma_campos")
+                ->where("id_campo", $id)
+                ->update([
+                    "st_vigente" => "Retirado"
+                ]);
+            $campos = DB::table("ma_campos as mc")
+                ->join("sys_tipos_dato as std", "mc.id_tipo", "=", "std.id_tipo")
+                ->select(
+                    "mc.id_campo as id",
+                    "mc.des_campo as campo",
+                    "std.des_tipo as tipo",
+                    "mc.created_at as registro",
+                    "mc.st_obligatorio as obligatorio"
+                )
+                ->where("mc.st_vigente", "Vigente")
+                ->get();
+            return Response::json([
+                "state" => "success",
+                "data" => [
+                    "campos" => $campos
+                ]
+            ]);
+        }
+        return Response::json([
+            "state" => "error",
+            "msg" => "Parámetros incorrectos"
+        ]);
+    }
+
+    public function sv_elimina_hito() {
+        extract(Request::input());
+        if(isset($id)) {
+            $usuario = Auth::user();
+            DB::table("ma_hitos_control")
+                ->where("id_hito", $id)
+                ->where("id_empresa", $usuario->id_empresa)
+                ->update([
+                    "st_vigente" => "Retirado"
+                ]);
+            //
+            $hitos = DB::table("ma_hitos_control as mhc")
+                ->where("mhc.id_empresa", $usuario->id_empresa)
+                ->where("mhc.st_vigente", "Vigente")
+                ->select(
+                    "mhc.id_hito as id",
+                    "mhc.des_hito as hito",
+                    "mhc.nu_dias_disparador as dias",
+                    DB::raw("date_format(mhc.created_at,'%Y-%m-%d') as fecha")
+                )
+                ->orderBy("id", "asc")
+                ->get();
+            return Response::json([
+                "state" => "success",
+                "data" => [
+                    "hitos" => $hitos
+                ]
+            ]);
+        }
+        return Response::json([
+            "state" => "error",
+            "msg" => "Parámetros incorrectos"
+        ]);
+    }
+
+    public function sv_elimina_estado() {
+        extract(Request::input());
+        if(isset($id)) {
+            DB::table("sys_estados")
+                ->where("id_estado", $id)
+                ->update([
+                    "st_vigente" => "Retirado"
+                ]);
+            $eprocesos = DB::table("sys_estados")
+                ->where("tp_estado", "P")
+                ->where("st_vigente", "Vigente")
+                ->select(
+                    "id_estado as id",
+                    "cod_estado as codigo",
+                    "des_estado as estado",
+                    "created_at as fecha"
+                )
+                ->orderBy("id", "asc")
+                ->get();
+            $econtrol = DB::table("sys_estados")
+                ->where("tp_estado", "C")
+                ->where("st_vigente", "Vigente")
+                ->select(
+                    "id_estado as id",
+                    "cod_estado as codigo",
+                    "des_estado as estado",
+                    "created_at as fecha"
+                )
+                ->orderBy("id", "asc")
+                ->get();
+            return Response::json([
+                "state" => "success",
+                "data" => [
+                    "eprocesos" => $eprocesos,
+                    "econtrol" => $econtrol
                 ]
             ]);
         }

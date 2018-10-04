@@ -57,10 +57,44 @@ class Registros extends Controller {
     public function usuarios() {
         $usuario = Auth::user();
         $menu = $this->ObtenerMenu($usuario);
+        $usuarios = DB::table("ma_usuarios as mu")
+            ->join("ma_entidad as me", "mu.cod_entidad", "=", "me.cod_entidad")
+            ->leftJoin("us_usuario_puesto as uup", function($join) {
+                $join->on("mu.id_empresa", "=", "uup.id_empresa")
+                    ->on("mu.id_usuario", "=", "uup.id_usuario")
+                    ->on("uup.st_vigente", "=", DB::raw("'Vigente'"));
+            })
+            ->leftJoin("ma_puesto as mp", function($join) {
+                $join->on("uup.id_empresa", "=", "mp.id_empresa")
+                    ->on("uup.id_puesto", "=", "mp.id_puesto");
+            })
+            ->leftJoin("ma_oficina as mo", function($join) {
+                $join->on("mp.id_oficina", "=", "mo.id_oficina")
+                    ->on("mp.id_empresa", "=", "mo.id_empresa");
+            })
+            ->select(
+                "mu.id_usuario as id",
+                "mu.cod_entidad as dni",
+                "me.des_nombre_1 as apepat",
+                "me.des_nombre_2 as apemat",
+                "me.des_nombre_3 as nombres",
+                DB::raw("date_format(mu.fe_ingreso,'%Y-%m-%d') as fingreso"),
+                "mu.des_alias as alias",
+                "mp.des_puesto as puesto",
+                "mo.des_oficina as oficina",
+                "mu.des_telefono as telefono",
+                "mu.des_email as email"
+            )
+            ->where("mu.id_empresa", 1)
+            ->orderBy("apepat", "asc")
+            ->orderBy("apemat", "asc")
+            ->orderBy("nombres", "asc")
+            ->get();
         //
         $arr_data = [
             "usuario" => $usuario,
-            "menu" => $menu
+            "menu" => $menu,
+            "usuarios" => $usuarios,
         ];
         return view("registro.usuarios")->with($arr_data);
     }

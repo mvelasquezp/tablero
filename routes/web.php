@@ -54,6 +54,9 @@ Route::middleware("auth")->namespace("Ajax")->prefix("ajax")->group(function() {
 		Route::post("ls-detalle-campos", "Estandarizacion@ls_detalle_campos");
 		Route::post("sv-agrega-campo", "Estandarizacion@sv_agrega_campo");
 		Route::post("sv-retira-campo", "Estandarizacion@sv_retira_campo");
+		Route::post("sv-elimina-campo", "Estandarizacion@sv_elimina_campo");
+		Route::post("sv-elimina-hito", "Estandarizacion@sv_elimina_hito");
+		Route::post("sv-elimina-estado", "Estandarizacion@sv_elimina_estado");
 		//
 		Route::post("ls-hitos-proyecto", "Estandarizacion@ls_hitos_proyecto");
 		Route::post("sv-hito-proyecto", "Estandarizacion@sv_hito_proyecto");
