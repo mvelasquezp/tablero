@@ -140,7 +140,7 @@ class Control extends Controller {
                 $proyectos[$idx]->estado = "";
                 $proyectos[$idx]->responsable = "";
                 $proyectos[$idx]->hobservaciones = "";
-                $proyectos[$idx]->indicador = "secondary";
+                $proyectos[$idx]->indicador = "secondary|minus";
             }
             //cálculo del % avance
 
