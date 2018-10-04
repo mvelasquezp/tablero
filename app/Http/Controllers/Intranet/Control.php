@@ -65,6 +65,19 @@ class Control extends Controller {
                     ->on("pp.id_organo", "=", "mau.id_organo")
                     ->on("pp.id_empresa", "=", "mau.id_empresa");
             })
+            ->join("pr_proyecto_hitos as pph", function($join) {
+                $join->on("pp.id_proyecto", "=", "pph.id_proyecto")
+                    ->on("pp.id_empresa", "=", "pph.id_empresa");
+            })
+            ->join("pr_catalogo_hitos as pch", function($join) {
+                $join->on("pph.id_empresa", "=", "pch.id_empresa")
+                    ->on("pph.id_hito", "=", "pch.id_hito")
+                    ->on("pph.id_catalogo", "=", "pch.id_catalogo");
+            })
+            ->join("pr_valoracion as pv", function($join) {
+                $join->on("pph.id_estado_proceso", "=", "pv.id_estado_p")
+                    ->on("pph.id_estado_documentacion", "=", "pv.id_estado_c");
+            })
             ->select(
                 "pp.id_proyecto as id",
                 "pcp.des_catalogo as tipo",
@@ -77,9 +90,11 @@ class Control extends Controller {
                 "pp.num_valor as valor",
                 "pp.num_armadas as armadas",
                 DB::raw("if(datediff(current_timestamp,pp.fe_fin) < 0,0,datediff(current_timestamp,pp.fe_fin)) as diasvence"),
-                "pp.des_observaciones as observaciones"
+                "pp.des_observaciones as observaciones",
+                DB::raw("100 * sum(pch.nu_peso * pv.num_puntaje)/sum(pch.nu_peso) as avance")
             )
             ->where("pp.id_empresa", $usuario->id_empresa)
+            ->groupBy("id", "tipo", "orden", "expediente", "femision", "areausr", "proyecto", "fentrega", "valor", "armadas", "diasvence", "observaciones")
             ->orderBy("pp.id_proyecto", "asc")
             ->get();
         //busca los ultimos hitos por proyecto
@@ -124,6 +139,8 @@ class Control extends Controller {
                 $proyectos[$idx]->responsable = "";
                 $proyectos[$idx]->hobservaciones = "";
             }
+            //cálculo del % avance
+
         }
         //listo
         $estados = DB::table("sys_estados")

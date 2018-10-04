@@ -8,6 +8,8 @@
             #form-hitos {display:none;}
             #dv-table {display:none;}
             .table th, .table td{vertical-align:middle !important;}
+            #grid-proyectos thead tr th {text-align:center}
+            .btn-indicador{text-align:center;width:32px !important;}
         </style>
     </head>
     <body>
@@ -152,19 +154,15 @@
                                     <input type="hidden" id="mah-hito" name="hito">
                                     <input type="hidden" id="mah-proyecto" name="proyecto">
                                     <input type="hidden" id="mah-detalle" name="detalle">
-                                    <div class="row">
-                                        <div class="col-4">
-                                            <label for="mah-inicio">Fecha inicio</label>
-                                            <input type="text" id="mah-inicio" name="inicio" class="form-control form-control-sm datepicker" placeholder="yyyy-mm-dd">
-                                        </div>
-                                        <div class="col-4">
-                                            <label for="mah-fin">Fecha fin</label>
+                                    <div class="row mb-2">
+                                        <div class="col-6">
+                                            <label class="mb-1" for="mah-fin">Fecha límite de ejecución</label>
                                             <input type="text" id="mah-fin" name="fin" class="form-control form-control-sm datepicker" placeholder="yyyy-mm-dd">
                                         </div>
                                     </div>
-                                    <div class="row">
+                                    <div class="row mb-2">
                                         <div class="col-10">
-                                            <label for="mah-documentacion">Control documentario</label>
+                                            <label class="mb-1" for="mah-documentacion">Control documentario</label>
                                             <select id="mah-documentacion" name="documentacion" class="form-control form-control-sm">
                                                 <option value="0" selected disabled>- Seleccione -</option>
                                                 @foreach($estados as $estado)
@@ -175,9 +173,9 @@
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="row">
+                                    <div class="row mb-2">
                                         <div class="col-10">
-                                            <label for="mah-proceso">Control proceso</label>
+                                            <label class="mb-1" for="mah-proceso">Control proceso</label>
                                             <select id="mah-proceso" name="proceso" class="form-control form-control-sm">
                                                 <option value="0" selected disabled>- Seleccione -</option>
                                                 @foreach($estados as $estado)
@@ -188,9 +186,9 @@
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="row">
+                                    <div class="row mb-2">
                                         <div class="col">
-                                            <label for="mah-observaciones">Observaciones</label>
+                                            <label class="mb-1" for="mah-observaciones">Observaciones</label>
                                             <textarea id="mah-observaciones" name="observaciones" class="form-control form-control-sm" style="resize:none"></textarea>
                                         </div>
                                     </div>
@@ -232,6 +230,7 @@
                         var ls_hitos = response.data.hitos;
                         for(var i in ls_hitos) {
                             var iHito = ls_hitos[i];
+                            var vIndicador = iHito.indicador.split("|");
                             tbody.append(
                                 $("<tr/>").append(
                                     $("<td/>").append(
@@ -252,13 +251,15 @@
                                 ).append(
                                     $("<td/>").html(iHito.avance + "%").addClass("text-right")
                                 ).append(
-                                    $("<td/>")
+                                    $("<td/>").append(
+                                        $("<a/>").append(
+                                            $("<i/>").addClass("fas fa-" + vIndicador[1])
+                                        ).attr("href","javascript:void(0)").addClass("btn btn-indicador btn-xs btn-" + vIndicador[0])
+                                    ).addClass("text-center")
                                 ).append(
-                                    $("<td/>").html(iHito.inicio)
+                                    $("<td/>").html(iHito.fin).addClass("text-right")
                                 ).append(
-                                    $("<td/>").html(iHito.fin)
-                                ).append(
-                                    $("<td/>").html(iHito.diasvcto)
+                                    $("<td/>").html(iHito.diasvcto).addClass("text-center")
                                 ).append(
                                     $("<td/>").html(iHito.responsable)
                                 ).append(
@@ -283,8 +284,6 @@
                                         $("<th/>").html("% Avance")
                                     ).append(
                                         $("<th/>").html("Indicador")
-                                    ).append(
-                                        $("<th/>").html("Fecha inicio")
                                     ).append(
                                         $("<th/>").html("Fecha límite")
                                     ).append(
@@ -318,6 +317,7 @@
                             $("<td/>").append(
                                 $("<a/>").attr({
                                     "href": "#",
+                                    "id": "a-" + iproyecto.id,
                                     "data-id": iproyecto.id
                                 }).addClass("btn btn-xs btn-primary text-light").append(
                                     $("<i/>").addClass("fas fa-list-ul")
@@ -344,11 +344,11 @@
                         ).append(
                             $("<td/>").html(iproyecto.armadas).addClass("text-right")
                         ).append(
-                            $("<td/>").html("").addClass("text-right")
+                            $("<td/>").html(parseFloat(iproyecto.avance).toFixed(2) + "%").addClass("text-right")
                         ).append(
                             $("<td/>").html("")
                         ).append(
-                            $("<td/>").html(iproyecto.diasvence)
+                            $("<td/>").html(iproyecto.diasvence).addClass("text-center")
                         ).append(
                             $("<td/>").html(iproyecto.estado)
                         ).append(
@@ -372,7 +372,6 @@
             function ModalActualizaHitoOnShow(args) {
                 var dataset = args.relatedTarget.dataset;
                 //
-                document.getElementById("mah-inicio").value = "";
                 document.getElementById("mah-fin").value = "";
                 document.getElementById("mah-observaciones").value = "";
                 $("#mah-documentacion option[value=0]").prop("selected", true);
@@ -391,7 +390,6 @@
                         document.getElementById("mah-hito").value = dataset.hito;
                         document.getElementById("mah-proyecto").value = dataset.proyecto;
                         document.getElementById("mah-detalle").value = dataset.id;
-                        document.getElementById("mah-inicio").value = estado.inicio;
                         document.getElementById("mah-fin").value = estado.fin;
                         document.getElementById("mah-observaciones").value = estado.observaciones;
                         $("#mah-documentacion option[value=" + estado.edocumentacion + "]").prop("selected", true);
@@ -407,7 +405,6 @@
                     hito: document.getElementById("mah-hito").value,
                     proyecto: document.getElementById("mah-proyecto").value,
                     detalle: document.getElementById("mah-detalle").value,
-                    inicio: document.getElementById("mah-inicio").value,
                     fin: document.getElementById("mah-fin").value,
                     documentacion: document.getElementById("mah-documentacion").value,
                     proceso: document.getElementById("mah-proceso").value,
@@ -418,6 +415,7 @@
                         ls_proyectos = response.data.proyectos;
                         $("#modal-actualiza-hito").modal("hide");
                         ListarProyectos();
+                        $("#a-" + p.proyecto).trigger("click");
                     }
                     else alert(response.msg);
                 }, "json");
