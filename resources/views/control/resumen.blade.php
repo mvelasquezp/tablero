@@ -312,6 +312,7 @@
                 tbody.empty();
                 for(var i in ls_proyectos) {
                     var iproyecto = ls_proyectos[i];
+                    var vIndicador = iproyecto.indicador.split("|");
                     tbody.append(
                         $("<tr/>").append(
                             $("<td/>").append(
@@ -346,7 +347,11 @@
                         ).append(
                             $("<td/>").html(parseFloat(iproyecto.avance).toFixed(2) + "%").addClass("text-right")
                         ).append(
-                            $("<td/>").html("")
+                            $("<td/>").append(
+                                $("<a/>").append(
+                                    $("<i/>").addClass("fas fa-" + vIndicador[1])
+                                ).attr("href","javascript:void(0)").addClass("btn btn-indicador btn-xs btn-" + vIndicador[0])
+                            ).addClass("text-center")
                         ).append(
                             $("<td/>").html(iproyecto.diasvence).addClass("text-center")
                         ).append(

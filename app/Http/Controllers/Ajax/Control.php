@@ -345,7 +345,8 @@ class Control extends Controller {
                     ->select(
                         DB::raw("ifnull(pph.des_hito, mhc.des_hito) as hito"),
                         DB::raw("if(me.cod_entidad is null, mp.des_puesto, concat(me.des_nombre_1,' ',me.des_nombre_2,' ',me.des_nombre_3)) as responsable"),
-                        "pph.des_observaciones as observaciones"
+                        "pph.des_observaciones as observaciones",
+                        DB::raw("if(pph.id_estado_proceso = 3,(if(datediff(current_timestamp, pph.fe_fin) > 0,'danger|times',if(datediff(pph.fe_fin, current_timestamp) < mhc.nu_dias_disparador,'success|check','warning|exclamation'))),'secondary|minus') as indicador")
                     )
                     ->where("pph.id_estado_proceso", 3)
                     ->where("pph.id_proyecto", $proyecto->id)
