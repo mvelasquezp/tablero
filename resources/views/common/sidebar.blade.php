@@ -29,11 +29,18 @@
     </ul>
 
     <ul class="list-unstyled CTAs">
-        <li>
+        <!--li>
             <a href="https://bootstrapious.com/tutorial/files/sidebar.zip" class="download"><i class="fas fa-cogs"></i> Opciones</a>
-        </li>
+        </li-->
         <li>
-            <a href="https://bootstrapious.com/p/bootstrap-sidebar" class="article"><i class="fas fa-sign-out-alt"></i> Salir</a>
+            <a href="javascript:logout()" class="article"><i class="fas fa-sign-out-alt"></i> Salir</a>
         </li>
     </ul>
 </nav>
+<script type="text/javascript">
+    function logout() {
+        if(window.confirm("¿Desea salir del sistema? Tendrá que ingresar sus credenciales nuevamente la próxima vez.")) {
+            location.href = "{{ url('login/logout') }}";
+        }
+    }
+</script>
