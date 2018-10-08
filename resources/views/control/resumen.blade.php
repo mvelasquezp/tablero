@@ -10,6 +10,7 @@
             .table th, .table td{vertical-align:middle !important;}
             #grid-proyectos thead tr th {text-align:center}
             .btn-indicador{border-radius:32px;height:32px;text-align:center;width:32px !important;}
+            #fl-busca{display:none;}
         </style>
     </head>
     <body>
@@ -17,13 +18,40 @@
             @include('common.sidebar')
             @include('common.navbar')
             <div id="content">
+                <div class="container">
+                    <div class="row">
+                        <div class="col">
+                            <div class="alert alert-secondary">
+                                <form class="form-inline">
+                                    <div class="btn-group btn-group-sm mr-4" role="group" aria-label="Basic example">
+                                        <button data-tipo="0" type="button" class="btn btn-primary btn-catalogo active">Todos</button>
+                                        <button data-tipo="1" type="button" class="btn btn-primary btn-catalogo">ASP</button>
+                                        <button data-tipo="2" type="button" class="btn btn-primary btn-catalogo">Terceros</button>
+                                    </div>
+                                    <label for="fl-atributo" class="mr-2">Buscar por</label>
+                                    <select id="fl-atributo" class="form-control form-control-sm mr-2">
+                                        <option value="-1" selected disabled>- Seleccione -</option>
+                                        <option value="0">Cualquier atributo</option>
+                                        @foreach($atributos as $atributo)
+                                        <option value="{{ $atributo->value }}" data-tipo="{{ $atributo->tipo }}">{{ $atributo->text }}</option>
+                                        @endforeach
+                                    </select>
+                                    <tag id="fl-input" class="mr-3"></tag>
+                                    <a id="fl-busca" href="#" class="btn btn-sm btn-primary text-light"><i class="fas fa-search"></i> Buscar</a>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <div class="container-fluid">
                     <div class="row">
                         <div class="col">
                             <table id="grid-proyectos" class="table table-sm table-striped">
                                 <thead>
                                     <tr>
-                                        <th width="1%"></th>
+                                        <th width="1%">
+                                            <!--a href="#" class="btn btn-xs btn-info text-light"><i class="fas fa-search"></i></a-->
+                                        </th>
                                         <th width="2%">ID</th>
                                         <th>Tipo proyecto</th>
                                         <th>Tipo orden</th>
@@ -41,11 +69,30 @@
                                         <th class="text-danger">Responsable</th>
                                         <th class="text-danger">Observaciones</th>
                                     </tr>
+                                    <!--tr class="tr-filtros">
+                                        <th></th>
+                                        <th></th>
+                                        <th></th>
+                                        <th></th>
+                                        <th></th>
+                                        <th></th>
+                                        <th></th>
+                                        <th></th>
+                                        <th></th>
+                                        <th></th>
+                                        <th></th>
+                                        <th></th>
+                                        <th></th>
+                                        <th></th>
+                                        <th></th>
+                                        <th></th>
+                                        <th></th>
+                                    </tr-->
                                 </thead>
                                 <tbody></tbody>
                             </table>
                             <!-- -->
-                            <nav aria-label="Navegador">
+                            <!--nav aria-label="Navegador">
                                 <ul class="pagination pagination-sm justify-content-end">
                                     <li class="page-item disabled">
                                         <a class="page-link" href="#" tabindex="-1">Previous</a>
@@ -60,7 +107,7 @@
                                         <a class="page-link bg-success text-light" href="{{ url('intranet/seguimiento/crea-proyecto') }}"><i class="fas fa-plus"></i> Nuevo proyecto</a>
                                     </li>
                                 </ul>
-                            </nav>
+                            </nav-->
                         </div>
                     </div>
                 </div>
@@ -130,8 +177,8 @@
             </div>
         </form>
         <!-- modals -->
-        <div id="modal-actualiza-hito" class="modal fade" tabindex="-1" role="dialog">
-            <div class="modal-dialog" role="document">
+        <div id="modal-actualiza-hito" class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog">
+            <div class="modal-dialog modal-lg" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title">Modal title</h5>
@@ -140,16 +187,8 @@
                         </button>
                     </div>
                     <div class="modal-body">
-                        <ul class="nav nav-tabs mb-2" id="myTab" role="tablist">
-                            <li class="nav-item">
-                                <a class="nav-link active" id="datos-tab" data-toggle="tab" href="#datos" role="tab" aria-controls="datos" aria-selected="true">Estado del hito</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" id="atributos-tab" data-toggle="tab" href="#atributos" role="tab" aria-controls="atributos" aria-selected="false">Atributos</a>
-                            </li>
-                        </ul>
-                        <div class="tab-content" id="myTabContent">
-                            <div class="tab-pane fade show active" id="datos" role="tabpanel" aria-labelledby="datos-tab">
+                        <div class="row">
+                            <div class="col">
                                 <form id="form-actualiza-hito">
                                     <input type="hidden" id="mah-hito" name="hito">
                                     <input type="hidden" id="mah-proyecto" name="proyecto">
@@ -194,9 +233,7 @@
                                     </div>
                                 </form>
                             </div>
-                            <div class="tab-pane fade" id="atributos" role="tabpanel" aria-labelledby="atributos-tab">
-                                <p>Aquí irán los atributos de los hitos de control</p>
-                            </div>
+                            <div id="col-atributos" class="col"></div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -212,6 +249,194 @@
         <script type="text/javascript" src="{{ asset('vendor/bootstrap-datepicker/locales/bootstrap-datepicker.es.min.js') }}"></script>
         <script type="text/javascript">
             var ls_proyectos = {!! json_encode($proyectos) !!};
+            var ls_atributos;
+            var curr_catalogo = 0;
+            //
+            function ListarProyectos() {
+                var tbody = $("#grid-proyectos tbody");
+                tbody.empty();
+                for(var i in ls_proyectos) {
+                    var iproyecto = ls_proyectos[i];
+                    if(curr_catalogo == 0 || iproyecto.catalogo == curr_catalogo) {
+                        tbody.append(
+                            $("<tr/>").attr({
+                                "id": "tr-" + iproyecto.id,
+                                "data-visible": "S",
+                                "data-catalogo": iproyecto.catalogo
+                            }).addClass("tr-proyecto").append(
+                                $("<td/>").append(
+                                    $("<a/>").attr({
+                                        "href": "#",
+                                        "id": "a-" + iproyecto.id,
+                                        "data-id": iproyecto.id
+                                    }).addClass("btn btn-xs btn-primary text-light").append(
+                                        $("<i/>").addClass("fas fa-list-ul")
+                                    ).on("click", MuestraHitos)
+                                )
+                            ).append(
+                                $("<td/>").addClass("text-right").html(iproyecto.id)
+                            ).append(
+                                $("<td/>").html(iproyecto.tipo)
+                            ).append(
+                                $("<td/>").html(iproyecto.orden)
+                            ).append(
+                                $("<td/>").html(iproyecto.expediente)
+                            ).append(
+                                $("<td/>").html(iproyecto.femision)
+                            ).append(
+                                $("<td/>").html(iproyecto.areausr)
+                            ).append(
+                                $("<td/>").html(iproyecto.proyecto)
+                            ).append(
+                                $("<td/>").html(iproyecto.fentrega)
+                            ).append(
+                                $("<td/>").html(parseFloat(iproyecto.valor).toLocaleString("en-US", { minimumFractionDigits:2, maximumFractionDigits:2 })).addClass("text-right")
+                            ).append(
+                                $("<td/>").html(iproyecto.armadas).addClass("text-right")
+                            ).append(
+                                $("<td/>").html(parseFloat(iproyecto.avance).toFixed(2) + "%").addClass("text-right text-danger").css("font-size","1.1em").css("font-weight","bold")
+                            ).append(
+                                $("<td/>").append(
+                                    $("<a/>").attr("href","javascript:void(0)").addClass("btn btn-indicador btn-xs btn-" + iproyecto.indicador)
+                                ).addClass("text-center")
+                            ).append(
+                                $("<td/>").html(iproyecto.diasvence).addClass("text-center text-danger").css("font-size","1.1em").css("font-weight","bold")
+                            ).append(
+                                $("<td/>").html(iproyecto.estado)
+                            ).append(
+                                $("<td/>").html(iproyecto.responsable)
+                            ).append(
+                                $("<td/>").html(iproyecto.hobservaciones)
+                            )
+                        ).append(
+                            $("<tr/>").hide()
+                        ).append(
+                            $("<tr/>").append(
+                                $("<td/>")
+                            ).append(
+                                $("<td/>").attr("colspan", 16).append(
+                                    $("<div/>").attr("id", "dv-" + iproyecto.id)
+                                )
+                            ).hide()
+                        );
+                    }
+                }
+            }
+            function ListarAtributos() {
+                var form = $("<form/>");
+                for(var i in ls_atributos) {
+                    var iAtributo = ls_atributos[i];
+                    switch(iAtributo.tipo) {
+                        case 1:
+                        case 2:
+                            form.append(
+                                $("<div/>").addClass("row mb-2").append(
+                                    $("<div/>").addClass("col-6").append(
+                                        $("<label/>").addClass("mb-1").attr("for","attr-" + iAtributo.campo).html(iAtributo.nombre)
+                                    ).append(
+                                        $("<input/>").attr({
+                                            "type": "number",
+                                            "id": "attr-" + iAtributo.campo,
+                                            "placeholder": "Ingrese " + iAtributo.nombre.toLowerCase(),
+                                            "data-proyecto": iAtributo.proyecto,
+                                            "data-hito": iAtributo.hito,
+                                            "data-campo": iAtributo.campo,
+                                            "data-detalle": iAtributo.detalle
+                                        }).addClass("form-control form-control-sm form-atributo").val(iAtributo.value)
+                                    )
+                                )
+                            );
+                            break;
+                        case 3:
+                            form.append(
+                                $("<div/>").addClass("row mb-2").append(
+                                    $("<div/>").addClass("col").append(
+                                        $("<label/>").addClass("mb-1").attr("for","attr-" + iAtributo.campo).html(iAtributo.nombre)
+                                    ).append(
+                                        $("<input/>").attr({
+                                            "type": "text",
+                                            "id": "attr-" + iAtributo.campo,
+                                            "placeholder": "Ingrese " + iAtributo.nombre.toLowerCase(),
+                                            "data-proyecto": iAtributo.proyecto,
+                                            "data-hito": iAtributo.hito,
+                                            "data-campo": iAtributo.campo,
+                                            "data-detalle": iAtributo.detalle
+                                        }).addClass("form-control form-control-sm form-atributo").val(iAtributo.value)
+                                    )
+                                )
+                            );
+                            break;
+                        case 4:
+                            form.append(
+                                $("<div/>").addClass("row mb-2").append(
+                                    $("<div/>").addClass("col-6").append(
+                                        $("<label/>").addClass("mb-1").attr("for","attr-" + iAtributo.campo).html(iAtributo.nombre)
+                                    ).append(
+                                        $("<input/>").attr({
+                                            "type": "text",
+                                            "id": "attr-" + iAtributo.campo,
+                                            "placeholder": "yyyy-mm-dd",
+                                            "data-proyecto": iAtributo.proyecto,
+                                            "data-hito": iAtributo.hito,
+                                            "data-campo": iAtributo.campo,
+                                            "data-detalle": iAtributo.detalle
+                                        }).addClass("form-control form-control-sm form-atributo datepicker").datepicker({
+                                            autoclose: true,
+                                            daysOfWeekHighlighted: [0,6],
+                                            format: 'yyyy-mm-dd',
+                                            language: 'es',
+                                            startView: 0,
+                                            startDate: '-1d',
+                                            todayHighlight: true,
+                                            zIndexOffset: 1030
+                                        }).val(iAtributo.value)
+                                    )
+                                )
+                            );
+                            break;
+                        case 5:
+                            form.append(
+                                $("<div/>").addClass("row mb-2").append(
+                                    $("<div/>").addClass("col-6").append(
+                                        $("<label/>").addClass("mb-1").attr("for","attr-" + iAtributo.campo).html(iAtributo.nombre)
+                                    ).append(
+                                        $("<input/>").attr({
+                                            "type": "text",
+                                            "id": "attr-" + iAtributo.campo,
+                                            "placeholder": "Ingrese " + iAtributo.nombre.toLowerCase(),
+                                            "maxlength": 1,
+                                            "data-proyecto": iAtributo.proyecto,
+                                            "data-hito": iAtributo.hito,
+                                            "data-campo": iAtributo.campo,
+                                            "data-detalle": iAtributo.detalle
+                                        }).addClass("form-control form-control-sm form-atributo").val(iAtributo.value)
+                                    )
+                                )
+                            );
+                            break;
+                        case 6:
+                            form.append(
+                                $("<div/>").addClass("row mb-2").append(
+                                    $("<div/>").addClass("col-6").append(
+                                        $("<label/>").addClass("mb-1").attr("for","attr-" + iAtributo.campo)
+                                    ).append(
+                                        $("<input/>").attr({
+                                            "type": "checkbox",
+                                            "id": "attr-" + iAtributo.campo,
+                                            "data-proyecto": iAtributo.proyecto,
+                                            "data-hito": iAtributo.hito,
+                                            "data-campo": iAtributo.campo,
+                                            "data-detalle": iAtributo.detalle
+                                        }).addClass("form-control form-control-sm form-atributo").prop("checked", iAtributo.value == "S")
+                                    )
+                                )
+                            );
+                            break;
+                        default: break;
+                    }
+                }
+                $("#col-atributos").empty().append(form);
+            }
             //
             function MuestraHitos(event) {
                 event.preventDefault();
@@ -303,71 +528,6 @@
                     else alert(response.msg);
                 }, "json");
             }
-            //
-            function ListarProyectos() {
-                var tbody = $("#grid-proyectos tbody");
-                tbody.empty();
-                for(var i in ls_proyectos) {
-                    var iproyecto = ls_proyectos[i];
-                    tbody.append(
-                        $("<tr/>").append(
-                            $("<td/>").append(
-                                $("<a/>").attr({
-                                    "href": "#",
-                                    "id": "a-" + iproyecto.id,
-                                    "data-id": iproyecto.id
-                                }).addClass("btn btn-xs btn-primary text-light").append(
-                                    $("<i/>").addClass("fas fa-list-ul")
-                                ).on("click", MuestraHitos)
-                            )
-                        ).append(
-                            $("<td/>").addClass("text-right").html(iproyecto.id)
-                        ).append(
-                            $("<td/>").html(iproyecto.tipo)
-                        ).append(
-                            $("<td/>").html(iproyecto.orden)
-                        ).append(
-                            $("<td/>").html(iproyecto.expediente)
-                        ).append(
-                            $("<td/>").html(iproyecto.femision)
-                        ).append(
-                            $("<td/>").html(iproyecto.areausr)
-                        ).append(
-                            $("<td/>").html(iproyecto.proyecto)
-                        ).append(
-                            $("<td/>").html(iproyecto.fentrega)
-                        ).append(
-                            $("<td/>").html(parseFloat(iproyecto.valor).toLocaleString("en-US", { minimumFractionDigits:2, maximumFractionDigits:2 })).addClass("text-right")
-                        ).append(
-                            $("<td/>").html(iproyecto.armadas).addClass("text-right")
-                        ).append(
-                            $("<td/>").html(parseFloat(iproyecto.avance).toFixed(2) + "%").addClass("text-right text-danger").css("font-size","1.1em").css("font-weight","bold")
-                        ).append(
-                            $("<td/>").append(
-                                $("<a/>").attr("href","javascript:void(0)").addClass("btn btn-indicador btn-xs btn-" + iproyecto.indicador)
-                            ).addClass("text-center")
-                        ).append(
-                            $("<td/>").html(iproyecto.diasvence).addClass("text-center text-danger").css("font-size","1.1em").css("font-weight","bold")
-                        ).append(
-                            $("<td/>").html(iproyecto.estado)
-                        ).append(
-                            $("<td/>").html(iproyecto.responsable)
-                        ).append(
-                            $("<td/>").html(iproyecto.hobservaciones)
-                        )
-                    ).append(
-                        $("<tr/>").hide()
-                    ).append(
-                        $("<tr/>").append(
-                            $("<td/>")
-                        ).append(
-                            $("<td/>").attr("colspan", 16).append(
-                                $("<div/>").attr("id", "dv-" + iproyecto.id)
-                            )
-                        ).hide()
-                    );
-                }
-            }
             function ModalActualizaHitoOnShow(args) {
                 var dataset = args.relatedTarget.dataset;
                 //
@@ -393,12 +553,27 @@
                         document.getElementById("mah-observaciones").value = estado.observaciones;
                         $("#mah-documentacion option[value=" + estado.edocumentacion + "]").prop("selected", true);
                         $("#mah-proceso option[value=" + estado.eproceso + "]").prop("selected", true);
+                        //escribe el formulario de atributos
+                        ls_atributos = response.data.atributos;
+                        ListarAtributos();
                     }
                     else alert(response.msg);
                 }, "json");
             }
             function ActualizarHito(event) {
                 event.preventDefault();
+                var atributos = [];
+                var extras = $(".form-atributo");
+                $.each(extras, function() {
+                    var ipextra = $(this);
+                    atributos.push({
+                        aproyecto: ipextra.data("proyecto"),
+                        ahito: ipextra.data("hito"),
+                        acampo: ipextra.data("campo"),
+                        adetalle: ipextra.data("detalle"),
+                        avalor: ipextra.val()
+                    });
+                });
                 var p = {
                     _token: "{{ csrf_token() }}",
                     hito: document.getElementById("mah-hito").value,
@@ -407,7 +582,8 @@
                     fin: document.getElementById("mah-fin").value,
                     documentacion: document.getElementById("mah-documentacion").value,
                     proceso: document.getElementById("mah-proceso").value,
-                    observaciones: document.getElementById("mah-observaciones").value
+                    observaciones: document.getElementById("mah-observaciones").value,
+                    atributos: atributos
                 };
                 $.post("{{ url('ajax/control/upd-estado-hito') }}", p, function(response) {
                     if(response.state == "success") {
@@ -418,6 +594,80 @@
                     }
                     else alert(response.msg);
                 }, "json");
+            }
+            function flAtributoOnChange(event) {
+                var tipo = $("#fl-atributo option:selected").data("tipo");
+                $("#fl-busca").show();
+                var input = $("<input/>").attr({
+                    "id": "fl-value",
+                    "placeholder": "Ingrese valor",
+                    "data-tipo": tipo
+                }).addClass("form-control form-control-sm");
+                switch(tipo) {
+                    case 1:
+                    case 2:
+                        input.attr("type", "number").width(80);
+                        break;
+                    case 3:
+                        input.attr("type", "text").width(320);
+                        break;
+                    case 4:
+                        input.attr("type", "text").datepicker({
+                            autoclose: true,
+                            daysOfWeekHighlighted: [0,6],
+                            format: 'yyyy-mm-dd',
+                            language: 'es',
+                            startView: 0,
+                            todayHighlight: true,
+                            zIndexOffset: 1030
+                        }).attr("placeholder", "yyyy-mm-dd").width(100);
+                        break;
+                    case 5:
+                        input.attr({
+                            "type": "text",
+                            "maxlength": 1
+                        }).width(60);
+                        break;
+                    case 6:
+                        input.attr({
+                            "type": "text",
+                            "maxlength": 1
+                        }).width(40);
+                        break;
+                    default: break;
+                }
+                $("#fl-input").empty().append(input);
+            }
+            function BuscarAtributo(event) {
+                event.preventDefault();
+                var texto = document.getElementById("fl-value").value;
+                if(texto != "") {
+                    var p = {
+                        _token: "{{ csrf_token() }}",
+                        tipo: $("#fl-value").data("tipo"),
+                        texto: texto
+                    };
+                    $.post("{{ url('ajax/control/fl-busca-campo') }}", p, function(response) {
+                        $("#grid-proyectos tbody tr").hide();
+                        if(response.state == "success") {
+                            var filas = response.data.proyectos;
+                            for(var i in filas) {
+                                var ifila = filas[i];
+                                $("#tr-" + ifila.id).show();
+                            }
+                        }
+                        else alert(response.msg);
+                    }, "json");
+                }
+                else $("#grid-proyectos tbody .tr-proyecto").show();
+            }
+            function btnCatalogoOnClick(event) {
+                event.preventDefault();
+                var a = $(this);
+                $(".btn-catalogo.active").removeClass("active");
+                a.addClass("active");
+                curr_catalogo = a.data("tipo");
+                ListarProyectos();
             }
             //
             ListarProyectos();
@@ -433,6 +683,10 @@
                 zIndexOffset: 1030
             });
             $("#modal-actualiza-hito .modal-footer .btn-primary").on("click", ActualizarHito);
+            $("#fl-atributo option[value=-1]").prop("selected", true);
+            $("#fl-atributo").on("change", flAtributoOnChange);
+            $("#fl-busca").on("click", BuscarAtributo);
+            $(".btn-catalogo").on("click", btnCatalogoOnClick);
         </script>
     </body>
 </html>

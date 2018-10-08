@@ -239,7 +239,7 @@ class Control extends Controller {
 
     public function ls_estado_hito() {
         extract(Request::input());
-        if(isset($proyecto, $hito)) {
+        if(isset($proyecto, $hito, $id)) {
             $usuario = Auth::user();
             $estado = DB::table("pr_proyecto_hitos")
                 ->select(
@@ -253,10 +253,32 @@ class Control extends Controller {
                 ->where("id_proyecto", $proyecto)
                 ->where("id_hito", $hito)
                 ->first();
+            $atributos = DB::table("pr_proyecto_hitos_campos as pphc")
+                ->join("ma_campos as mc", function($join) {
+                    $join->on("pphc.id_campo", "=", "mc.id_campo")
+                        ->on("pphc.id_empresa", "=", "mc.id_empresa");
+                })
+                ->join("sys_tipos_dato as std", "mc.id_tipo", "=", "std.id_tipo")
+                ->select(
+                    "pphc.id_proyecto as proyecto",
+                    "pphc.id_hito as hito",
+                    "pphc.id_campo as campo",
+                    "pphc.id_detalle as detalle",
+                    "mc.des_campo as nombre",
+                    "mc.id_tipo as tipo",
+                    "pphc.des_valor as value"
+                )
+                ->where("pphc.id_proyecto", $proyecto)
+                ->where("pphc.id_hito", $hito)
+                ->where("pphc.id_detalle", $id)
+                ->where("mc.st_obligatorio", "N")
+                ->orderBy("pphc.id_hito", "asc")
+                ->get();
             return Response::json([
                 "state" => "success",
                 "data" => [
-                    "estado" => $estado
+                    "estado" => $estado,
+                    "atributos" => $atributos
                 ]
             ]);
         }
@@ -268,7 +290,7 @@ class Control extends Controller {
 
     public function upd_estado_hito() {
         extract(Request::input());
-        if(isset($hito, $proyecto, $detalle, $fin, $documentacion, $proceso, $observaciones)) {
+        if(isset($hito, $proyecto, $detalle, $fin, $documentacion, $proceso)) {
             $usuario = Auth::user();
             DB::table("pr_proyecto_hitos")
                 ->where("id_detalle", $detalle)
@@ -279,8 +301,23 @@ class Control extends Controller {
                     "fe_fin" => $fin,
                     "id_estado_documentacion" => $documentacion,
                     "id_estado_proceso" => $proceso,
-                    "des_observaciones" => $observaciones
+                    "des_observaciones" => isset($observaciones) ? $observaciones : ""
                 ]);
+            //actualiza los atributos adicionales
+            foreach($atributos as $atributo) {
+                extract($atributo);
+                DB::table("pr_proyecto_hitos_campos")
+                    ->where("id_detalle", $adetalle)
+                    ->where("id_proyecto", $aproyecto)
+                    ->where("id_hito", $ahito)
+                    ->where("id_empresa", $usuario->id_empresa)
+                    ->where("id_campo", $acampo)
+                    ->update([
+                        "updated_at" => date("Y-m-d H:i:s"),
+                        "des_valor" => $avalor
+                    ]);
+            }
+            //carga la lista de proyectos
             $proyectos = DB::table("pr_proyecto as pp")
                 ->join("pr_catalogo_proyecto as pcp", "pp.id_catalogo", "=", "pcp.id_catalogo")
                 ->join("ma_area_usuaria as mau", function($join) {
@@ -304,6 +341,7 @@ class Control extends Controller {
                 })
                 ->select(
                     "pp.id_proyecto as id",
+                    "pp.id_catalogo as catalogo",
                     "pcp.des_catalogo as tipo",
                     DB::raw("if(pp.tp_orden = 'C','Compras','Servicios') as orden"),
                     "pp.des_expediente as expediente",
@@ -318,7 +356,7 @@ class Control extends Controller {
                     DB::raw("100 * sum(pch.nu_peso * pv.num_puntaje)/sum(pch.nu_peso) as avance")
                 )
                 ->where("pp.id_empresa", $usuario->id_empresa)
-                ->groupBy("id", "tipo", "orden", "expediente", "femision", "areausr", "proyecto", "fentrega", "valor", "armadas", "diasvence", "observaciones")
+                ->groupBy("id", "catalogo", "tipo", "orden", "expediente", "femision", "areausr", "proyecto", "fentrega", "valor", "armadas", "diasvence", "observaciones")
                 ->orderBy("pp.id_proyecto", "asc")
                 ->get();
             //busca los ultimos hitos por proyecto
@@ -373,6 +411,72 @@ class Control extends Controller {
                 "data" => [
                     "proyectos" => $proyectos
                 ]
+            ]);
+        }
+        return Response::json([
+            "state" => "error",
+            "msg" => "Parámetros incorrectos"
+        ]);
+    }
+
+    function fl_busca_campo() {
+        extract(Request::input());
+        if(isset($tipo, $texto)) {
+            $usuario = Auth::user();
+            switch($tipo) {
+                case 0:
+                case 3:
+                    $texto = "%" . strtolower($texto) . "%";
+                    $ls_proyectos = DB::table("pr_proyecto_hitos_campos")
+                        ->where("id_empresa", $usuario->id_empresa)
+                        ->where(DB::raw("lower(des_valor)"), "like", $texto)
+                        ->select("id_proyecto as id")
+                        ->distinct()
+                        ->get();
+                    break;
+                case 1:
+                case 2:
+                case 4:
+                case 5:
+                case 6:
+                    $ls_proyectos = DB::table("pr_proyecto_hitos_campos")
+                        ->where("id_empresa", $usuario->id_empresa)
+                        ->where("des_valor", $texto)
+                        ->select("id_proyecto as id")
+                        ->distinct()
+                        ->get();
+                    break;
+                default:
+                    $ls_proyectos = [];
+                    break;
+            }
+            return Response::json([
+                "state" => "success",
+                "data" => [
+                    "proyectos" => $ls_proyectos
+                ]
+            ]);
+        }
+        return Response::json([
+            "state" => "error",
+            "msg" => "Parámetros incorrectos"
+        ]);
+    }
+
+    function sv_mensaje() {
+        extract(Request::input());
+        if(isset($saludo, $cuerpo, $boton)) {
+            DB::table("sys_mensaje")
+                ->where("id_mensaje", 1)
+                ->update([
+                    "des_titulo" => $saludo,
+                    "des_cuerpo" => $cuerpo,
+                    "des_boton" => $boton,
+                    "updated_at" => date("Y-m-d H:i:s")
+                ]);
+            return Response::json([
+                "state" => "success",
+                "data" => []
             ]);
         }
         return Response::json([

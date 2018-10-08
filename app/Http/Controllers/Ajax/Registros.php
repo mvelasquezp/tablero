@@ -181,4 +181,57 @@ class Registros extends Controller {
         ]);
     }
 
+    public function ls_permisos() {
+        extract(Request::input());
+        if(isset($usuario)) {
+            $user = Auth::user();
+            $accesos = DB::table("sys_permisos")
+                ->where("id_empresa", $user->id_empresa)
+                ->where("id_usuario", $usuario)
+                ->where("st_habilitado", "S")
+                ->where("st_vigente", "Vigente")
+                ->select("id_item as id")
+                ->get();
+            return Response::json([
+                "state" => "success",
+                "data" => [
+                    "accesos" => $accesos
+                ]
+            ]);
+        }
+        return Response::json([
+            "state" => "error",
+            "msg" => "Parámetros incorrectos"
+        ]);
+    }
+
+    public function sv_permisos() {
+        extract(Request::input());
+        if(isset($usuario, $accesos)) {
+            $user = Auth::user();
+            DB::table("sys_permisos")
+                ->where("id_empresa", $user->id_empresa)
+                ->where("id_usuario", $usuario)
+                ->delete();
+            $arrToInsert = [];
+            foreach($accesos as $acceso) {
+                $arrToInsert[] = [
+                    "id_item" => $acceso,
+                    "id_usuario" => $usuario,
+                    "id_empresa" => $user->id_empresa
+                ];
+            }
+            DB::table("sys_permisos")->insert($arrToInsert);
+            return Response::json([
+                "state" => "success",
+                "data" => [
+                ]
+            ]);
+        }
+        return Response::json([
+            "state" => "error",
+            "msg" => "Parámetros incorrectos"
+        ]);
+    }
+
 }

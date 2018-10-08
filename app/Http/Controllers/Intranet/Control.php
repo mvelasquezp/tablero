@@ -57,6 +57,16 @@ class Control extends Controller {
     public function resumen() {
         $usuario = Auth::user();
         $menu = $this->ObtenerMenu($usuario);
+        $atributos = DB::table("ma_campos")
+            ->select(
+                "id_campo as value",
+                "des_campo as text",
+                "id_tipo as tipo"
+            )
+            ->where("id_empresa", $usuario->id_empresa)
+            ->where("st_obligatorio", "N")
+            ->orderBy("text", "asc")
+            ->get();
         $proyectos = DB::table("pr_proyecto as pp")
             ->join("pr_catalogo_proyecto as pcp", "pp.id_catalogo", "=", "pcp.id_catalogo")
             ->join("ma_area_usuaria as mau", function($join) {
@@ -80,6 +90,7 @@ class Control extends Controller {
             })
             ->select(
                 "pp.id_proyecto as id",
+                "pp.id_catalogo as catalogo",
                 "pcp.des_catalogo as tipo",
                 DB::raw("if(pp.tp_orden = 'C','Compras','Servicios') as orden"),
                 "pp.des_expediente as expediente",
@@ -94,7 +105,7 @@ class Control extends Controller {
                 DB::raw("100 * sum(pch.nu_peso * pv.num_puntaje)/sum(pch.nu_peso) as avance")
             )
             ->where("pp.id_empresa", $usuario->id_empresa)
-            ->groupBy("id", "tipo", "orden", "expediente", "femision", "areausr", "proyecto", "fentrega", "valor", "armadas", "diasvence", "observaciones")
+            ->groupBy("id", "catalogo", "tipo", "orden", "expediente", "femision", "areausr", "proyecto", "fentrega", "valor", "armadas", "diasvence", "observaciones")
             ->orderBy("pp.id_proyecto", "asc")
             ->get();
         //busca los ultimos hitos por proyecto
@@ -143,7 +154,6 @@ class Control extends Controller {
                 $proyectos[$idx]->indicador = "secondary";
             }
             //cálculo del % avance
-
         }
         //listo
         $estados = DB::table("sys_estados")
@@ -157,6 +167,7 @@ class Control extends Controller {
             "menu" => $menu,
             "proyectos" => $proyectos,
             "estados" => $estados,
+            "atributos" => $atributos
         ];
         return view("control.resumen")->with($arr_data);
     }
@@ -196,6 +207,20 @@ class Control extends Controller {
             "id_pago" => $id_pago->id,
         ];
         return view("control.crear")->with($arr_data);
+    }
+
+    public function alertas() {
+        $usuario = Auth::user();
+        $menu = $this->ObtenerMenu($usuario);
+        $mensaje = DB::table("sys_mensaje")
+            ->select("des_titulo as saludo", "des_cuerpo as cuerpo", "des_boton as boton")
+            ->first();
+        $arr_data = [
+            "usuario" => $usuario,
+            "menu" => $menu,
+            "mensaje" => $mensaje,
+        ];
+        return view("control.alertas")->with($arr_data);
     }
 
 }

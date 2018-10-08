@@ -19,6 +19,7 @@ Route::middleware("auth")->namespace("Intranet")->group(function() {
 		Route::prefix("registros")->group(function() {
 			Route::get("usuarios", "Registros@usuarios");
 			Route::get("organigrama", "Registros@organigrama");
+			Route::get("administradores", "Registros@administradores");
 		});
 		//modulo de estandarizacion de procesos
 		Route::prefix("estandarizacion")->group(function() {
@@ -31,6 +32,17 @@ Route::middleware("auth")->namespace("Intranet")->group(function() {
 		Route::prefix("seguimiento")->group(function() {
 			Route::get("resumen", "Control@resumen");
 			Route::get("crea-proyecto", "Control@crear");
+			Route::get("alertas", "Control@alertas");
+		});
+		//modulo de informes
+		Route::prefix("reportes")->group(function() {
+			Route::get("informe", "Reportes@informe");
+			Route::get("estadisticas", "Reportes@estadisticas");
+			//exportar
+			Route::prefix("export")->group(function() {
+				Route::get("informe", "Export@informe");
+				Route::get("estadistica", "Export@estadistica");
+			});
 		});
 	});
 });
@@ -41,6 +53,8 @@ Route::middleware("auth")->namespace("Ajax")->prefix("ajax")->group(function() {
 		Route::post("sv-usuario", "Registros@sv_usuario");
 		Route::any("ls-puestos", "Registros@ls_puestos");
 		Route::post("sv-puesto", "Registros@sv_puesto");
+		Route::post("ls-permisos", "Registros@ls_permisos");
+		Route::post("sv-permisos", "Registros@sv_permisos");
 	});
 	//modulo de estandarizacion de procesos
 	Route::prefix("estandarizacion")->group(function() {
@@ -79,6 +93,8 @@ Route::middleware("auth")->namespace("Ajax")->prefix("ajax")->group(function() {
 		Route::post("ls-hitos-proyecto", "Control@ls_hitos_proyecto");
 		Route::post("ls-estado-hito", "Control@ls_estado_hito");
 		Route::post("upd-estado-hito", "Control@upd_estado_hito");
+		Route::post("fl-busca-campo", "Control@fl_busca_campo");
+		Route::post("sv-mensaje", "Control@sv_mensaje");
 	});
 });
 //autenticacion de usuarios

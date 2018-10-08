@@ -122,4 +122,55 @@ class Registros extends Controller {
         return view("registro.organigrama")->with($arr_data);
     }
 
+    public function administradores() {
+        $usuario = Auth::user();
+        $menu = $this->ObtenerMenu($usuario);
+        $usuarios = DB::table("ma_usuarios as mu")
+            ->join("ma_entidad as me", "mu.cod_entidad", "=", "me.cod_entidad")
+            ->leftJoin("us_usuario_puesto as uup", function($join) {
+                $join->on("mu.id_empresa", "=", "uup.id_empresa")
+                    ->on("mu.id_usuario", "=", "uup.id_usuario")
+                    ->on("uup.st_vigente", "=", DB::raw("'Vigente'"));
+            })
+            ->leftJoin("ma_puesto as mp", function($join) {
+                $join->on("uup.id_empresa", "=", "mp.id_empresa")
+                    ->on("uup.id_puesto", "=", "mp.id_puesto");
+            })
+            ->leftJoin("ma_oficina as mo", function($join) {
+                $join->on("mp.id_oficina", "=", "mo.id_oficina")
+                    ->on("mp.id_empresa", "=", "mo.id_empresa");
+            })
+            ->select(
+                "mu.id_usuario as id",
+                "mu.cod_entidad as dni",
+                "me.des_nombre_1 as apepat",
+                "me.des_nombre_2 as apemat",
+                "me.des_nombre_3 as nombres",
+                DB::raw("ifnull(mp.des_puesto,'(sin asignar)') as puesto")
+            )
+            ->where("mu.id_empresa", 1)
+            ->orderBy("apepat", "asc")
+            ->orderBy("apemat", "asc")
+            ->orderBy("nombres", "asc")
+            ->get();
+        $opciones = DB::table("ma_menu as mm")
+            ->select(
+                "mm.id_item as id",
+                "mg.des_nombre as menu",
+                "mm.des_nombre as item"
+            )
+            ->leftJoin("ma_menu as mg", "mm.id_ancestro", "=", "mg.id_item")
+            ->whereNotNull("mm.id_ancestro")
+            ->orderBy("mg.id_item", "asc")
+            ->orderBy("mm.id_item", "asc")
+            ->get();
+        $arr_data = [
+            "usuario" => $usuario,
+            "menu" => $menu,
+            "usuarios" => $usuarios,
+            "opciones" => $opciones,
+        ];
+        return view("registro.administradores")->with($arr_data);
+    }
+
 }
