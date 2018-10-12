@@ -384,7 +384,8 @@ class Control extends Controller {
                         DB::raw("ifnull(pph.des_hito, mhc.des_hito) as hito"),
                         DB::raw("if(me.cod_entidad is null, mp.des_puesto, concat(me.des_nombre_1,' ',me.des_nombre_2,' ',me.des_nombre_3)) as responsable"),
                         "pph.des_observaciones as observaciones",
-                        DB::raw("if(pph.id_estado_proceso = 3,(if(datediff(current_timestamp, pph.fe_fin) > 0,'danger',if(datediff(pph.fe_fin, current_timestamp) < mhc.nu_dias_disparador,'success','warning'))),'secondary') as indicador")
+                        DB::raw("if(pph.id_estado_proceso = 3,(if(datediff(current_timestamp, pph.fe_fin) > 0,'danger',if(datediff(pph.fe_fin, current_timestamp) < mhc.nu_dias_disparador,'success','warning'))),'secondary') as indicador"),
+                        DB::raw("if(datediff(current_timestamp,pph.fe_fin) < 0,0,datediff(current_timestamp,pph.fe_fin)) as diasvence")
                     )
                     ->where("pph.id_estado_proceso", 3)
                     ->where("pph.id_proyecto", $proyecto->id)
@@ -397,12 +398,14 @@ class Control extends Controller {
                     $proyectos[$idx]->responsable = $detalle->responsable;
                     $proyectos[$idx]->hobservaciones = $detalle->observaciones;
                     $proyectos[$idx]->indicador = $detalle->indicador;
+                    $proyectos[$idx]->diasvence = $detalle->diasvence;
                 }
                 else {
                     $proyectos[$idx]->estado = "";
                     $proyectos[$idx]->responsable = "";
                     $proyectos[$idx]->hobservaciones = "";
                     $proyectos[$idx]->indicador = "secondary";
+                    $proyectos[$idx]->diasvence = 0;
                 }
             }
             //listo
