@@ -335,6 +335,7 @@
             document.getElementById("dir-abreviatura").value = "";
             MuestraOrganos();
             MuestraDirecciones();
+            MuestraAreas();
         </script>
     </body>
 </html>

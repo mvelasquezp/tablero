@@ -171,13 +171,13 @@
                             $("<td/>").html(iUsuario.email)
                         ).append(
                             $("<td/>").append(
-                                $("<a/>").attr({
+                                /*$("<a/>").attr({
                                     "href": "#",
                                     "data-cod": iUsuario.dni,
                                     "data-id": iUsuario.id
-                                }).addClass("btn btn-xs btn-primary").append(
+                                }).addClass("btn btn-xs btn-primary text-light").append(
                                     $("<i/>").addClass("fas fa-edit")
-                                ).append("&nbsp;Editar")
+                                ).append("&nbsp;Editar")*/
                             )
                         )
                     );

@@ -75,6 +75,15 @@ class Control extends Controller {
                     ->on("pp.id_organo", "=", "mau.id_organo")
                     ->on("pp.id_empresa", "=", "mau.id_empresa");
             })
+            ->join("ma_direccion_central as mdc", function($join) {
+                $join->on("mau.id_direccion", "=", "mdc.id_direccion")
+                    ->on("mau.id_organo", "=", "mdc.id_organo")
+                    ->on("mau.id_empresa", "=", "mdc.id_empresa");
+            })
+            ->join("ma_organo_control as moc", function($join) {
+                $join->on("mdc.id_organo", "=", "moc.id_organo")
+                    ->on("mdc.id_empresa", "=", "moc.id_empresa");
+            })
             ->join("pr_proyecto_hitos as pph", function($join) {
                 $join->on("pp.id_proyecto", "=", "pph.id_proyecto")
                     ->on("pp.id_empresa", "=", "pph.id_empresa");
@@ -95,7 +104,7 @@ class Control extends Controller {
                 DB::raw("if(pp.tp_orden = 'C','Compras','Servicios') as orden"),
                 "pp.des_expediente as expediente",
                 DB::raw("date_format(pp.created_at,'%Y-%m-%d') as femision"),
-                "mau.des_area as areausr",
+                DB::raw("concat(moc.des_organo,' - ',mdc.des_direccion,' - ',mau.des_area) as areausr"),
                 "pp.des_proyecto as proyecto",
                 DB::raw("date_format(pp.fe_fin,'%Y-%m-%d') as fentrega"),
                 "pp.num_valor as valor",
@@ -133,7 +142,8 @@ class Control extends Controller {
                     DB::raw("ifnull(pph.des_hito, mhc.des_hito) as hito"),
                     DB::raw("if(me.cod_entidad is null, mp.des_puesto, concat(me.des_nombre_1,' ',me.des_nombre_2,' ',me.des_nombre_3)) as responsable"),
                     "pph.des_observaciones as observaciones",
-                    DB::raw("if(pph.id_estado_proceso = 3,(if(datediff(current_timestamp, pph.fe_fin) > 0,'danger',if(datediff(pph.fe_fin, current_timestamp) < mhc.nu_dias_disparador,'success','warning'))),'secondary') as indicador")
+                    DB::raw("if(pph.id_estado_proceso = 3,(if(datediff(current_timestamp, pph.fe_fin) > 0,'danger',if(datediff(pph.fe_fin, current_timestamp) < mhc.nu_dias_disparador,'success','warning'))),'secondary') as indicador"),
+                    DB::raw("if(datediff(current_timestamp,pph.fe_fin) < 0,0,datediff(current_timestamp,pph.fe_fin)) as diasvence")
                 )
                 ->where("pph.id_estado_proceso", 3)
                 ->where("pph.id_proyecto", $proyecto->id)
@@ -146,12 +156,14 @@ class Control extends Controller {
                 $proyectos[$idx]->responsable = $detalle->responsable;
                 $proyectos[$idx]->hobservaciones = $detalle->observaciones;
                 $proyectos[$idx]->indicador = $detalle->indicador;
+                $proyectos[$idx]->diasvence = $detalle->diasvence;
             }
             else {
                 $proyectos[$idx]->estado = "";
                 $proyectos[$idx]->responsable = "";
                 $proyectos[$idx]->hobservaciones = "";
                 $proyectos[$idx]->indicador = "secondary";
+                $proyectos[$idx]->diasvence = 0;
             }
             //cálculo del % avance
         }

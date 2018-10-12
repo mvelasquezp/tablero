@@ -9,6 +9,12 @@
 	<link rel="stylesheet" type="text/css" href="{{ asset('vendor/font-awesome-4.7.0/css/font-awesome.min.css') }}">
 	<link rel="stylesheet" type="text/css" href="{{ asset('css/util.css') }}">
 	<link rel="stylesheet" type="text/css" href="{{ asset('css/login.css') }}">
+	<style type="text/css">
+		.container-login100{
+			background-image: url('images/bg.jpg');
+			background-size:cover;
+		}
+	</style>
 </head>
 <body>
 	

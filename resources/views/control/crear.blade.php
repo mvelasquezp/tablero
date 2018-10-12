@@ -456,7 +456,6 @@
                 format: 'yyyy-mm-dd',
                 language: 'es',
                 startView: 0,
-                startDate: '+0d',
                 todayHighlight: true,
                 zIndexOffset: 1030
             });

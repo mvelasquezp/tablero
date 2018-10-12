@@ -24,9 +24,9 @@
                             <div class="alert alert-secondary">
                                 <form class="form-inline">
                                     <div class="btn-group btn-group-sm mr-4" role="group" aria-label="Basic example">
-                                        <button data-tipo="0" type="button" class="btn btn-primary btn-catalogo active">Todos</button>
+                                        <button data-tipo="0" type="button" class="btn btn-success btn-catalogo active">Todos</button>
                                         <button data-tipo="1" type="button" class="btn btn-primary btn-catalogo">ASP</button>
-                                        <button data-tipo="2" type="button" class="btn btn-primary btn-catalogo">Terceros</button>
+                                        <button data-tipo="2" type="button" class="btn btn-danger btn-catalogo">Terceros</button>
                                     </div>
                                     <label for="fl-atributo" class="mr-2">Buscar por</label>
                                     <select id="fl-atributo" class="form-control form-control-sm mr-2">
@@ -56,7 +56,7 @@
                                         <th>Tipo proyecto</th>
                                         <th>Tipo orden</th>
                                         <th>N° Expediente</th>
-                                        <th>Fecha emisión</th>
+                                        <th>Fecha recepción UAP</th>
                                         <th>Área usuaria</th>
                                         <th>Descripción</th>
                                         <th>Fecha entrega</th>
@@ -326,7 +326,8 @@
                 var form = $("<form/>");
                 for(var i in ls_atributos) {
                     var iAtributo = ls_atributos[i];
-                    switch(iAtributo.tipo) {
+                    var tipo = parseInt(iAtributo.tipo);
+                    switch(tipo) {
                         case 1:
                         case 2:
                             form.append(
