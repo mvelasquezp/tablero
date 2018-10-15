@@ -51,10 +51,15 @@ Route::middleware("auth")->namespace("Ajax")->prefix("ajax")->group(function() {
 	//modulo de registros
 	Route::prefix("registros")->group(function() {
 		Route::post("sv-usuario", "Registros@sv_usuario");
+		Route::post("dt-usuario", "Registros@dt_usuario");
 		Route::any("ls-puestos", "Registros@ls_puestos");
+		Route::any("ls-combo-puestos", "Registros@ls_combo_puestos");
+		Route::post("ed-usuario", "Registros@ed_usuario");
 		Route::post("sv-puesto", "Registros@sv_puesto");
 		Route::post("ls-permisos", "Registros@ls_permisos");
 		Route::post("sv-permisos", "Registros@sv_permisos");
+		Route::post("dt-puesto", "Registros@dt_puesto");
+		Route::post("ed-puesto", "Registros@ed_puesto");
 	});
 	//modulo de estandarizacion de procesos
 	Route::prefix("estandarizacion")->group(function() {
@@ -85,6 +90,12 @@ Route::middleware("auth")->namespace("Ajax")->prefix("ajax")->group(function() {
 		Route::post("ls-combo-direcciones", "Estandarizacion@ls_combo_direcciones");
 		Route::post("sv-area", "Estandarizacion@sv_area");
 		Route::post("ls-combo-areas", "Estandarizacion@ls_combo_areas");
+		Route::post("dt-organo", "Estandarizacion@dt_organo");
+		Route::post("dt-direccion", "Estandarizacion@dt_direccion");
+		Route::post("dt-area", "Estandarizacion@dt_area");
+		Route::post("ed-organo", "Estandarizacion@ed_organo");
+		Route::post("ed-direccion", "Estandarizacion@ed_direccion");
+		Route::post("ed-area", "Estandarizacion@ed_area");
 	});
 	//modulo de control de proyectos
 	Route::prefix("control")->group(function() {

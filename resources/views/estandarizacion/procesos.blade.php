@@ -254,6 +254,7 @@
                     if(response.state == "success") {
                         a.show();
                         input.prop("readonly", false);
+                        alert("Se actualizó el peso del hito");
                     }
                 }, "json");
             }

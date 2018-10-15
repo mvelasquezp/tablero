@@ -62,7 +62,7 @@ class Export extends Controller {
             ->groupBy("id", "tipo", "orden", "expediente", "femision", "areausr", "proyecto", "fentrega", "valor", "armadas", "diasvence", "observaciones")
             ->orderBy("pp.id_proyecto", "asc")
             ->get();
-        //busca los ultimos hitos por proyecto
+        //busca los ultimos hitos por proyecto y carga el detalle
         foreach($proyectos as $idx => $proyecto) {
             $detalle = DB::table("pr_proyecto_hitos as pph")
                 ->join("ma_hitos_control as mhc", function($join) {
@@ -107,13 +107,88 @@ class Export extends Controller {
                 $proyectos[$idx]->hobservaciones = "";
                 $proyectos[$idx]->indicador = "secondary";
             }
+            $hitos = DB::table("pr_proyecto_hitos as pph")
+                ->join("pr_catalogo_hitos as pch", function($join) {
+                    $join->on("pph.id_empresa", "=", "pch.id_empresa")
+                        ->on("pph.id_catalogo", "=", "pch.id_catalogo")
+                        ->on("pph.id_hito", "=", "pch.id_hito");
+                })
+                ->join("sys_estados as sed", "pph.id_estado_documentacion", "=", "sed.id_estado")
+                ->join("sys_estados as sep", "pph.id_estado_proceso", "=", "sep.id_estado")
+                ->join("ma_hitos_control as mhc", function($join) {
+                    $join->on("pph.id_hito", "=", "mhc.id_hito")
+                        ->on("pph.id_empresa", "=", "mhc.id_empresa");
+                })
+                ->join("ma_puesto as mp", function($join) {
+                    $join->on("pph.id_responsable", "=", "mp.id_puesto")
+                        ->on("pph.id_empresa", "=", "mp.id_empresa");
+                })
+                ->join("pr_valoracion as pv", function($join) {
+                    $join->on("pph.id_estado_proceso", "=", "pv.id_estado_p")
+                        ->on("pph.id_estado_documentacion", "=", "pv.id_estado_c");
+                })
+                ->leftJoin("us_usuario_puesto as uup", function($join) {
+                    $join->on("mp.id_puesto", "=", "uup.id_puesto")
+                        ->on("mp.id_empresa", "=", "uup.id_empresa")
+                        ->on("uup.st_vigente", "=", DB::raw("'Vigente'"));
+                })
+                ->leftJoin("ma_usuarios as mu", function($join) {
+                    $join->on("uup.id_usuario", "=", "mu.id_usuario")
+                        ->on("uup.id_empresa", "=", "mu.id_empresa")
+                        ->on("mu.st_vigente", "=", DB::raw("'Vigente'"));
+                })
+                ->leftJoin("ma_entidad as me", "mu.cod_entidad", "=", "me.cod_entidad")
+                ->select(
+                    "pph.id_proyecto as pid",
+                    "pph.id_detalle as id",
+                    "pph.id_hito as hid",
+                    DB::raw("ifnull(pph.des_hito, mhc.des_hito) as hito"),
+                    DB::raw("100 * pv.num_puntaje as avance"),
+                    DB::raw("date_format(pph.fe_inicio,'%Y-%m-%d') as inicio"),
+                    DB::raw("date_format(pph.fe_fin,'%Y-%m-%d') as fin"),
+                    DB::raw("if(datediff(current_timestamp,pph.fe_fin) < 0,0,datediff(current_timestamp,pph.fe_fin)) as diasvcto"),
+                    "mp.des_puesto as responsable",
+                    DB::raw("ifnull(concat(me.des_nombre_1,' ',des_nombre_2,' ',des_nombre_3),'(sin asignar)') as nombre"),
+                    "sed.des_estado as edocumentacion",
+                    "sep.des_estado as eproceso",
+                    "pph.des_observaciones as observaciones",
+                    DB::raw("if(pph.id_estado_proceso = 3,(if(datediff(current_timestamp, pph.fe_fin) > 0,'danger',if(datediff(pph.fe_fin, current_timestamp) < mhc.nu_dias_disparador,'success','warning'))),'secondary') as indicador")
+                )
+                ->where("pph.id_proyecto", $proyecto->id)
+                ->where("pph.id_empresa", $usuario->id_empresa)
+                ->orderBy("pph.id_detalle", "asc")
+                ->get();
+            foreach($hitos as $jdx => $hito) {
+                $hitos[$jdx]->atributos = DB::table("pr_proyecto_hitos_campos as pphc")
+                    ->join("ma_campos as mc", function($join) {
+                        $join->on("pphc.id_campo", "=", "mc.id_campo")
+                            ->on("pphc.id_empresa", "=", "mc.id_empresa");
+                    })
+                    ->join("sys_tipos_dato as std", "mc.id_tipo", "=", "std.id_tipo")
+                    ->select(
+                        "pphc.id_proyecto as proyecto",
+                        "pphc.id_hito as hito",
+                        "pphc.id_campo as campo",
+                        "pphc.id_detalle as detalle",
+                        "mc.des_campo as nombre",
+                        "mc.id_tipo as tipo",
+                        "pphc.des_valor as value"
+                    )
+                    ->where("pphc.id_proyecto", $proyecto->id)
+                    ->where("pphc.id_hito", $hito->hid)
+                    ->where("pphc.id_detalle", $hito->id)
+                    ->where("mc.st_obligatorio", "N")
+                    ->orderBy("pphc.id_hito", "asc")
+                    ->get();
+            }
+            $proyectos[$idx]->hitos = $hitos;
         }
         Excel::create("informe", function($excel) use($proyectos) {
             $excel->setTitle("Resumen de proyectos");
             $excel->setCreator("mvelasquezp")
                 ->setCompany("Ministerio de Salud");
             $excel->setDescription("Informe resumen de proyectos");
-            $excel->sheet("data", function($sheet) use($proyectos) {
+            $excel->sheet("Resumen", function($sheet) use($proyectos) {
                 $sheet->row(1, ["ID", "Tipo proyecto", "Tipo orden", "N° Expediente", "Fecha emisión", "Área usuaria", "Descripción", "Fecha entrega", "Valor", "N° pagos", "% Avance", "Indicador", "Días vencimiento", "Estado actual", "Responsable", "Observaciones"]);
                 $sheet->cell("A1:P1", function($cell) {
                     $cell->setBackground("#00897b")
@@ -145,6 +220,57 @@ class Export extends Controller {
                     });
                 }
             });
+            //una hoja para cada proyecto
+            foreach($proyectos as $i => $proyecto) {
+                $arr_proyecto_hd = ["% Avance", "Fecha límite", "Días vcto.", "Responsable", "Control documentario", "Control del proceso", "Observaciones"];
+                $bg_rows = ["#ffffff", "#f0f0f0"];
+                $excel->sheet($proyecto->tipo . "-" . $proyecto->id, function($sheet) use($proyecto, $arr_proyecto_hd, $bg_rows) {
+                    //
+                    $cabecera_1 = ["", "", "", "", "", "", "", "", "", "", "", "", "", "", ""];
+                    $cabecera_2 = ["ID", "Tipo proyecto", "Tipo orden", "N° Expediente", "Fecha emisión", "Área usuaria", "Descripción", "Fecha entrega", "Valor", "N° pagos", "% Avance", "Días vencimiento", "Estado actual", "Responsable", "Observaciones"];
+                    $iRow = [
+                        $proyecto->id, //A
+                        $proyecto->tipo,
+                        $proyecto->orden,
+                        $proyecto->expediente,
+                        $proyecto->femision,
+                        $proyecto->areausr,
+                        $proyecto->proyecto,
+                        $proyecto->fentrega,
+                        $proyecto->valor,
+                        $proyecto->armadas,
+                        $proyecto->avance,
+                        $proyecto->diasvence,
+                        $proyecto->estado,
+                        $proyecto->responsable,
+                        $proyecto->hobservaciones //P
+                    ];
+                    $hitos = $proyecto->hitos;
+                    foreach($hitos as $j => $hito) {
+                            foreach($arr_proyecto_hd as $z => $hd) {
+                                $cabecera_1[] = $z == 0 ? $hito->hito : "";
+                                $cabecera_2[] = $hd;
+                            }
+                        array_push($iRow, $hito->avance, $hito->fin, $hito->diasvcto, $hito->responsable, $hito->edocumentacion, $hito->eproceso, $hito->observaciones);
+                        $atributos = $hito->atributos;
+                        foreach($atributos as $k => $atributo) {
+                                $cabecera_1[] = "";
+                                $cabecera_2[] = $atributo->nombre;
+                            $iRow[] = $atributo->value;
+                        }
+                    }
+                    $sheet->row(3, $iRow);
+                    $sheet->row(1, $cabecera_1);
+                    $sheet->row(1, function($row) {
+                        $row->setBackground("#d8d8d8")->setFontColor("#404040");
+                    });
+                    $sheet->row(2, $cabecera_2);
+                    $sheet->row(2, function($row) {
+                        $row->setBackground("#00897b")->setFontColor("#f0f0f0");
+                    });
+                });
+            }
+            //hoja con Terceros
         })->download("xlsx");
     }
 

@@ -101,6 +101,7 @@ class Estandarizacion extends Controller {
         $menu = $this->ObtenerMenu($usuario);
         $cestados = DB::table("sys_estados")
             ->where("tp_estado", "C")
+            ->where("st_vigente", "Vigente")
             ->select(
                 "id_estado as id",
                 "des_estado as estado",
@@ -110,6 +111,7 @@ class Estandarizacion extends Controller {
             ->get();
         $pestados = DB::table("sys_estados")
             ->where("tp_estado", "P")
+            ->where("st_vigente", "Vigente")
             ->select(
                 "id_estado as id",
                 "des_estado as estado",
@@ -172,9 +174,11 @@ class Estandarizacion extends Controller {
                 "moc.des_organo as organo",
                 "mdc.des_direccion as direccion",
                 "mau.des_area as area",
-                "mau.des_abreviatura as abrev"
+                "mau.des_abreviatura as abrev",
+                "mau.st_vigente as vigencia"
             )
             ->where("mau.id_empresa", $usuario->id_empresa)
+            ->orderBy("mau.st_vigente", "desc")
             ->orderBy("moc.des_organo", "asc")
             ->orderBy("mdc.des_direccion", "asc")
             ->orderBy("mau.des_area", "asc")

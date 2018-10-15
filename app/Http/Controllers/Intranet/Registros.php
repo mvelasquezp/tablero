@@ -83,9 +83,11 @@ class Registros extends Controller {
                 "mp.des_puesto as puesto",
                 "mo.des_oficina as oficina",
                 "mu.des_telefono as telefono",
-                "mu.des_email as email"
+                "mu.des_email as email",
+                "mu.st_vigente as vigencia"
             )
             ->where("mu.id_empresa", 1)
+            ->orderBy("vigencia", "desc")
             ->orderBy("apepat", "asc")
             ->orderBy("apemat", "asc")
             ->orderBy("nombres", "asc")

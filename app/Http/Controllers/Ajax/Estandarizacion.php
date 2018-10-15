@@ -123,6 +123,7 @@ class Estandarizacion extends Controller {
             ]);
 	        $campos = DB::table("ma_campos as mc")
 	        	->join("sys_tipos_dato as std", "mc.id_tipo", "=", "std.id_tipo")
+                ->where("mc.st_vigente", "Vigente")
 	        	->select(
 	        		"mc.id_campo as id",
 	        		"mc.des_campo as campo",
@@ -320,8 +321,28 @@ class Estandarizacion extends Controller {
     			"id_campo" => $campo,
     			"id_usuario_asigna" => $usuario->id_usuario
     		]);
+            $campos = DB::table("pr_hitos_campo as phc")
+                ->join("ma_campos as mc", function($join) {
+                    $join->on("phc.id_campo", "=", "mc.id_campo")
+                        ->on("phc.id_empresa", "=", "mc.id_empresa");
+                })
+                ->join("sys_tipos_dato as std", "mc.id_tipo", "=", "std.id_tipo")
+                ->where("phc.id_empresa", $usuario->id_empresa)
+                ->where("phc.st_vigente", "Vigente")
+                ->where("phc.id_hito", $hito)
+                ->select(
+                    "mc.id_campo as id",
+                    "mc.des_campo as campo",
+                    "std.des_tipo as tipo",
+                    "phc.created_at as fecha",
+                    "mc.st_obligatorio as obligatorio"
+                )
+                ->get();
     		return Response::json([
-    			"state" => "success"
+    			"state" => "success",
+                "data" => [
+                    "campos" => $campos
+                ]
     		]);
     	}
         return Response::json([
@@ -339,8 +360,28 @@ class Estandarizacion extends Controller {
     			->where("id_campo", $campo)
     			->where("id_empresa", $usuario->id_empresa)
     			->delete();
+            $campos = DB::table("pr_hitos_campo as phc")
+                ->join("ma_campos as mc", function($join) {
+                    $join->on("phc.id_campo", "=", "mc.id_campo")
+                        ->on("phc.id_empresa", "=", "mc.id_empresa");
+                })
+                ->join("sys_tipos_dato as std", "mc.id_tipo", "=", "std.id_tipo")
+                ->where("phc.id_empresa", $usuario->id_empresa)
+                ->where("phc.st_vigente", "Vigente")
+                ->where("phc.id_hito", $hito)
+                ->select(
+                    "mc.id_campo as id",
+                    "mc.des_campo as campo",
+                    "std.des_tipo as tipo",
+                    "phc.created_at as fecha",
+                    "mc.st_obligatorio as obligatorio"
+                )
+                ->get();
     		return Response::json([
-    			"state" => "success"
+    			"state" => "success",
+                "data" => [
+                    "campos" => $campos
+                ]
     		]);
     	}
         return Response::json([
@@ -365,6 +406,7 @@ class Estandarizacion extends Controller {
                 })
                 ->leftJoin("ma_entidad as me", "mu.cod_entidad", "=", "me.cod_entidad")
                 ->where("mhc.id_empresa", $usuario->id_empresa)
+                ->where("mhc.st_vigente", "Vigente")
                 ->select(
                     "mhc.id_hito as id",
                     "pch.nu_orden as orden",
@@ -393,12 +435,17 @@ class Estandarizacion extends Controller {
         extract(Request::input());
         if(isset($tipo, $hito, $peso)) {
             $usuario = Auth::user();
+            $orden = DB::table("pr_catalogo_hitos")
+                ->where("id_empresa", $usuario->id_empresa)
+                ->where("id_catalogo", $tipo)
+                ->max("nu_orden");
             DB::table("pr_catalogo_hitos")->insert([
                 "id_hito" => $hito,
                 "id_empresa" => $usuario->id_empresa,
                 "id_catalogo" => $tipo,
                 "id_usuario_registra" => $usuario->id_usuario,
-                "nu_peso" => $peso
+                "nu_peso" => $peso,
+                "nu_orden" => ($orden + 1)
             ]);
             $procesos = DB::table("ma_hitos_control as mhc")
                 ->leftJoin("pr_catalogo_hitos as pch", function($join) use($tipo) {
@@ -872,6 +919,177 @@ class Estandarizacion extends Controller {
                 "data" => [
                     "eprocesos" => $eprocesos,
                     "econtrol" => $econtrol
+                ]
+            ]);
+        }
+        return Response::json([
+            "state" => "error",
+            "msg" => "Parámetros incorrectos"
+        ]);
+    }
+
+    public function dt_organo() {
+        extract(Request::input());
+        if(isset($id)) {
+            $usuario = Auth::user();
+            $data = DB::table("ma_organo_control")
+                ->where("id_organo", $id)
+                ->select("id_organo as id", "des_organo as nombre", "des_abreviatura as abrev")
+                ->first();
+            if($data) return Response::json([
+                "state" => "success",
+                "data" => [
+                    "organo" => $data
+                ]
+            ]);
+        }
+    }
+
+    public function dt_direccion() {
+        extract(Request::input());
+        if(isset($id)) {
+            $usuario = Auth::user();
+            $data = DB::table("ma_direccion_central")
+                ->where("id_direccion", $id)
+                ->select("id_direccion as id", "des_direccion as nombre", "des_abreviatura as abrev")
+                ->first();
+            if($data) return Response::json([
+                "state" => "success",
+                "data" => [
+                    "direccion" => $data
+                ]
+            ]);
+        }
+    }
+
+    public function dt_area() {
+        extract(Request::input());
+        if(isset($id)) {
+            $usuario = Auth::user();
+            $data = DB::table("ma_area_usuaria")
+                ->where("id_area", $id)
+                ->select("id_area as id", "des_area as nombre", "des_abreviatura as abrev", "st_vigente as vigencia")
+                ->first();
+            if($data) return Response::json([
+                "state" => "success",
+                "data" => [
+                    "area" => $data
+                ]
+            ]);
+        }
+    }
+
+    public function ed_organo() {
+        extract(Request::input());
+        if(isset($id, $nombre, $abreviatura)) {
+            $usuario = Auth::user();
+            DB::table("ma_organo_control")
+                ->where("id_organo", $id)
+                ->update([
+                    "des_organo" => $nombre,
+                    "des_abreviatura" => $abreviatura,
+                    "updated_at" => date("Y-m-d H:i:s")
+                ]);
+            $organos = DB::table("ma_organo_control")
+                ->where("id_empresa", $usuario->id_empresa)
+                ->select(
+                    "id_organo as id",
+                    "des_organo as organo",
+                    "des_abreviatura as abrev"
+                )
+                ->orderBy("des_organo", "asc")
+                ->get();
+            return Response::json([
+                "state" => "success",
+                "data" => [
+                    "organos" => $organos
+                ]
+            ]);
+        }
+        return Response::json([
+            "state" => "error",
+            "msg" => "Parámetros incorrectos"
+        ]);
+    }
+
+    public function ed_direccion() {
+        extract(Request::input());
+        if(isset($id, $nombre, $abreviatura)) {
+            $usuario = Auth::user();
+            DB::table("ma_direccion_central")
+                ->where("id_direccion", $id)
+                ->update([
+                    "des_direccion" => $nombre,
+                    "des_abreviatura" => $abreviatura,
+                    "updated_at" => date("Y-m-d H:i:s")
+                ]);
+            $direcciones = DB::table("ma_direccion_central as mdc")
+                ->join("ma_organo_control as moc", function($join) {
+                    $join->on("mdc.id_empresa", "=", "moc.id_empresa")
+                        ->on("mdc.id_organo", "=", "moc.id_organo");
+                })
+                ->select(
+                    "mdc.id_direccion as id",
+                    "moc.des_organo as organo",
+                    "mdc.des_direccion as direccion",
+                    "mdc.des_abreviatura as abrev"
+                )
+                ->where("mdc.id_empresa", $usuario->id_empresa)
+                ->orderBy("moc.des_organo", "asc")
+                ->orderBy("mdc.des_direccion", "asc")
+                ->get();
+            return Response::json([
+                "state" => "success",
+                "data" => [
+                    "direcciones" => $direcciones
+                ]
+            ]);
+        }
+        return Response::json([
+            "state" => "error",
+            "msg" => "Parámetros incorrectos"
+        ]);
+    }
+
+    public function ed_area() {
+        extract(Request::input());
+        if(isset($id, $nombre, $abreviatura, $vigencia)) {
+            $usuario = Auth::user();
+            DB::table("ma_area_usuaria")
+                ->where("id_area", $id)
+                ->update([
+                    "des_area" => $nombre,
+                    "des_abreviatura" => $abreviatura,
+                    "st_vigente" => $vigencia,
+                    "updated_at" => date("Y-m-d H:i:s")
+                ]);
+            $areas = DB::table("ma_area_usuaria as mau")
+                ->join("ma_direccion_central as mdc", function($join) {
+                    $join->on("mau.id_empresa", "=", "mdc.id_empresa")
+                        ->on("mau.id_direccion", "=", "mdc.id_direccion")
+                        ->on("mau.id_organo", "=", "mdc.id_organo");
+                })
+                ->join("ma_organo_control as moc", function($join) {
+                    $join->on("mdc.id_empresa", "=", "moc.id_empresa")
+                        ->on("mdc.id_organo", "=", "moc.id_organo");
+                })
+                ->select(
+                    "mau.id_area as id",
+                    "moc.des_organo as organo",
+                    "mdc.des_direccion as direccion",
+                    "mau.des_area as area",
+                    "mau.des_abreviatura as abrev",
+                    "mau.st_vigente as vigencia"
+                )
+                ->where("mau.id_empresa", $usuario->id_empresa)
+                ->orderBy("moc.des_organo", "asc")
+                ->orderBy("mdc.des_direccion", "asc")
+                ->orderBy("mau.des_area", "asc")
+                ->get();
+            return Response::json([
+                "state" => "success",
+                "data" => [
+                    "areas" => $areas
                 ]
             ]);
         }

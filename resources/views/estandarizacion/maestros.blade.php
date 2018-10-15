@@ -383,9 +383,32 @@
                 };
                 $.post("{{ url('ajax/estandarizacion/sv-agrega-campo') }}", p, function(response) {
                     if(response.state == "success") {
+                        //oliboli
                         a.removeClass("btn-success").empty().off("click").addClass("btn-danger").append(
                             $("<i/>").addClass("fas fa-trash")
                         ).append("&nbsp;Retirar campo").on("click", QuitarCampo);
+                        //
+                        var iTbody = $("#dv-" + p.hito).children("div").children("table").children("tbody");
+                        iTbody.empty();
+                        var campos = response.data.campos;
+                        for(var i in campos) {
+                            var iCampo = campos[i];
+                            iTbody.append(
+                                $("<tr/>").append(
+                                    $("<td/>").html(iCampo.id)
+                                ).append(
+                                    $("<td/>").html(iCampo.campo)
+                                ).append(
+                                    $("<td/>").html(iCampo.tipo)
+                                ).append(
+                                    $("<td/>").append(
+                                        /*$("<a/>").attr("href", "#").append(
+                                            $("<i/>").addClass("fas fa-trash")
+                                        ).addClass("btn btn-xs btn-danger")*/
+                                    )
+                                )
+                            );
+                        }
                     }
                     else alert(response.msg);
                     a.show();
@@ -404,9 +427,32 @@
                 };
                 $.post("{{ url('ajax/estandarizacion/sv-retira-campo') }}", p, function(response) {
                     if(response.state == "success") {
+                        //oliboli
                         a.removeClass("btn-danger").empty().off("click").addClass("btn-success").append(
                             $("<i/>").addClass("fas fa-plus")
                         ).append("&nbsp;Agregar campo").on("click", AgregaCampo);
+                        //
+                        var iTbody = $("#dv-" + p.hito).children("div").children("table").children("tbody");
+                        iTbody.empty();
+                        var campos = response.data.campos;
+                        for(var i in campos) {
+                            var iCampo = campos[i];
+                            iTbody.append(
+                                $("<tr/>").append(
+                                    $("<td/>").html(iCampo.id)
+                                ).append(
+                                    $("<td/>").html(iCampo.campo)
+                                ).append(
+                                    $("<td/>").html(iCampo.tipo)
+                                ).append(
+                                    $("<td/>").append(
+                                        /*$("<a/>").attr("href", "#").append(
+                                            $("<i/>").addClass("fas fa-trash")
+                                        ).addClass("btn btn-xs btn-danger")*/
+                                    )
+                                )
+                            );
+                        }
                     }
                     else alert(response.msg);
                     a.show();
@@ -617,9 +663,9 @@
                                         "data-target": "#modal-hito-campo",
                                         "data-hid": ihito.id,
                                         "data-desc": ihito.hito
-                                    }).addClass("btn btn-xs btn-success").append(
+                                    }).addClass("btn btn-xs btn-success text-light").append(
                                         $("<i/>").addClass("fas fa-plus")
-                                    ).append("&nbsp;Agregar campo opcional")
+                                    ).append("&nbsp;Modificar los campos")
                                 ).attr("id","dv-" + ihito.id).addClass("mb-2")
                             ).attr("colspan", 4)
                         ).addClass("tr-hidden")
@@ -704,9 +750,9 @@
                                     $("<td/>").html(iCampo.tipo)
                                 ).append(
                                     $("<td/>").append(
-                                        $("<a/>").attr("href", "#").append(
+                                        /*$("<a/>").attr("href", "#").append(
                                             $("<i/>").addClass("fas fa-trash")
-                                        ).addClass("btn btn-xs btn-danger")
+                                        ).addClass("btn btn-xs btn-danger")*/
                                     )
                                 )
                             );

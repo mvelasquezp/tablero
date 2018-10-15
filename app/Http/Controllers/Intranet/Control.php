@@ -65,6 +65,7 @@ class Control extends Controller {
             )
             ->where("id_empresa", $usuario->id_empresa)
             ->where("st_obligatorio", "N")
+            ->where("st_vigente", "Vigente")
             ->orderBy("text", "asc")
             ->get();
         $proyectos = DB::table("pr_proyecto as pp")

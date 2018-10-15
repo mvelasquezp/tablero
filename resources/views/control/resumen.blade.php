@@ -11,6 +11,9 @@
             #grid-proyectos thead tr th {text-align:center}
             .btn-indicador{border-radius:32px;height:32px;text-align:center;width:32px !important;}
             #fl-busca{display:none;}
+            .text-title{font-weight:bold}
+            label{font-size:0.85rem}
+            .tr-filtros{display: none;}
         </style>
     </head>
     <body>
@@ -28,10 +31,10 @@
                                         <button data-tipo="1" type="button" class="btn btn-primary btn-catalogo">ASP</button>
                                         <button data-tipo="2" type="button" class="btn btn-danger btn-catalogo">Terceros</button>
                                     </div>
-                                    <label for="fl-atributo" class="mr-2">Buscar por</label>
+                                    <label for="fl-atributo" class="mr-2">Atributos del hito</label>
                                     <select id="fl-atributo" class="form-control form-control-sm mr-2">
                                         <option value="-1" selected disabled>- Seleccione -</option>
-                                        <option value="0">Cualquier atributo</option>
+                                        <option value="0" data-tipo="0">Cualquier atributo</option>
                                         @foreach($atributos as $atributo)
                                         <option value="{{ $atributo->value }}" data-tipo="{{ $atributo->tipo }}">{{ $atributo->text }}</option>
                                         @endforeach
@@ -48,11 +51,11 @@
                         <div class="col">
                             <table id="grid-proyectos" class="table table-sm table-striped">
                                 <thead>
-                                    <tr>
+                                    <tr class="tr-header">
                                         <th width="1%">
-                                            <!--a href="#" class="btn btn-xs btn-info text-light"><i class="fas fa-search"></i></a-->
+                                            <a href="#" class="btn btn-xs btn-info text-light btn-filtros"><i class="fas fa-search"></i></a>
                                         </th>
-                                        <th width="2%">ID</th>
+                                        <th width="3%">ID</th>
                                         <th>Tipo proyecto</th>
                                         <th>Tipo orden</th>
                                         <th>N° Expediente</th>
@@ -61,7 +64,7 @@
                                         <th>Descripción</th>
                                         <th>Fecha entrega</th>
                                         <th>Valor</th>
-                                        <th>N° pagos</th>
+                                        <th width="3%">N° pagos</th>
                                         <th class="text-danger">% Avance</th>
                                         <th class="text-danger">Indicador</th>
                                         <th class="text-danger">Días vencimiento</th>
@@ -69,25 +72,62 @@
                                         <th class="text-danger">Responsable</th>
                                         <th class="text-danger">Observaciones</th>
                                     </tr>
-                                    <!--tr class="tr-filtros">
-                                        <th></th>
-                                        <th></th>
-                                        <th></th>
-                                        <th></th>
-                                        <th></th>
-                                        <th></th>
-                                        <th></th>
-                                        <th></th>
-                                        <th></th>
-                                        <th></th>
-                                        <th></th>
-                                        <th></th>
-                                        <th></th>
-                                        <th></th>
-                                        <th></th>
-                                        <th></th>
-                                        <th></th>
-                                    </tr-->
+                                    <tr class="tr-filtros tr-header">
+                                        <th>
+                                            <a href="#" class="btn btn-xs btn-info text-light btn-filtros"><i class="fas fa-search"></i></a>
+                                        </th>
+                                        <th width="3%">ID</th>
+                                        <th>Tipo proyecto</th>
+                                        <th>
+                                            <select id="fl-tporden" class="form-control form-control-sm fl-select" data-idx="3">
+                                                <option value="0">Cualquiera</option>
+                                                <option value="Compras">Compras</option>
+                                                <option value="Servicios">Servicios</option>
+                                            </select>
+                                        </th>
+                                        <th>
+                                            <input type="text" id="fl-expediente" class="form-control form-control-sm fl-texto" data-idx="4" placeholder="Expediente">
+                                        </th>
+                                        <th>
+                                            <input type="text" id="fl-recepcion" class="form-control form-control-sm datepicker" placeholder="F.R.UAP">
+                                        </th>
+                                        <th>
+                                            <input type="text" id="fl-areausr" class="form-control form-control-sm fl-texto" data-idx="6" placeholder="Área usuaria">
+                                        </th>
+                                        <th>
+                                            <input type="text" id="fl-descripcion" class="form-control form-control-sm fl-texto" data-idx="7" placeholder="Descripción">
+                                        </th>
+                                        <th>
+                                            <input type="text" id="fl-entrega" class="form-control form-control-sm datepicker" placeholder="F. Entrega">
+                                        </th>
+                                        <th>
+                                            <input type="text" id="fl-valor" class="form-control form-control-sm fl-texto" data-idx="9" placeholder="Valor">
+                                        </th>
+                                        <th width="3%">
+                                            <select id="fl-armadas" class="form-control form-control-sm fl-select" data-idx="10">
+                                                <option value="0">Todo</option>
+                                                @for($i = 1; $i < 11; $i++)
+                                                <option value="{{ $i }}">{{ $i }} pagos</option>
+                                                @endfor
+                                            </select>
+                                        </th>
+                                        <th class="text-danger">
+                                            <input type="text" id="fl-avance" class="form-control form-control-sm fl-texto" data-idx="11" placeholder="% avance">
+                                        </th>
+                                        <th class="text-danger">Indicador</th>
+                                        <th class="text-danger">
+                                            <input type="text" id="fl-diasvc" class="form-control form-control-sm fl-texto" data-idx="13" placeholder="Días vence">
+                                        </th>
+                                        <th class="text-danger">
+                                            <input type="text" id="fl-estado" class="form-control form-control-sm fl-texto" data-idx="14" placeholder="Estado">
+                                        </th>
+                                        <th class="text-danger">
+                                            <input type="text" id="fl-responsable" class="form-control form-control-sm fl-texto" data-idx="15" placeholder="Responsable">
+                                        </th>
+                                        <th class="text-danger">
+                                            <input type="text" id="fl-observaciones" class="form-control form-control-sm fl-texto" data-idx="16" placeholder="Observaciones">
+                                        </th>
+                                    </tr>
                                 </thead>
                                 <tbody></tbody>
                             </table>
@@ -188,20 +228,21 @@
                     </div>
                     <div class="modal-body">
                         <div class="row">
-                            <div class="col">
+                            <div class="col" style="border-right:1px solid #d8d8d8">
+                                <p class="mb-2 text-danger text-title">Atributos del proceso</p>
                                 <form id="form-actualiza-hito">
                                     <input type="hidden" id="mah-hito" name="hito">
                                     <input type="hidden" id="mah-proyecto" name="proyecto">
                                     <input type="hidden" id="mah-detalle" name="detalle">
                                     <div class="row mb-2">
                                         <div class="col-6">
-                                            <label class="mb-1" for="mah-fin">Fecha límite de ejecución</label>
+                                            <label class="mb-1 text-danger" for="mah-fin">Fecha límite de ejecución</label>
                                             <input type="text" id="mah-fin" name="fin" class="form-control form-control-sm datepicker" placeholder="yyyy-mm-dd">
                                         </div>
                                     </div>
                                     <div class="row mb-2">
                                         <div class="col-10">
-                                            <label class="mb-1" for="mah-documentacion">Control documentario</label>
+                                            <label class="mb-1 text-danger" for="mah-documentacion">Control documentario</label>
                                             <select id="mah-documentacion" name="documentacion" class="form-control form-control-sm">
                                                 <option value="0" selected disabled>- Seleccione -</option>
                                                 @foreach($estados as $estado)
@@ -214,7 +255,7 @@
                                     </div>
                                     <div class="row mb-2">
                                         <div class="col-10">
-                                            <label class="mb-1" for="mah-proceso">Control proceso</label>
+                                            <label class="mb-1 text-danger" for="mah-proceso">Control proceso</label>
                                             <select id="mah-proceso" name="proceso" class="form-control form-control-sm">
                                                 <option value="0" selected disabled>- Seleccione -</option>
                                                 @foreach($estados as $estado)
@@ -227,7 +268,7 @@
                                     </div>
                                     <div class="row mb-2">
                                         <div class="col">
-                                            <label class="mb-1" for="mah-observaciones">Observaciones</label>
+                                            <label class="mb-1 text-danger" for="mah-observaciones">Observaciones</label>
                                             <textarea id="mah-observaciones" name="observaciones" class="form-control form-control-sm" style="resize:none"></textarea>
                                         </div>
                                     </div>
@@ -333,7 +374,7 @@
                             form.append(
                                 $("<div/>").addClass("row mb-2").append(
                                     $("<div/>").addClass("col-6").append(
-                                        $("<label/>").addClass("mb-1").attr("for","attr-" + iAtributo.campo).html(iAtributo.nombre)
+                                        $("<label/>").addClass("mb-1 text-primary").attr("for","attr-" + iAtributo.campo).html(iAtributo.nombre)
                                     ).append(
                                         $("<input/>").attr({
                                             "type": "number",
@@ -352,7 +393,7 @@
                             form.append(
                                 $("<div/>").addClass("row mb-2").append(
                                     $("<div/>").addClass("col").append(
-                                        $("<label/>").addClass("mb-1").attr("for","attr-" + iAtributo.campo).html(iAtributo.nombre)
+                                        $("<label/>").addClass("mb-1 text-primary").attr("for","attr-" + iAtributo.campo).html(iAtributo.nombre)
                                     ).append(
                                         $("<input/>").attr({
                                             "type": "text",
@@ -371,7 +412,7 @@
                             form.append(
                                 $("<div/>").addClass("row mb-2").append(
                                     $("<div/>").addClass("col-6").append(
-                                        $("<label/>").addClass("mb-1").attr("for","attr-" + iAtributo.campo).html(iAtributo.nombre)
+                                        $("<label/>").addClass("mb-1 text-primary").attr("for","attr-" + iAtributo.campo).html(iAtributo.nombre)
                                     ).append(
                                         $("<input/>").attr({
                                             "type": "text",
@@ -387,7 +428,6 @@
                                             format: 'yyyy-mm-dd',
                                             language: 'es',
                                             startView: 0,
-                                            startDate: '-1d',
                                             todayHighlight: true,
                                             zIndexOffset: 1030
                                         }).val(iAtributo.value)
@@ -399,7 +439,7 @@
                             form.append(
                                 $("<div/>").addClass("row mb-2").append(
                                     $("<div/>").addClass("col-6").append(
-                                        $("<label/>").addClass("mb-1").attr("for","attr-" + iAtributo.campo).html(iAtributo.nombre)
+                                        $("<label/>").addClass("mb-1 text-primary").attr("for","attr-" + iAtributo.campo).html(iAtributo.nombre)
                                     ).append(
                                         $("<input/>").attr({
                                             "type": "text",
@@ -419,7 +459,7 @@
                             form.append(
                                 $("<div/>").addClass("row mb-2").append(
                                     $("<div/>").addClass("col-6").append(
-                                        $("<label/>").addClass("mb-1").attr("for","attr-" + iAtributo.campo)
+                                        $("<label/>").addClass("mb-1 text-primary").attr("for","attr-" + iAtributo.campo)
                                     ).append(
                                         $("<input/>").attr({
                                             "type": "checkbox",
@@ -436,7 +476,9 @@
                         default: break;
                     }
                 }
-                $("#col-atributos").empty().append(form);
+                $("#col-atributos").empty().append(
+                    $("<p/>").addClass("text-primary mb-2 text-title").html("Atributos del hito")
+                ).append(form);
             }
             //
             function MuestraHitos(event) {
@@ -609,6 +651,7 @@
                     case 2:
                         input.attr("type", "number").width(80);
                         break;
+                    case 0:
                     case 3:
                         input.attr("type", "text").width(320);
                         break;
@@ -670,6 +713,28 @@
                 curr_catalogo = a.data("tipo");
                 ListarProyectos();
             }
+            function BtnFiltrosOnClick(event) {
+                event.preventDefault();
+                $(".tr-header").toggle();
+            }
+            function BuscaTxt(txt, col) {
+                var filas = $(".tr-proyecto");
+                $.each(filas, function() {
+                    var fila = $(this);
+                    var vcell = fila.children("td").eq(col).html().toLowerCase();
+                    if(vcell.indexOf(txt) > -1) fila.show();
+                    else fila.hide();
+                });
+            }
+            function BuscaCombo(txt, col) {
+                var filas = $(".tr-proyecto");
+                $.each(filas, function() {
+                    var fila = $(this);
+                    var vcell = fila.children("td").eq(col).html();
+                    if(txt == "0" || txt == 0 || vcell == txt) fila.show();
+                    else fila.hide();
+                });
+            }
             //
             ListarProyectos();
             $("#modal-actualiza-hito").on("show.bs.modal", ModalActualizaHitoOnShow);
@@ -679,15 +744,34 @@
                 format: 'yyyy-mm-dd',
                 language: 'es',
                 startView: 0,
-                startDate: '-1d',
                 todayHighlight: true,
                 zIndexOffset: 1030
             });
+            //
+            function FlKeyup(e) {
+                var input = $(this);
+                var col = input.data("idx");
+                var txt = input.val().toLowerCase();
+                BuscaTxt(txt, col);
+            }
+            function FlChange(e) {
+                var select = $(this);
+                var col = select.data("idx");
+                var txt = select.val();
+                BuscaCombo(txt, col);
+            }
+            //
             $("#modal-actualiza-hito .modal-footer .btn-primary").on("click", ActualizarHito);
             $("#fl-atributo option[value=-1]").prop("selected", true);
             $("#fl-atributo").on("change", flAtributoOnChange);
             $("#fl-busca").on("click", BuscarAtributo);
             $(".btn-catalogo").on("click", btnCatalogoOnClick);
+            $(".btn-filtros").on("click", BtnFiltrosOnClick);
+            //filtros
+            $(".fl-select").on("change", FlChange);
+            $(".fl-texto").on("keyup", FlKeyup);
+            //$("#fl-recepcion").on("keypress", )
+            //$("#fl-entrega").on("keypress", FlE);
         </script>
     </body>
 </html>

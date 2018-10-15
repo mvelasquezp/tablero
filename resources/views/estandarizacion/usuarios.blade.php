@@ -6,6 +6,7 @@
         <style type="text/css">
             #form-hitos {display:none;}
             #dv-table {display:none;}
+            table th, table td{vertical-align:middle}
         </style>
     </head>
     <body>
@@ -37,7 +38,7 @@
                                                         <label class="mb-1" for="org-abreviatura">Abreviatura</label>
                                                         <input type="text" class="form-control form-control-sm" id="org-abreviatura" placeholder="Abreviatura o siglas">
                                                     </div>
-                                                    <button type="submit" class="btn btn-primary mt-1"><i class="fas fa-save"></i> Guardar</button>
+                                                    <button type="submit" class="btn btn-success mt-1"><i class="fas fa-save"></i> Guardar</button>
                                                 </form>
                                             </div>
                                         </div>
@@ -75,7 +76,7 @@
                                                         <label class="mb-1" for="dir-abreviatura">Abreviatura</label>
                                                         <input type="text" class="form-control form-control-sm" id="dir-abreviatura" placeholder="Abreviatura o siglas">
                                                     </div>
-                                                    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Guardar</button>
+                                                    <button type="submit" class="btn btn-success"><i class="fas fa-save"></i> Guardar</button>
                                                 </form>
                                             </div>
                                         </div>
@@ -120,7 +121,7 @@
                                                         <label class="mb-1" for="are-abreviatura">Abreviatura</label>
                                                         <input type="text" class="form-control form-control-sm" id="are-abreviatura" placeholder="Abreviatura o siglas">
                                                     </div>
-                                                    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Guardar</button>
+                                                    <button type="submit" class="btn btn-success"><i class="fas fa-save"></i> Guardar</button>
                                                 </form>
                                             </div>
                                         </div>
@@ -133,6 +134,7 @@
                                                         <th>Dirección</th>
                                                         <th>Área</th>
                                                         <th>Abreviatura</th>
+                                                        <th>Estado</th>
                                                         <th></th>
                                                     </tr>
                                                 </thead>
@@ -148,6 +150,117 @@
             </div>
         </div>
         <div class="overlay"></div>
+        <!-- modal edicion organo -->
+        <div id="modal-eorgano" class="modal fade" tabindex="-1" role="dialog">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Editar órgano</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="form-eorgano">
+                            <input type="hidden" id="eorgano-id">
+                            <div class="row mb-3">
+                                <div class="col">
+                                    <label for="eorgano-nombre">Órgano de control</label>
+                                    <input type="text" class="form-control" id="eorgano-nombre" placeholder="Nombre órgano de control">
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-6">
+                                    <label for="eorgano-abreviatura">Abreviatura</label>
+                                    <input type="text" class="form-control" id="eorgano-abreviatura" placeholder="Abreviatura del órgano de control">
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                        <button type="button" class="btn btn-primary" onclick="$('#form-eorgano').submit()"><i class="fas fa-save"></i> Guardar cambios</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- modal edicion direccion -->
+        <div id="modal-edireccion" class="modal fade" tabindex="-1" role="dialog">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Editar dirección</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="form-edireccion">
+                            <input type="hidden" id="edireccion-id">
+                            <div class="row mb-3">
+                                <div class="col">
+                                    <label for="edireccion-nombre">Dirección central</label>
+                                    <input type="text" class="form-control" id="edireccion-nombre" placeholder="Nombre dirección central">
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-6">
+                                    <label for="edireccion-abreviatura">Abreviatura</label>
+                                    <input type="text" class="form-control" id="edireccion-abreviatura" placeholder="Abreviatura de la dirección">
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                        <button type="button" class="btn btn-primary" onclick="$('#form-edireccion').submit()"><i class="fas fa-save"></i> Guardar cambios</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- modal edicion area -->
+        <div id="modal-earea" class="modal fade" tabindex="-1" role="dialog">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Editar área</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="form-earea">
+                            <input type="hidden" id="earea-id">
+                            <div class="row mb-3">
+                                <div class="col">
+                                    <label for="earea-nombre">Área usuaria</label>
+                                    <input type="text" class="form-control" id="earea-nombre" placeholder="Nombre área usuaria">
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-6">
+                                    <label for="earea-abreviatura">Abreviatura</label>
+                                    <input type="text" class="form-control" id="earea-abreviatura" placeholder="Abreviatura del área usuaria">
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-6">
+                                    <label for="earea-vigencia">Retirar</label>
+                                    <select id="earea-vigencia" class="form-control form-control-sm">
+                                        <option value="Vigente" selected>No</option>
+                                        <option value="Retirado">Si</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                        <button type="button" class="btn btn-primary" onclick="$('#form-earea').submit()"><i class="fas fa-save"></i> Guardar cambios</button>
+                    </div>
+                </div>
+            </div>
+        </div>
         <!-- scripts -->
         @include('common.scripts')
         <script type="text/javascript">
@@ -179,12 +292,16 @@
                         ).append(
                             $("<td/>").html(iorgano.abrev)
                         ).append(
-                            $("<a/>").attr({
-                                "href": "#",
-                                "data-id": iorgano.id
-                            }).addClass("btn btn-xs btn-danger").append(
-                                $("<i/>").addClass("fas fa-trash")
-                            ).append("&nbsp;Eliminar")
+                            $("<td/>").append(
+                                $("<a/>").attr({
+                                    "href": "#",
+                                    "data-id": iorgano.id,
+                                    "data-toggle": "modal",
+                                    "data-target": "#modal-eorgano"
+                                }).addClass("btn btn-xs btn-primary text-light").append(
+                                    $("<i/>").addClass("fas fa-edit")
+                                ).append("&nbsp;Editar")
+                            )
                         )
                     );
                     dcombo.append(
@@ -210,12 +327,16 @@
                         ).append(
                             $("<td/>").html(idireccion.abrev)
                         ).append(
-                            $("<a/>").attr({
-                                "href": "#",
-                                "data-id": idireccion.id
-                            }).addClass("btn btn-xs btn-danger").append(
-                                $("<i/>").addClass("fas fa-trash")
-                            ).append("&nbsp;Eliminar")
+                            $("<td/>").append(
+                                $("<a/>").attr({
+                                    "href": "#",
+                                    "data-id": idireccion.id,
+                                    "data-toggle": "modal",
+                                    "data-target": "#modal-edireccion"
+                                }).addClass("btn btn-xs btn-primary text-light").append(
+                                    $("<i/>").addClass("fas fa-edit")
+                                ).append("&nbsp;Editar")
+                            )
                         )
                     );
                 }
@@ -237,17 +358,119 @@
                         ).append(
                             $("<td/>").html(iarea.abrev)
                         ).append(
-                            $("<a/>").attr({
-                                "href": "#",
-                                "data-id": iarea.id
-                            }).addClass("btn btn-xs btn-danger").append(
-                                $("<i/>").addClass("fas fa-trash")
-                            ).append("&nbsp;Eliminar")
+                            $("<td/>").append(
+                                iarea.vigencia == 'Vigente' ?
+                                $("<a/>").addClass("btn btn-xs btn-success text-light").attr("href","javascript:void(0)").html(iarea.vigencia) :
+                                $("<a/>").addClass("btn btn-xs btn-danger text-light").attr("href","javascript:void(0)").html(iarea.vigencia)
+                            )
+                        ).append(
+                            $("<td/>").append(
+                                $("<a/>").attr({
+                                    "href": "#",
+                                    "data-id": iarea.id,
+                                    "data-toggle": "modal",
+                                    "data-target": "#modal-earea"
+                                }).addClass("btn btn-xs btn-primary text-light").append(
+                                    $("<i/>").addClass("fas fa-edit")
+                                ).append("&nbsp;Editar")
+                            )
                         )
                     );
                 }
             }
             //listeners
+            function ModalEorganoOnShow(e) {
+                var id = e.relatedTarget.dataset.id;
+                document.getElementById("eorgano-id").value = id;
+                var p = { _token: "{{ csrf_token() }}", id: id };
+                $.post("{{ url('ajax/estandarizacion/dt-organo') }}", p, function(response) {
+                    if(response.state == "success") {
+                        var data = response.data.organo;
+                        document.getElementById("eorgano-nombre").value = data.nombre;
+                        document.getElementById("eorgano-abreviatura").value = data.abrev;
+                    }
+                    else alert(response.msg);
+                }, "json");
+            }
+            function ModalEdireccionOnShow(e) {
+                var id = e.relatedTarget.dataset.id;
+                document.getElementById("edireccion-id").value = id;
+                var p = { _token: "{{ csrf_token() }}", id: id };
+                $.post("{{ url('ajax/estandarizacion/dt-direccion') }}", p, function(response) {
+                    if(response.state == "success") {
+                        var data = response.data.direccion;
+                        document.getElementById("edireccion-nombre").value = data.nombre;
+                        document.getElementById("edireccion-abreviatura").value = data.abrev;
+                    }
+                    else alert(response.msg);
+                }, "json");
+            }
+            function ModalEareaOnShow(e) {
+                var id = e.relatedTarget.dataset.id;
+                document.getElementById("earea-id").value = id;
+                var p = { _token: "{{ csrf_token() }}", id: id };
+                $.post("{{ url('ajax/estandarizacion/dt-area') }}", p, function(response) {
+                    if(response.state == "success") {
+                        var data = response.data.area;
+                        document.getElementById("earea-nombre").value = data.nombre;
+                        document.getElementById("earea-abreviatura").value = data.abrev;
+                        $("#earea-vigencia option[value=" + data.vigencia + "]").prop("selected", true);
+                    }
+                    else alert(response.msg);
+                }, "json");
+            }
+            function FormEorganoOnSubmit(event) {
+                event.preventDefault();
+                var p = {
+                    _token: "{{ csrf_token() }}",
+                    id: document.getElementById("eorgano-id").value,
+                    nombre: document.getElementById("eorgano-nombre").value,
+                    abreviatura: document.getElementById("eorgano-abreviatura").value
+                };
+                $.post("{{ url('ajax/estandarizacion/ed-organo') }}", p, function(response) {
+                    if(response.state == "success") {
+                        ls_organos = response.data.organos;
+                        MuestraOrganos();
+                        $("#modal-eorgano").modal("hide");
+                    }
+                    else alert(response.msg);
+                }, "json");
+            }
+            function FormEdireccionOnSubmit(event) {
+                event.preventDefault();
+                var p = {
+                    _token: "{{ csrf_token() }}",
+                    id: document.getElementById("edireccion-id").value,
+                    nombre: document.getElementById("edireccion-nombre").value,
+                    abreviatura: document.getElementById("edireccion-abreviatura").value
+                };
+                $.post("{{ url('ajax/estandarizacion/ed-direccion') }}", p, function(response) {
+                    if(response.state == "success") {
+                        ls_direcciones = response.data.direcciones;
+                        MuestraDirecciones();
+                        $("#modal-edireccion").modal("hide");
+                    }
+                    else alert(response.msg);
+                }, "json");
+            }
+            function FormEareaOnSubmit(event) {
+                event.preventDefault();
+                var p = {
+                    _token: "{{ csrf_token() }}",
+                    id: document.getElementById("earea-id").value,
+                    nombre: document.getElementById("earea-nombre").value,
+                    abreviatura: document.getElementById("earea-abreviatura").value,
+                    vigencia: document.getElementById("earea-vigencia").value
+                };
+                $.post("{{ url('ajax/estandarizacion/ed-area') }}", p, function(response) {
+                    if(response.state == "success") {
+                        ls_areas = response.data.areas;
+                        MuestraAreas();
+                        $("#modal-earea").modal("hide");
+                    }
+                    else alert(response.msg);
+                }, "json");
+            }
             function FormOrganoOnSubmit(event) {
                 event.preventDefault();
                 var p = {
@@ -333,6 +556,12 @@
             document.getElementById("org-abreviatura").value = "";
             document.getElementById("dir-nombre").value = "";
             document.getElementById("dir-abreviatura").value = "";
+            $("#form-eorgano").on("submit", FormEorganoOnSubmit);
+            $("#form-edireccion").on("submit", FormEdireccionOnSubmit);
+            $("#form-earea").on("submit", FormEareaOnSubmit);
+            $("#modal-eorgano").on("show.bs.modal", ModalEorganoOnShow);
+            $("#modal-edireccion").on("show.bs.modal", ModalEdireccionOnShow);
+            $("#modal-earea").on("show.bs.modal", ModalEareaOnShow);
             MuestraOrganos();
             MuestraDirecciones();
             MuestraAreas();

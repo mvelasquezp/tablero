@@ -128,7 +128,7 @@
                             <div class="row mb-3">
                                 <div class="col">
                                     <label class="mb-1" for="np-valor">Valor</label>
-                                    <input type="text" id="np-valor" class="form-control form-control-sm" placeholder="Asigne un nombre al proyecto">
+                                    <input type="text" id="np-valor" class="form-control form-control-sm" placeholder="Asigne el valor del proyecto">
                                 </div>
                                 <div class="col">
                                     <label class="mb-1" for="np-armadas">Nro. de pagos (armadas)</label>
@@ -185,6 +185,7 @@
         @include('common.scripts')
         <script type="text/javascript" src="{{ asset('vendor/bootstrap-datepicker/js/bootstrap-datepicker.min.js') }}"></script>
         <script type="text/javascript" src="{{ asset('vendor/bootstrap-datepicker/locales/bootstrap-datepicker.es.min.js') }}"></script>
+        <script type="text/javascript" src="{{ asset('vendor/imask/imask.js') }}"></script>
         <script type="text/javascript">
             var ls_hitos = [];
             var ls_cargos = [];
@@ -437,6 +438,42 @@
             function ModalResponsablesOnShow(event) {
                 //
             }
+            function ValidarNumeroEntero(e) {
+                if ($.inArray(e.keyCode, [46, 8, 9, 27, 13]) !== -1 ||
+                     // Allow: Ctrl/cmd+A
+                    (e.keyCode == 65 && (e.ctrlKey === true || e.metaKey === true)) ||
+                     // Allow: Ctrl/cmd+C
+                    (e.keyCode == 67 && (e.ctrlKey === true || e.metaKey === true)) ||
+                     // Allow: Ctrl/cmd+X
+                    (e.keyCode == 88 && (e.ctrlKey === true || e.metaKey === true)) ||
+                     // Allow: home, end, left, right
+                    (e.keyCode >= 35 && e.keyCode <= 39)) {
+                         // let it happen, don't do anything
+                         return;
+                }
+                // Ensure that it is a number and stop the keypress
+                if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
+                    e.preventDefault();
+                }
+            }
+            function ValidarNumeroDecimal(e) {
+                if ($.inArray(e.keyCode, [46, 8, 9, 27, 13, 110, 190]) !== -1 ||
+                     // Allow: Ctrl/cmd+A
+                    (e.keyCode == 65 && (e.ctrlKey === true || e.metaKey === true)) ||
+                     // Allow: Ctrl/cmd+C
+                    (e.keyCode == 67 && (e.ctrlKey === true || e.metaKey === true)) ||
+                     // Allow: Ctrl/cmd+X
+                    (e.keyCode == 88 && (e.ctrlKey === true || e.metaKey === true)) ||
+                     // Allow: home, end, left, right
+                    (e.keyCode >= 35 && e.keyCode <= 39)) {
+                         // let it happen, don't do anything
+                         return;
+                }
+                // Ensure that it is a number and stop the keypress
+                if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
+                    e.preventDefault();
+                }
+            }
             //inicio
             $("#np-catalogo option[value=0]").prop("selected", true);
             $("#np-tporden option[value=0]").prop("selected", true);
@@ -465,6 +502,14 @@
             $("#np-armadas").on("change", MuestraHitosControl);
             $("#modal-responsables").on("show.bs.modal", ModalResponsablesOnShow);
             $("#modal-responsables .modal-footer .btn-primary").on("click", GuardarProyecto);
+            $("#np-valor").on("keydown", ValidarNumeroDecimal);
+            $("#np-plazo").on("keydown", ValidarNumeroEntero);
+            //
+            var element = document.getElementById('np-expediente');
+            var maskOptions = {
+                mask: '00-0000000-000'
+            };
+            var mask = new IMask(element, maskOptions);
         </script>
     </body>
 </html>
