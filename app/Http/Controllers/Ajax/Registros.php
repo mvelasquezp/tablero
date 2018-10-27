@@ -39,17 +39,17 @@ class Registros extends Controller {
                 move_uploaded_file($sourcePath, $targetPath);
             }
             //genera la entidad
-            /*DB::table("ma_entidad")->insert([
+            DB::table("ma_entidad")->insert([
                 "cod_entidad" => $dni,
                 "des_nombre_1" => strtoupper($apepat),
                 "des_nombre_2" => strtoupper($apemat),
                 "des_nombre_3" => strtoupper($nombres),
                 "tp_documento" => $tpdoc
-            ]);*/
+            ]);
             //genera el usuario
             $alias = strtolower(substr($nombres,0,1) . $apepat . substr($apemat,0,1));
             $password = substr($apepat,0,2) . substr($apemat,0,2) . $dni;
-            /*$id = DB::table("ma_usuarios")->insertGetId([
+            $id = DB::table("ma_usuarios")->insertGetId([
                 "des_alias" => $alias,
                 "des_email" => $mail,
                 "des_telefono" => $telefono,
@@ -59,15 +59,15 @@ class Registros extends Controller {
                 "id_empresa" => $usuario->id_empresa,
                 "cod_entidad" => $dni,
                 "st_vigente" => $vigencia
-            ]);*/
+            ]);
             //asigna puesto
             if($cargo != 0) {
-                /*DB::table("us_usuario_puesto")->insert([
+                DB::table("us_usuario_puesto")->insert([
                     "id_usuario" => $id,
                     "id_empresa" => $usuario->id_empresa,
                     "id_puesto" => $cargo,
                     "st_vigente" => "Vigente"
-                ]);*/
+                ]);
             }
             //envia el mail
             $maildata = [

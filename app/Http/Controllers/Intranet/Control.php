@@ -171,6 +171,7 @@ class Control extends Controller {
         //listo
         $estados = DB::table("sys_estados")
             ->select("id_estado as value", "des_estado as text", "tp_estado as tipo")
+            ->where("st_vigente", "Vigente")
             ->orderBy("tp_estado", "asc")
             ->orderBy("id_estado", "asc")
             ->get();

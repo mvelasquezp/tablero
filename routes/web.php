@@ -14,6 +14,7 @@
 //Route::get("/", "Intranet");
 Route::middleware("auth")->namespace("Intranet")->group(function() {
 	Route::get("/", "Main@home");
+	Route::get("mail", "Main@mail");
 	//modulo de registros
 	Route::prefix("intranet")->group(function() {
 		Route::prefix("registros")->group(function() {

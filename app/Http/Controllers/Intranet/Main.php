@@ -58,4 +58,13 @@ class Main extends Controller {
         return redirect("intranet/seguimiento/resumen");
     }
 
+    public function mail() {
+        \Mail::send("mails.prueba", [], function($message) {
+            $message->to("mvelasquezp88@gmail.com")
+                ->subject("Prueba");
+            $message->from(env("MAIL_FROM"), env("MAIL_NAME"));
+        });
+        return "listo";
+    }
+
 }

@@ -225,6 +225,7 @@ class Estandarizacion extends Controller {
     		]);
     		$estados = DB::table("sys_estados")
 	    		->where("tp_estado", "P")
+                ->where("st_vigente", "Vigente")
 	    		->select(
 	    			"id_estado as id",
 	    			"cod_estado as codigo",
@@ -256,6 +257,7 @@ class Estandarizacion extends Controller {
     		]);
     		$estados = DB::table("sys_estados")
 	    		->where("tp_estado", "C")
+                ->where("st_vigente", "Vigente")
 	    		->select(
 	    			"id_estado as id",
 	    			"cod_estado as codigo",
@@ -290,6 +292,7 @@ class Estandarizacion extends Controller {
     			})
     			->where("mc.id_empresa", $usuario->id_empresa)
                 ->where("mc.st_obligatorio", "N")
+                ->where("mc.st_vigente", "VIgente")
     			->select(
     				"mc.id_campo as id",
     				"mc.des_campo as campo",
@@ -297,6 +300,7 @@ class Estandarizacion extends Controller {
     				DB::raw("ifnull(phc.id_hito,0) as hito"),
                     "mc.st_obligatorio as obligatorio"
     			)
+                ->orderBy("id", "asc")
     			->get();
 			return Response::json([
 				"state" => "success",

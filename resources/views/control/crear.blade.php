@@ -104,7 +104,7 @@
                                 </div>
                                 <div class="col-2">
                                     <label class="mb-1">&nbsp;</label>
-                                    <a href="#" class="btn btn-sm btn-primary"><i class="fas fa-plus"></i> Nuevo</a>
+                                    <a href="{{ url('intranet/estandarizacion/usuarios') }}" class="btn btn-sm btn-primary"><i class="fas fa-plus"></i> Nuevo</a>
                                 </div>
                             </div>
                             <div class="row mb-3">
