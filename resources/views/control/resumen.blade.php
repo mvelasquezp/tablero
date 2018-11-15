@@ -49,7 +49,7 @@
                 <div class="container-fluid">
                     <div class="row">
                         <div class="col">
-                            <table id="grid-proyectos" class="table table-sm table-striped">
+                            <table id="grid-proyectos" class="table table-sm table-striped table-responsive">
                                 <thead>
                                     <tr class="tr-header">
                                         <th width="1%">
@@ -62,6 +62,8 @@
                                         <th>Fecha recepción UAP</th>
                                         <th>Área usuaria</th>
                                         <th>Descripción</th>
+                                        <th>Contratista</th>
+                                        <th>Plazo ejecución</th>
                                         <th>Fecha entrega</th>
                                         <th>Valor</th>
                                         <th width="3%">N° pagos</th>
@@ -132,9 +134,9 @@
                                 <tbody></tbody>
                             </table>
                             <!-- -->
-                            <!--nav aria-label="Navegador">
+                            <nav aria-label="Navegador">
                                 <ul class="pagination pagination-sm justify-content-end">
-                                    <li class="page-item disabled">
+                                    <!--li class="page-item disabled">
                                         <a class="page-link" href="#" tabindex="-1">Previous</a>
                                     </li>
                                     <li class="page-item"><a class="page-link" href="#">1</a></li>
@@ -142,12 +144,12 @@
                                     <li class="page-item"><a class="page-link" href="#">3</a></li>
                                     <li class="page-item">
                                         <a class="page-link" href="#">Next</a>
-                                    </li>
+                                    </li-->
                                     <li class="page-item" style="margin-left:20px;">
                                         <a class="page-link bg-success text-light" href="{{ url('intranet/seguimiento/crea-proyecto') }}"><i class="fas fa-plus"></i> Nuevo proyecto</a>
                                     </li>
                                 </ul>
-                            </nav-->
+                            </nav>
                         </div>
                     </div>
                 </div>
@@ -221,7 +223,7 @@
             <div class="modal-dialog modal-lg" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title">Modal title</h5>
+                        <h5 class="modal-title">Cambio de responsable</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
@@ -284,10 +286,112 @@
                 </div>
             </div>
         </div>
+        <!-- -->
+        <div id="modal-edicion" class="modal fade" tabindex="-1" role="dialog">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Modal title</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="form-nuevo" class="container">
+                            <input type="hidden" id="np-proyecto">
+                            <div class="row">
+                                <div class="col">
+                                    <div class="row mb-3">
+                                        <div class="col">
+                                            <label class="mb-1" for="np-expediente">Número de expediente</label>
+                                            <input type="text" id="np-expediente" class="form-control form-control-sm" placeholder="##-#######-###">
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <div class="col-6">
+                                            <label class="mb-1" for="np-frecepcion">Fecha recepción UAP</label>
+                                            <input type="text" id="np-frecepcion" class="form-control form-control-sm datepicker" placeholder="yyyy-mm-dd">
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <div class="col">
+                                            <label class="mb-1" for="np-descripcion">Descripción</label>
+                                            <input type="text" id="np-descripcion" class="form-control form-control-sm" placeholder="Asigne un nombre al proyecto">
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <div class="col-6">
+                                            <label class="mb-1" for="np-plazo">Plazo de ejecución</label>
+                                            <input type="text" id="np-plazo" class="form-control form-control-sm" placeholder="Ingrese nro. de días">
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <div class="col">
+                                            <label class="mb-1" for="np-contratista">Contratista</label>
+                                            <input type="text" id="np-contratista" class="form-control form-control-sm" placeholder="Nombre del contratista">
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <div class="col">
+                                            <label class="mb-1" for="np-valor">Valor</label>
+                                            <input type="text" id="np-valor" class="form-control form-control-sm" placeholder="Asigne el valor del proyecto">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-sm btn-primary"><i class="fas fa-save"></i> Guardar cambios</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- -->
+        <div id="modal-responsable" class="modal fade" tabindex="-1" role="dialog">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Modal title</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="form-nuevo" class="container">
+                            <input type="hidden" id="sr-proyecto">
+                            <input type="hidden" id="sr-hito">
+                            <input type="hidden" id="sr-detalle">
+                            <div class="row">
+                                <div class="col">
+                                    <div class="row mb-3">
+                                        <div class="col">
+                                            <label class="mb-1" for="sr-responsable">Nuevo responsable</label>
+                                            <select class="form-control" id="sr-responsable">
+                                                <option value="-1" selected disabled>- Seleccione -</option>
+                                                @foreach($responsables as $responsable)
+                                                <option value="{{ $responsable->value }}" data-usuario="{{ $responsable->usuario }}">{{ $responsable->text }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-sm btn-primary"><i class="fas fa-save"></i> Guardar cambios</button>
+                    </div>
+                </div>
+            </div>
+        </div>
         <!-- scripts -->
         @include('common.scripts')
         <script type="text/javascript" src="{{ asset('vendor/bootstrap-datepicker/js/bootstrap-datepicker.min.js') }}"></script>
         <script type="text/javascript" src="{{ asset('vendor/bootstrap-datepicker/locales/bootstrap-datepicker.es.min.js') }}"></script>
+        <script type="text/javascript" src="{{ asset('vendor/imask/imask.js') }}"></script>
         <script type="text/javascript">
             var ls_proyectos = {!! json_encode($proyectos) !!};
             var ls_atributos;
@@ -329,6 +433,10 @@
                             ).append(
                                 $("<td/>").html(iproyecto.proyecto)
                             ).append(
+                                $("<td/>").html(iproyecto.contratista)
+                            ).append(
+                                $("<td/>").html(iproyecto.ndias).addClass("text-right")
+                            ).append(
                                 $("<td/>").html(iproyecto.fentrega)
                             ).append(
                                 $("<td/>").html(parseFloat(iproyecto.valor).toLocaleString("en-US", { minimumFractionDigits:2, maximumFractionDigits:2 })).addClass("text-right")
@@ -355,7 +463,7 @@
                             $("<tr/>").append(
                                 $("<td/>")
                             ).append(
-                                $("<td/>").attr("colspan", 16).append(
+                                $("<td/>").attr("colspan", 18).append(
                                     $("<div/>").attr("id", "dv-" + iproyecto.id)
                                 )
                             ).hide()
@@ -530,6 +638,19 @@
                                 ).append(
                                     $("<td/>").html(iHito.nombre)
                                 ).append(
+                                    $("<td/>").append(
+                                        $("<a/>").append(
+                                            $("<i/>").addClass("fas fa-exchange-alt")
+                                        ).attr({
+                                            "href": "#",
+                                            "data-proyecto": id,
+                                            "data-hito": iHito.hid,
+                                            "data-id": iHito.id,
+                                            "data-toggle": "modal",
+                                            "data-target": "#modal-responsable"
+                                        }).addClass("btn btn-primary btn-xs text-light")
+                                    )
+                                ).append(
                                     $("<td/>").html(iHito.edocumentacion).css("font-weight","bold")
                                 ).append(
                                     $("<td/>").html(iHito.eproceso).css("font-weight","bold")
@@ -558,6 +679,8 @@
                                     ).append(
                                         $("<th/>").html("")
                                     ).append(
+                                        $("<th/>").attr("width","1%").html("")
+                                    ).append(
                                         $("<th/>").html("Control documentario")
                                     ).append(
                                         $("<th/>").html("Control del proceso")
@@ -566,6 +689,19 @@
                                     )
                                 ).addClass("thead-dark")
                             ).append(tbody).addClass("table table-sm table-striped")
+                        ).append(
+                            $("<div/>").append(
+                                $("<div/>").append(
+                                    $("<a/>").attr({
+                                        "href": "#",
+                                        "data-toggle": "modal",
+                                        "data-target": "#modal-edicion",
+                                        "data-id": id
+                                    }).append(
+                                        $("<i/>").addClass("fas fa-edit")
+                                    ).append("&nbsp;Editar proyecto").addClass("btn btn-sm btn-warning mb-2")
+                                ).addClass("col")
+                            ).addClass("row")
                         );
                     }
                     else alert(response.msg);
@@ -689,7 +825,8 @@
                     var p = {
                         _token: "{{ csrf_token() }}",
                         tipo: $("#fl-value").data("tipo"),
-                        texto: texto
+                        texto: texto,
+                        campo: document.getElementById("fl-atributo").value
                     };
                     $.post("{{ url('ajax/control/fl-busca-campo') }}", p, function(response) {
                         $("#grid-proyectos tbody tr").hide();
@@ -735,6 +872,76 @@
                     else fila.hide();
                 });
             }
+            function ActualizarProyecto(event) {
+                event.preventDefault();
+                var p = {
+                    _token: "{{ csrf_token() }}",
+                    id: document.getElementById("np-proyecto").value,
+                    expediente: document.getElementById("np-expediente").value,
+                    frecepcion: document.getElementById("np-frecepcion").value,
+                    descripcion: document.getElementById("np-descripcion").value,
+                    plazo: document.getElementById("np-plazo").value,
+                    contratista: document.getElementById("np-contratista").value,
+                    valor: document.getElementById("np-valor").value
+                };
+                $.post("{{ url('ajax/control/upd-proyecto') }}", p, function(response) {
+                    if(response.state == "success") {
+                        ls_proyectos = response.data.proyectos;
+                        alert("Proyecto actualizado!");
+                        $("#modal-edicion").modal("hide");
+                        ListarProyectos();
+                    }
+                    else alert(response.msg);
+                }, "json");
+            }
+            function ModalEdicionOnShow(event) {
+                var dataset = event.relatedTarget.dataset;
+                var id = dataset.id;
+                var p = {
+                    _token: "{{ csrf_token() }}",
+                    id: id
+                };
+                $.post("{{ url('ajax/control/dt-proyecto') }}", p, function(response) {
+                    if(response.state == "success") {
+                        var proyecto = response.data.proyecto;
+                        $("#modal-edicion .modal-title").html(proyecto.descripcion);
+                        document.getElementById("np-proyecto").value = id;
+                        document.getElementById("np-expediente").value = proyecto.expediente;
+                        document.getElementById("np-frecepcion").value = proyecto.frecepcion;
+                        document.getElementById("np-descripcion").value = proyecto.descripcion;
+                        document.getElementById("np-plazo").value = proyecto.plazo;
+                        document.getElementById("np-contratista").value = proyecto.contratista;
+                        document.getElementById("np-valor").value = proyecto.valor;
+                    }
+                }, "json");
+            }
+            function ActualizarResponsable(event) {
+                event.preventDefault();
+                var p = {
+                    _token: "{{ csrf_token() }}",
+                    id: document.getElementById("sr-detalle").value,
+                    proyecto: document.getElementById("sr-proyecto").value,
+                    hito: document.getElementById("sr-hito").value,
+                    responsable: document.getElementById("sr-responsable").value,
+                    usuario: $("#sr-responsable option:selected").data("usuario")
+                };
+                $.post("{{ url('ajax/control/upd-responsable-proyecto') }}", p, function(response) {
+                    if(response.state == "success") {
+                        ls_proyectos = response.data.proyectos;
+                        alert("Responsable actualizado");
+                        $("#modal-responsable").modal("hide");
+                        ListarProyectos();
+                    }
+                    else alert(response.msg);
+                }, "json");
+            }
+            function ModalResponsableOnShow(event) {
+                var dataset = event.relatedTarget.dataset;
+                $("#sr-responsable option[value=-1]").prop("selected", true);
+                document.getElementById("sr-detalle").value = dataset.id;
+                document.getElementById("sr-proyecto").value = dataset.proyecto;
+                document.getElementById("sr-hito").value = dataset.hito;
+            }
             //
             ListarProyectos();
             $("#modal-actualiza-hito").on("show.bs.modal", ModalActualizaHitoOnShow);
@@ -745,7 +952,7 @@
                 language: 'es',
                 startView: 0,
                 todayHighlight: true,
-                zIndexOffset: 1030
+                zIndexOffset: 5000
             });
             //
             function FlKeyup(e) {
@@ -770,8 +977,18 @@
             //filtros
             $(".fl-select").on("change", FlChange);
             $(".fl-texto").on("keyup", FlKeyup);
+            //modal
+            $("#modal-edicion").on("show.bs.modal", ModalEdicionOnShow);
+            $("#modal-edicion .modal-footer .btn-primary").on("click", ActualizarProyecto);
+            $("#modal-responsable").on("show.bs.modal", ModalResponsableOnShow);
+            $("#modal-responsable .modal-footer .btn-primary").on("click", ActualizarResponsable);
             //$("#fl-recepcion").on("keypress", )
             //$("#fl-entrega").on("keypress", FlE);
+            var element = document.getElementById('np-expediente');
+            var maskOptions = {
+                mask: '00-0000000-000'
+            };
+            var mask = new IMask(element, maskOptions);
         </script>
     </body>
 </html>

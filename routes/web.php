@@ -21,6 +21,7 @@ Route::middleware("auth")->namespace("Intranet")->group(function() {
 			Route::get("usuarios", "Registros@usuarios");
 			Route::get("organigrama", "Registros@organigrama");
 			Route::get("administradores", "Registros@administradores");
+			Route::get("bienvenida", "Registros@bienvenida");
 		});
 		//modulo de estandarizacion de procesos
 		Route::prefix("estandarizacion")->group(function() {
@@ -61,6 +62,7 @@ Route::middleware("auth")->namespace("Ajax")->prefix("ajax")->group(function() {
 		Route::post("sv-permisos", "Registros@sv_permisos");
 		Route::post("dt-puesto", "Registros@dt_puesto");
 		Route::post("ed-puesto", "Registros@ed_puesto");
+		Route::post("sv-mensaje", "Registros@sv_mensaje");
 	});
 	//modulo de estandarizacion de procesos
 	Route::prefix("estandarizacion")->group(function() {
@@ -79,6 +81,7 @@ Route::middleware("auth")->namespace("Ajax")->prefix("ajax")->group(function() {
 		Route::post("sv-elimina-estado", "Estandarizacion@sv_elimina_estado");
 		//
 		Route::post("ls-hitos-proyecto", "Estandarizacion@ls_hitos_proyecto");
+		Route::post("upd-retira-hito", "Estandarizacion@ls_retira_hito");
 		Route::post("sv-hito-proyecto", "Estandarizacion@sv_hito_proyecto");
 		Route::post("upd-hito-proyecto", "Estandarizacion@upd_hito_proyecto");
 		Route::post("upd-sube-hito", "Estandarizacion@upd_sube_hito");
@@ -101,7 +104,11 @@ Route::middleware("auth")->namespace("Ajax")->prefix("ajax")->group(function() {
 	//modulo de control de proyectos
 	Route::prefix("control")->group(function() {
 		Route::post("ls-hitos-control", "Control@ls_hitos_control");
+		Route::post("dt-proyecto", "Control@dt_proyecto");
+		Route::post("sv-nueva-area", "Control@sv_nueva_area");
 		Route::post("sv-proyecto", "Control@sv_proyecto");
+		Route::post("upd-proyecto", "Control@upd_proyecto");
+		Route::post("upd-responsable-proyecto", "Control@upd_responsable_proyecto");
 		Route::post("ls-hitos-proyecto", "Control@ls_hitos_proyecto");
 		Route::post("ls-estado-hito", "Control@ls_estado_hito");
 		Route::post("upd-estado-hito", "Control@upd_estado_hito");

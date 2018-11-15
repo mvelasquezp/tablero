@@ -107,6 +107,8 @@ class Control extends Controller {
                 DB::raw("date_format(pp.created_at,'%Y-%m-%d') as femision"),
                 DB::raw("concat(moc.des_organo,' - ',mdc.des_direccion,' - ',mau.des_area) as areausr"),
                 "pp.des_proyecto as proyecto",
+                "pp.des_contratista as contratista",
+                "pp.num_dias as ndias",
                 DB::raw("date_format(pp.fe_fin,'%Y-%m-%d') as fentrega"),
                 "pp.num_valor as valor",
                 "pp.num_armadas as armadas",
@@ -115,7 +117,7 @@ class Control extends Controller {
                 DB::raw("100 * sum(pch.nu_peso * pv.num_puntaje)/sum(pch.nu_peso) as avance")
             )
             ->where("pp.id_empresa", $usuario->id_empresa)
-            ->groupBy("id", "catalogo", "tipo", "orden", "expediente", "femision", "areausr", "proyecto", "fentrega", "valor", "armadas", "diasvence", "observaciones")
+            ->groupBy("id", "catalogo", "tipo", "orden", "expediente", "femision", "areausr", "proyecto", "contratista", "ndias", "fentrega", "valor", "armadas", "diasvence", "observaciones")
             ->orderBy("pp.id_proyecto", "asc")
             ->get();
         //busca los ultimos hitos por proyecto
@@ -168,6 +170,25 @@ class Control extends Controller {
             }
             //cálculo del % avance
         }
+        $responsables = DB::table("ma_puesto as mp")
+            ->leftJoin("us_usuario_puesto as uup", function($join) {
+                $join->on("mp.id_puesto", "=", "uup.id_puesto")
+                    ->on("mp.id_empresa", "=", "uup.id_empresa")
+                    ->on("uup.st_vigente", "=", DB::raw("'Vigente'"));
+            })
+            ->leftJoin("ma_usuarios as mu", function($join) {
+                $join->on("uup.id_usuario", "=", "mu.id_usuario")
+                    ->on("uup.id_empresa", "=", "mu.id_empresa");
+            })
+            ->leftJoin("ma_entidad as me", "mu.cod_entidad", "=", "me.cod_entidad")
+            ->select(
+                "mp.id_puesto as value",
+                "uup.id_usuario as usuario",
+                DB::raw("if(uup.id_usuario is null,concat(mp.des_puesto, ' (sin asignar)'),concat(mp.des_puesto,' | ',me.des_nombre_1,' ',me.des_nombre_2,' ',me.des_nombre_3)) as text")
+            )
+            ->where("mp.st_vigente", "Vigente")
+            ->orderBy("mp.des_puesto", "asc")
+            ->get();
         //listo
         $estados = DB::table("sys_estados")
             ->select("id_estado as value", "des_estado as text", "tp_estado as tipo")
@@ -181,7 +202,8 @@ class Control extends Controller {
             "menu" => $menu,
             "proyectos" => $proyectos,
             "estados" => $estados,
-            "atributos" => $atributos
+            "atributos" => $atributos,
+            "responsables" => $responsables
         ];
         return view("control.resumen")->with($arr_data);
     }
@@ -208,7 +230,7 @@ class Control extends Controller {
             ->get();
         $id_pago = DB::table("ma_hitos_control")
             ->select("id_hito as id")
-            ->where("des_hito", "Pago")
+            ->where("des_hito", "PAGOS")
             ->where("id_empresa", $usuario->id_empresa)
             ->where("st_vigente", "Vigente")
             ->first();
@@ -228,6 +250,7 @@ class Control extends Controller {
         $menu = $this->ObtenerMenu($usuario);
         $mensaje = DB::table("sys_mensaje")
             ->select("des_titulo as saludo", "des_cuerpo as cuerpo", "des_boton as boton")
+            ->where("id_mensaje", 1)
             ->first();
         $arr_data = [
             "usuario" => $usuario,

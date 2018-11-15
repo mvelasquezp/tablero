@@ -3,7 +3,7 @@
         <a href="javascript:void(0)" id="sidebarCollapse" class="btn btn-link">
             <i class="fas fa-ellipsis-v text-dark"></i>
         </a>
-        <a class="navbar-brand" href="#">
+        <a class="navbar-brand" href="{{ url('intranet/seguimiento/resumen') }}">
             <img src="{{ asset('images/icons/logo_minsa.png') }}" style="height:28px;">
         </a>
         <div class="collapse navbar-collapse" id="navbarSupportedContent">

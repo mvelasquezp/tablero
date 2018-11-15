@@ -175,4 +175,19 @@ class Registros extends Controller {
         return view("registro.administradores")->with($arr_data);
     }
 
+    public function bienvenida() {
+        $usuario = Auth::user();
+        $menu = $this->ObtenerMenu($usuario);
+        $mensaje = DB::table("sys_mensaje")
+            ->select("des_titulo as saludo", "des_cuerpo as cuerpo", "des_boton as despedida")
+            ->where("id_mensaje", 2)
+            ->first();
+        $arr_data = [
+            "usuario" => $usuario,
+            "menu" => $menu,
+            "mensaje" => $mensaje,
+        ];
+        return view("registro.bienvenida")->with($arr_data);
+    }
+
 }

@@ -16,7 +16,7 @@
                     <div class="row justify-content-md-center">
                         <div class="col-6">
                             <div class="alert alert-secondary">
-                                <form class="form-inline">
+                                <form id="form-busca" class="form-inline">
                                     <input type="text" class="form-control form-control-sm mr-sm-2" id="tb-buscar" placeholder="¿Qué desea buscar?">
                                     <button type="submit" class="btn btn-sm btn-primary text-light"><i class="fas fa-search"></i> Buscar</button>
                                     <a href="#" class="btn btn-sm btn-success ml-3 text-light" data-toggle="modal" data-target="#modal-registro"><i class="fas fa-user-plus"></i> Nuevo</a>
@@ -225,48 +225,53 @@
         <script type="text/javascript">
             var ls_usuarios = {!! json_encode($usuarios) !!};
             //
-            function EscribirListaUsuarios() {
+            function EscribirListaUsuarios(text) {
                 var tbody = $("#tabla-usuarios tbody");
                 tbody.empty();
                 for(var i in ls_usuarios) {
                     var iUsuario = ls_usuarios[i];
-                    tbody.append(
-                        $("<tr/>").append(
-                            $("<td/>")
-                        ).append(
-                            $("<td/>").html(iUsuario.dni)
-                        ).append(
-                            $("<td/>").html(iUsuario.apepat)
-                        ).append(
-                            $("<td/>").html(iUsuario.apemat)
-                        ).append(
-                            $("<td/>").html(iUsuario.nombres)
-                        ).append(
-                            $("<td/>").html(iUsuario.fingreso)
-                        ).append(
-                            $("<td/>").html(iUsuario.alias)
-                        ).append(
-                            $("<td/>").html(iUsuario.puesto)
-                        ).append(
-                            $("<td/>").html(iUsuario.oficina)
-                        ).append(
-                            $("<td/>").html(iUsuario.telefono)
-                        ).append(
-                            $("<td/>").html(iUsuario.email)
-                        ).append(
-                            $("<td/>").append(
-                                $("<a/>").attr({
-                                    "href": "#",
-                                    "data-cod": iUsuario.dni,
-                                    "data-id": iUsuario.id,
-                                    "data-toggle": "modal",
-                                    "data-target": "#modal-edicion"
-                                }).addClass("btn btn-xs btn-primary text-light").append(
-                                    $("<i/>").addClass("fas fa-edit")
-                                ).append("&nbsp;Editar")
+                    text = text.toLowerCase();
+                    if(text == "" || iUsuario.dni.indexOf(text) > -1 || (iUsuario.apepat && iUsuario.apepat.toLowerCase().indexOf(text) > -1) || 
+                        (iUsuario.apemat && iUsuario.apemat.toLowerCase().indexOf(text) > -1) || (iUsuario.nombres && iUsuario.nombres.toLowerCase().indexOf(text) > -1) || 
+                        (iUsuario.puesto && iUsuario.puesto.toLowerCase().indexOf(text) > -1) || (iUsuario.oficina && iUsuario.oficina.toLowerCase().indexOf(text) > -1)) {
+                        tbody.append(
+                            $("<tr/>").append(
+                                $("<td/>")
+                            ).append(
+                                $("<td/>").html(iUsuario.dni)
+                            ).append(
+                                $("<td/>").html(iUsuario.apepat)
+                            ).append(
+                                $("<td/>").html(iUsuario.apemat)
+                            ).append(
+                                $("<td/>").html(iUsuario.nombres)
+                            ).append(
+                                $("<td/>").html(iUsuario.fingreso)
+                            ).append(
+                                $("<td/>").html(iUsuario.alias)
+                            ).append(
+                                $("<td/>").html(iUsuario.puesto)
+                            ).append(
+                                $("<td/>").html(iUsuario.oficina)
+                            ).append(
+                                $("<td/>").html(iUsuario.telefono)
+                            ).append(
+                                $("<td/>").html(iUsuario.email)
+                            ).append(
+                                $("<td/>").append(
+                                    $("<a/>").attr({
+                                        "href": "#",
+                                        "data-cod": iUsuario.dni,
+                                        "data-id": iUsuario.id,
+                                        "data-toggle": "modal",
+                                        "data-target": "#modal-edicion"
+                                    }).addClass("btn btn-xs btn-primary text-light").append(
+                                        $("<i/>").addClass("fas fa-edit")
+                                    ).append("&nbsp;Editar")
+                                )
                             )
-                        )
-                    );
+                        );
+                    }
                 }
             }
             function ValidarNumero(e) {
@@ -309,6 +314,10 @@
                 $("#form-registro")[0].reset();
                 $("#reg-cargo option[value=0]").prop("selected", true);
                 $("#reg-vigencia option[value=Vigente]").prop("selected", true);
+            }
+            function BuscarUsuarios(event) {
+                event.preventDefault();
+                EscribirListaUsuarios(document.getElementById("tb-buscar").value);
             }
             //
             $("#modal-registro").on("show.bs.modal", function(args) {
@@ -394,10 +403,11 @@
                     }
                 });
             });
-            EscribirListaUsuarios();
+            EscribirListaUsuarios('');
             $("#modal-registro").on("show.bs.modal", LimpiarFormulario);
             $("#reg-dni").on("keydown", ValidarNumero);
             $("#reg-telefono").on("keydown", ValidarTelefono);
+            $("#form-busca").on("submit", BuscarUsuarios);
         </script>
     </body>
 </html>

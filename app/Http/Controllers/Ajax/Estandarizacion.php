@@ -402,7 +402,8 @@ class Estandarizacion extends Controller {
                 ->leftJoin("pr_catalogo_hitos as pch", function($join) use($tipo) {
                     $join->on("mhc.id_hito", "=", "pch.id_hito")
                         ->on("mhc.id_empresa", "=", "pch.id_empresa")
-                        ->on("pch.id_catalogo", "=", DB::raw($tipo));
+                        ->on("pch.id_catalogo", "=", DB::raw($tipo))
+                        ->on("pch.st_vigente", DB::raw("'Vigente'"));
                 })
                 ->leftJoin("ma_usuarios as mu", function($join) {
                     $join->on("pch.id_usuario_registra", "=", "mu.id_usuario")
@@ -426,6 +427,73 @@ class Estandarizacion extends Controller {
                 "state" => "success",
                 "data" => [
                     "procesos" => $procesos
+                ]
+            ]);
+        }
+        return Response::json([
+            "state" => "error",
+            "msg" => "Parámetros incorrectos"
+        ]);
+    }
+
+    public function ls_retira_hito() {
+        extract(Request::input());
+        if(isset($hito, $tipo)) {
+            $usuario = Auth::user();
+            /*$count = DB::table("pr_proyecto")->count();
+            if($count == 0) {
+                //
+            }
+            return Response::json();*/
+            $orden = DB::table("pr_catalogo_hitos")
+                ->where("id_hito", $hito)
+                ->where("id_catalogo", $tipo)
+                ->where("id_empresa", $usuario->id_empresa)
+                ->select("nu_orden as orden")
+                ->first();
+            DB::table("pr_catalogo_hitos")
+                ->where("id_hito", $hito)
+                ->where("id_catalogo", $tipo)
+                ->where("id_empresa", $usuario->id_empresa)
+                ->update([
+                    "st_vigente" => "Retirado",
+                    "nu_orden" => 0
+                ]);
+            DB::table("pr_catalogo_hitos")
+                ->where("id_catalogo", $tipo)
+                ->where("id_empresa", $usuario->id_empresa)
+                ->where("nu_orden", ">", $orden->orden)
+                ->decrement("nu_orden", 1);
+            $procesos = DB::table("ma_hitos_control as mhc")
+                ->leftJoin("pr_catalogo_hitos as pch", function($join) use($tipo) {
+                    $join->on("mhc.id_hito", "=", "pch.id_hito")
+                        ->on("mhc.id_empresa", "=", "pch.id_empresa")
+                        ->on("pch.id_catalogo", "=", DB::raw($tipo));
+                })
+                ->leftJoin("ma_usuarios as mu", function($join) {
+                    $join->on("pch.id_usuario_registra", "=", "mu.id_usuario")
+                        ->on("pch.id_empresa", "=", "mu.id_empresa");
+                })
+                ->leftJoin("ma_entidad as me", "mu.cod_entidad", "=", "me.cod_entidad")
+                ->where("mhc.id_empresa", $usuario->id_empresa)
+                ->where("mhc.st_vigente", "Vigente")
+                ->where("pch.st_vigente", "Vigente")
+                ->select(
+                    "mhc.id_hito as id",
+                    "pch.nu_orden as orden",
+                    "pch.id_catalogo as tipo",
+                    "mhc.des_hito as proceso",
+                    "pch.nu_peso as peso",
+                    "me.des_nombre_1 as agrega",
+                    "pch.created_at as fregistro"
+                )
+                ->orderBy("pch.nu_orden", "asc")
+                ->get();
+            return Response::json([
+                "state" => "success",
+                "data" => [
+                    "procesos" => $procesos,
+                    "orden" => $orden
                 ]
             ]);
         }
@@ -541,6 +609,7 @@ class Estandarizacion extends Controller {
                 })
                 ->leftJoin("ma_entidad as me", "mu.cod_entidad", "=", "me.cod_entidad")
                 ->where("mhc.id_empresa", $usuario->id_empresa)
+                ->where("pch.st_vigente", "Vigente")
                 ->select(
                     "mhc.id_hito as id",
                     "pch.nu_orden as orden",
@@ -597,6 +666,7 @@ class Estandarizacion extends Controller {
                 })
                 ->leftJoin("ma_entidad as me", "mu.cod_entidad", "=", "me.cod_entidad")
                 ->where("mhc.id_empresa", $usuario->id_empresa)
+                ->where("pch.st_vigente", "Vigente")
                 ->select(
                     "mhc.id_hito as id",
                     "pch.nu_orden as orden",

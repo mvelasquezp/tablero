@@ -64,11 +64,12 @@
                                             <th width="1%"></th>
                                             <th width="3%">ID</th>
                                             <th width="1%"></th>
-                                            <th width="35%">Proceso</th>
+                                            <th width="36%">Proceso</th>
                                             <th width="10%">Peso</th>
                                             <th width="30%">Usu.Registra</th>
                                             <th width="15%">Fe.Registro</th>
-                                            <th width="5%"></th>
+                                            <th width="2%"></th>
+                                            <th width="2%"></th>
                                         </tr>
                                     </thead>
                                     <tbody id="procesos-tbody"></tbody>
@@ -180,10 +181,22 @@
                                     $("<a/>").attr({
                                         "href": "#",
                                         "data-hito": iproceso.id,
-                                        "data-tipo": iproceso.tipo
+                                        "data-tipo": iproceso.tipo,
+                                        "title": "Grabar peso del hito"
                                     }).append(
-                                        $("<i/>").addClass("far fa-save")
+                                        $("<i/>").addClass("fas fa-save")
                                     ).addClass("btn btn-primary btn-xs").on("click", ActualizaPesoProceso)
+                                )
+                            ).append(
+                                $("<td/>").append(
+                                    $("<a/>").attr({
+                                        "href": "#",
+                                        "data-hito": iproceso.id,
+                                        "data-tipo": iproceso.tipo,
+                                        "title": "Eliminar el hito"
+                                    }).append(
+                                        $("<i/>").addClass("fas fa-trash")
+                                    ).addClass("btn btn-danger btn-xs").on("click", RetirarHito)
                                 )
                             )
                         );
@@ -256,6 +269,23 @@
                         input.prop("readonly", false);
                         alert("Se actualizó el peso del hito");
                     }
+                }, "json");
+            }
+            function RetirarHito(event) {
+                event.preventDefault();
+                var a = $(this);
+console.log(a);
+                var p = {
+                    _token: "{{ csrf_token() }}",
+                    tipo: a.data("tipo"),
+                    hito: a.data("hito")
+                };
+                $.post("{{ url('ajax/estandarizacion/upd-retira-hito') }}", p, function(response) {
+                    if(response.state == "success") {
+                        ls_procesos = response.data.procesos;
+                        CargarProcesos();
+                    }
+                    else alert(response.msg);
                 }, "json");
             }
             function FormTipoOnSubmit(event) {

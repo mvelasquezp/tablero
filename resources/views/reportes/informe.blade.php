@@ -68,7 +68,7 @@
                     </div>
                     <div class="row">
                         <div class="col text-right">
-                            <a href="{{ url('intranet/reportes/export/informe') }}" target="_blank" class="btn btn-sm btn-success text-light"><i class="far fa-file-excel"></i> Exportar a XLS</a>
+                            <a href="{{ url('intranet/reportes/export/informe') }}" target="_blank" class="btn btn-sm btn-success text-light"><i class="far fa-file-excel"></i> Reportes en TD XLS</a>
                         </div>
                     </div>
                 </div>

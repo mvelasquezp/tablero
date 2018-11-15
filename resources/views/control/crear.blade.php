@@ -104,7 +104,7 @@
                                 </div>
                                 <div class="col-2">
                                     <label class="mb-1">&nbsp;</label>
-                                    <a href="{{ url('intranet/estandarizacion/usuarios') }}" class="btn btn-sm btn-primary"><i class="fas fa-plus"></i> Nuevo</a>
+                                    <a id="bt-nuevo" href="#" data-toggle="modal" data-target="#modal-nuevo" class="btn btn-sm btn-primary text-light" style="display:none;"><i class="fas fa-plus"></i> Nuevo</a>
                                 </div>
                             </div>
                             <div class="row mb-3">
@@ -181,6 +181,39 @@
                 </div>
             </div>
         </div>
+        <!-- modals -->
+        <div id="modal-nuevo" class="modal fade" tabindex="-1" role="dialog">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Nueva área usuaria</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form>
+                            <div class="form-row mb-3">
+                                <div class="col">
+                                    <label for="na-area">Nombre</label>
+                                    <input type="text" class="form-control form-control-sm" placeholder="Nombre Área Usuaria" id="na-area">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="col">
+                                    <label for="na-abrev">Abreviatura</label>
+                                    <input type="text" class="form-control form-control-sm" placeholder="Abreviatura" id="na-abrev">
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-primary"><i class="fas fa-save"></i> Guardar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
         <!-- scripts -->
         @include('common.scripts')
         <script type="text/javascript" src="{{ asset('vendor/bootstrap-datepicker/js/bootstrap-datepicker.min.js') }}"></script>
@@ -211,7 +244,7 @@
                             for(var z in ls_cargos) {
                                 var zCargo = ls_cargos[z];
                                 select.append(
-                                    $("<option/>").val(zCargo.value).html(zCargo.text)
+                                    $("<option/>").attr("data-usuario", zCargo.usuario).val(zCargo.value).html(zCargo.text)
                                 );
                             }
                             ctHitos.append(
@@ -245,7 +278,7 @@
                         for(var z in ls_cargos) {
                             var zCargo = ls_cargos[z];
                             select.append(
-                                $("<option/>").val(zCargo.value).html(zCargo.text)
+                                $("<option/>").val(zCargo.value).html(zCargo.text).attr("data-usuario", zCargo.usuario)
                             );
                         }
                         ctHitos.append(
@@ -331,6 +364,7 @@
                     organo: document.getElementById("np-organo").value,
                     direccion: $(this).val()
                 };
+                $("#bt-nuevo").fadeIn(150);
                 $.post("{{ url('ajax/estandarizacion/ls-combo-areas') }}", p, function(response) {
                     if(response.state == "success") {
                         var cmb_direcciones = response.data.areas;
@@ -422,7 +456,8 @@
                     hitos.push({
                         orden: sl.data("pos"),
                         hid: sl.data("hito"),
-                        responsable: sl.val()
+                        responsable: sl.val(),
+                        usuario: sl.children("option:selected").data("usuario")
                     });
                 });
                 if(correcto) {
@@ -496,12 +531,50 @@
                 todayHighlight: true,
                 zIndexOffset: 1030
             });
+            //
+            function GuardarAreaUsuaria(event) {
+                event.preventDefault();
+                $("#np-area").empty().append(
+                    $("<option/>").val(0).html("- Seleccione -").prop("selected", true).prop("disabled", true)
+                );
+                var p = {
+                    _token: "{{ csrf_token() }}",
+                    organo: document.getElementById("np-organo").value,
+                    direccion: document.getElementById("np-direccion").value,
+                    area: document.getElementById("na-area").value,
+                    abrev: document.getElementById("na-abrev").value,
+                };
+                $.post("{{ url('ajax/control/sv-nueva-area') }}", p, function(response) {
+                    if(response.state == "success") {
+                        var ls_careas = response.data.areas;
+                        for(var i in ls_careas) {
+                            var iArea = ls_careas[i];
+                            $("#np-area").append(
+                                $("<option/>").val(iArea.value).html(iArea.text)
+                            );
+                        }
+                        alert("Área agregada");
+                        $("#modal-nuevo").modal("hide");
+                    }
+                    else alert(response.msg);
+                }, "json");
+            }
+            function ModalNuevoOnShow(event) {
+                $("#na-area").val("");
+                $("#na-organo option[value=0]").prop("selected", true);
+                $("#na-direccion").empty().append(
+                    $("<option/>").val(0).html("Seleccione")
+                );
+            }
+            //
             $("#np-catalogo").on("change", NpCatalogoOnChange);
             $("#np-organo").on("change", NpOrganoOnChange);
             $("#np-direccion").on("change", NpDireccionOnChange);
             $("#np-armadas").on("change", MuestraHitosControl);
             $("#modal-responsables").on("show.bs.modal", ModalResponsablesOnShow);
             $("#modal-responsables .modal-footer .btn-primary").on("click", GuardarProyecto);
+            $("#modal-nuevo").on("show.bs.modal", ModalNuevoOnShow);
+            $("#modal-nuevo .modal-footer .btn-primary").on("click", GuardarAreaUsuaria);
             $("#np-valor").on("keydown", ValidarNumeroDecimal);
             $("#np-plazo").on("keydown", ValidarNumeroEntero);
             //

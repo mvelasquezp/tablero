@@ -69,11 +69,17 @@ class Registros extends Controller {
                     "st_vigente" => "Vigente"
                 ]);
             }
+            //mensaje de correo
+            $mensaje = DB::table("sys_mensaje")
+                ->where("id_mensaje", 2)
+                ->select("des_titulo as titulo", "des_cuerpo as cuerpo", "des_boton as despedida")
+                ->first();
             //envia el mail
             $maildata = [
                 "nombre" => $nombres,
                 "usuario" => $alias,
-                "clave" => $password
+                "clave" => $password,
+                "mensaje" => $mensaje,
             ];
             \Mail::send("mails.activacion", $maildata, function($message) use($mail, $nombres, $apepat) {
                 $message->to($mail, strtoupper($nombres) . " " . strtoupper($apepat))
@@ -502,6 +508,28 @@ class Registros extends Controller {
                     "ancestros" => $ancestros,
                     "oficinas" => $oficinas
                 ]
+            ]);
+        }
+        return Response::json([
+            "state" => "error",
+            "msg" => "Parámetros incorrectos"
+        ]);
+    }
+
+    function sv_mensaje() {
+        extract(Request::input());
+        if(isset($saludo, $cuerpo, $boton)) {
+            DB::table("sys_mensaje")
+                ->where("id_mensaje", 2)
+                ->update([
+                    "des_titulo" => $saludo,
+                    "des_cuerpo" => $cuerpo,
+                    "des_boton" => $boton,
+                    "updated_at" => date("Y-m-d H:i:s")
+                ]);
+            return Response::json([
+                "state" => "success",
+                "data" => []
             ]);
         }
         return Response::json([

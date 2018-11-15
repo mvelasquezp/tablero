@@ -225,7 +225,7 @@
                         </div>
                     </div>
                     <div class="text-right">
-                        <a href="{{ url('intranet/reportes/export/estadistica') }}" target="_blank" class="btn btn-sm btn-success text-light"><i class="far fa-file-excel"></i> Exportar los datos a formato XLS</a>
+                        <a href="{{ url('intranet/reportes/export/estadistica') }}" target="_blank" class="btn btn-sm btn-success text-light"><i class="far fa-file-excel"></i> Estadísticas en TD XLS</a>
                     </div>
                 </div>
             </div>
