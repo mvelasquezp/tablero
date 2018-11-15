@@ -986,7 +986,7 @@
             //$("#fl-entrega").on("keypress", FlE);
             var element = document.getElementById('np-expediente');
             var maskOptions = {
-                mask: '00-0000000-000'
+                mask: '00-000000-000'
             };
             var mask = new IMask(element, maskOptions);
         </script>

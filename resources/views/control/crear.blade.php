@@ -427,22 +427,6 @@
                     alert("Seleccione el Área Usuaria");
                     return false;
                 }
-                if(p.descripcion == "") {
-                    alert("Ingrese un nombre de proyecto válido");
-                    return false;
-                }
-                if(p.ndias == "") {
-                    alert("Ingrese el plazo de ejecución");
-                    return false;
-                }
-                if(p.contratista == "") {
-                    alert("Ingrese el nombre del contratista");
-                    return false;
-                }
-                if(p.valor == "") {
-                    alert("Ingrese el valor del proyecto");
-                    return false;
-                }
                 var hitos = [];
                 var sl_hitos = $(".np-hito");
                 var correcto = true;
@@ -580,7 +564,7 @@
             //
             var element = document.getElementById('np-expediente');
             var maskOptions = {
-                mask: '00-0000000-000'
+                mask: '00-000000-000'
             };
             var mask = new IMask(element, maskOptions);
         </script>

@@ -77,10 +77,10 @@ class Control extends Controller {
 
     public function sv_proyecto() {
         extract(Request::input());
-        if(isset($tpcateg, $tporden, $expediente, $inicio, $organo, $direccion, $area, $descripcion, $ndias, $contratista, $valor, $armadas, $hitos)) {
+        if(isset($tpcateg, $tporden, $expediente, $inicio, $organo, $direccion, $area, $armadas, $hitos)) {
+            //, $descripcion, $ndias, $contratista, $valor
             $user = Auth::user();
-            $fin = date("Y-m-d", strtotime($inicio . " + " . $ndias . " days"));
-            $id = DB::table("pr_proyecto")->insertGetId([
+            $arrToInsert = [
                 "id_empresa" => $user->id_empresa,
                 "id_catalogo" => $tpcateg,
                 "tp_orden" => $tporden,
@@ -89,13 +89,21 @@ class Control extends Controller {
                 "id_organo" => $organo,
                 "id_direccion" => $direccion,
                 "id_area" => $area,
-                "des_proyecto" => $descripcion,
-                "fe_fin" => $fin,
-                "des_contratista" => $contratista,
-                "num_valor" => $valor,
+                //"des_proyecto" => $descripcion,
+                //"fe_fin" => $fin,
+                //"des_contratista" => $contratista,
+                //"num_valor" => $valor,
                 "num_armadas" => $armadas,
-                "num_dias" => $ndias, //calcular
-            ]);
+                //"num_dias" => $ndias, //calcular
+            ];
+            if(isset($descripcion)) $arrToInsert["des_proyecto"] = $descripcion;
+            if(isset($ndias)) {
+                $arrToInsert["num_dias"] = $ndias;
+                $arrToInsert["fe_fin"] = date("Y-m-d", strtotime($inicio . " + " . $ndias . " days"));
+            }
+            if(isset($contratista)) $arrToInsert["des_contratista"] = $contratista;
+            if(isset($valor)) $arrToInsert["num_valor"] = $valor;
+            $id = DB::table("pr_proyecto")->insertGetId($arrToInsert);
             //inserta los hitos
             $count = 0;
             $pagos_id = DB::table("ma_hitos_control")->where("des_hito","PAGOS")->select("id_hito")->first();
