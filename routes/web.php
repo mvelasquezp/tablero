@@ -47,6 +47,7 @@ Route::middleware("auth")->namespace("Intranet")->group(function() {
 			});
 		});
 	});
+	Route::get("perfil", "Main@perfil");
 });
 //ajax
 Route::middleware("auth")->namespace("Ajax")->prefix("ajax")->group(function() {
@@ -114,6 +115,13 @@ Route::middleware("auth")->namespace("Ajax")->prefix("ajax")->group(function() {
 		Route::post("upd-estado-hito", "Control@upd_estado_hito");
 		Route::post("fl-busca-campo", "Control@fl_busca_campo");
 		Route::post("sv-mensaje", "Control@sv_mensaje");
+		Route::post("clona-proyecto", "Control@clona_proyecto");
+	});
+	//opciones generales
+	Route::prefix("intranet")->group(function() {
+		Route::post("upd-datos", "Intranet@upd_datos");
+		Route::post("upd-clave", "Intranet@upd_clave");
+		Route::post("upd-imagen", "Intranet@upd_imagen");
 	});
 });
 //autenticacion de usuarios

@@ -29,9 +29,9 @@
     </ul>
 
     <ul class="list-unstyled CTAs">
-        <!--li>
-            <a href="https://bootstrapious.com/tutorial/files/sidebar.zip" class="download"><i class="fas fa-cogs"></i> Opciones</a>
-        </li-->
+        <li>
+            <a href="{{ url('perfil') }}" class="download"><i class="fas fa-user-circle"></i> Perfil</a>
+        </li>
         <li>
             <a href="javascript:logout()" class="article"><i class="fas fa-sign-out-alt"></i> Salir</a>
         </li>

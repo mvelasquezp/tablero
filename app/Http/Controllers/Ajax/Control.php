@@ -106,10 +106,12 @@ class Control extends Controller {
             $id = DB::table("pr_proyecto")->insertGetId($arrToInsert);
             //inserta los hitos
             $count = 0;
-            $pagos_id = DB::table("ma_hitos_control")->where("des_hito","PAGOS")->select("id_hito")->first();
+            $pagos_id = DB::table("ma_hitos_control")->where("des_hito",env("APP_HITOS_PAGO"))->select("id_hito")->first();
             $pagos_id = $pagos_id->id_hito;
             foreach($hitos as $idx => $hito) {
                 extract($hito);
+                $disparador = DB::table("ma_hitos_control")->where("id_hito", $hid)->where("id_empresa", $user->id_empresa)->select("nu_dias_disparador as dias")->first();
+                $f_fin = date("Y-m-d H:i:s", strtotime($inicio . " + " . $disparador->dias . " days"));
                 $dataToInsert = [
                     "id_detalle" => ($idx+ 1),
                     "id_proyecto" => $id,
@@ -120,8 +122,8 @@ class Control extends Controller {
                     "id_estado_documentacion" => 2,
                     "id_responsable" => $responsable,
                     "fe_inicio" => $inicio,
-                    "nu_dias" => $ndias,
-                    "fe_fin" => $fin,
+                    "nu_dias" => $disparador->dias,
+                    "fe_fin" => $f_fin,
                 ];
                 if(isset($usuario)) $dataToInsert["id_responsable_usuario"] = $usuario;
                 DB::table("pr_proyecto_hitos")->insert($dataToInsert);
@@ -243,7 +245,7 @@ class Control extends Controller {
                     "sed.des_estado as edocumentacion",
                     "sep.des_estado as eproceso",
                     "pph.des_observaciones as observaciones",
-                    DB::raw("if(pph.id_estado_proceso = 3,(if(datediff(current_timestamp, pph.fe_fin) > 0,'danger',if(datediff(pph.fe_fin, current_timestamp) < mhc.nu_dias_disparador,'success','warning'))),'secondary') as indicador")
+                    DB::raw("if(pph.id_estado_proceso = 3,(if(datediff(current_timestamp, pph.fe_fin) > 1,'danger',if(datediff(current_timestamp, pph.fe_fin) < -1 * mhc.nu_dias_disparador,'success','warning'))),'secondary') as indicador")
                 )
                 ->where("pph.id_proyecto", $proyecto)
                 ->where("pph.id_empresa", $usuario->id_empresa)
@@ -409,7 +411,7 @@ class Control extends Controller {
                         DB::raw("ifnull(pph.des_hito, mhc.des_hito) as hito"),
                         DB::raw("if(me.cod_entidad is null, mp.des_puesto, concat(me.des_nombre_1,' ',me.des_nombre_2,' ',me.des_nombre_3)) as responsable"),
                         "pph.des_observaciones as observaciones",
-                        DB::raw("if(pph.id_estado_proceso = 3,(if(datediff(current_timestamp, pph.fe_fin) > 0,'danger',if(datediff(pph.fe_fin, current_timestamp) < mhc.nu_dias_disparador,'success','warning'))),'secondary') as indicador"),
+                        DB::raw("if(pph.id_estado_proceso = 3,(if(datediff(current_timestamp, pph.fe_fin) > 1,'danger',if(datediff(current_timestamp, pph.fe_fin) < -1 * mhc.nu_dias_disparador,'success','warning'))),'secondary') as indicador"),
                         DB::raw("if(datediff(current_timestamp,pph.fe_fin) < 0,0,datediff(current_timestamp,pph.fe_fin)) as diasvence")
                     )
                     ->where("pph.id_estado_proceso", 3)
@@ -653,7 +655,7 @@ class Control extends Controller {
                         DB::raw("ifnull(pph.des_hito, mhc.des_hito) as hito"),
                         DB::raw("if(me.cod_entidad is null, mp.des_puesto, concat(me.des_nombre_1,' ',me.des_nombre_2,' ',me.des_nombre_3)) as responsable"),
                         "pph.des_observaciones as observaciones",
-                        DB::raw("if(pph.id_estado_proceso = 3,(if(datediff(current_timestamp, pph.fe_fin) > 0,'danger',if(datediff(pph.fe_fin, current_timestamp) < mhc.nu_dias_disparador,'success','warning'))),'secondary') as indicador"),
+                        DB::raw("if(pph.id_estado_proceso = 3,(if(datediff(current_timestamp, pph.fe_fin) > 1,'danger',if(datediff(current_timestamp, pph.fe_fin) < -1 * mhc.nu_dias_disparador,'success','warning'))),'secondary') as indicador"),
                         DB::raw("if(datediff(current_timestamp,pph.fe_fin) < 0,0,datediff(current_timestamp,pph.fe_fin)) as diasvence")
                     )
                     ->where("pph.id_estado_proceso", 3)
@@ -782,7 +784,7 @@ class Control extends Controller {
                         DB::raw("ifnull(pph.des_hito, mhc.des_hito) as hito"),
                         DB::raw("if(me.cod_entidad is null, mp.des_puesto, concat(me.des_nombre_1,' ',me.des_nombre_2,' ',me.des_nombre_3)) as responsable"),
                         "pph.des_observaciones as observaciones",
-                        DB::raw("if(pph.id_estado_proceso = 3,(if(datediff(current_timestamp, pph.fe_fin) > 0,'danger',if(datediff(pph.fe_fin, current_timestamp) < mhc.nu_dias_disparador,'success','warning'))),'secondary') as indicador"),
+                        DB::raw("if(pph.id_estado_proceso = 3,(if(datediff(current_timestamp, pph.fe_fin) > 1,'danger',if(datediff(current_timestamp, pph.fe_fin) < -1 * mhc.nu_dias_disparador,'success','warning'))),'secondary') as indicador"),
                         DB::raw("if(datediff(current_timestamp,pph.fe_fin) < 0,0,datediff(current_timestamp,pph.fe_fin)) as diasvence")
                     )
                     ->where("pph.id_estado_proceso", 3)
@@ -842,6 +844,65 @@ class Control extends Controller {
                 "data" => [
                     "areas" => $areas
                 ]
+            ]);
+        }
+        return Response::json([
+            "state" => "error",
+            "msg" => "Parámetros incorrectos"
+        ]);
+    }
+
+    public function clona_proyecto() {
+        extract(Request::input());
+        if(isset($id, $nombre)) {
+            $usuario = Auth::user();
+            $old = DB::table("pr_proyecto")
+                ->where("id_proyecto", $id)
+                ->where("id_empresa", $usuario->id_empresa)
+                ->select("id_catalogo", "tp_orden", "des_expediente", "num_valor", "des_observaciones", "fe_inicio", "num_dias", "fe_fin", "st_vigente", "id_area", "id_direccion", "id_organo", "des_contratista", "num_armadas")
+                ->first();
+            $hoy = date("Y-m-d H:i:s");
+            $_proyecto = DB::table("pr_proyecto")->insertGetId([
+                "id_empresa" => $usuario->id_empresa,
+                "id_catalogo" => $old->id_catalogo,
+                "des_proyecto" => $nombre,
+                "tp_orden" => $old->tp_orden,
+                "des_expediente" => $old->des_expediente,
+                "st_vigente" => "Vigente",
+                "fe_inicio" => $hoy,
+                "id_area" => $old->id_area,
+                "id_direccion" => $old->id_direccion,
+                "id_organo" => $old->id_organo,
+                "num_armadas" => $old->num_armadas
+            ]);
+            $hitos = DB::table("pr_proyecto_hitos")
+                ->where("id_proyecto", $id)
+                ->where("id_empresa", $usuario->id_empresa)
+                ->select("id_detalle","id_hito","id_catalogo","id_responsable","des_hito","fe_inicio","nu_dias","fe_fin","id_responsable_usuario")
+                ->get();
+            foreach($hitos as $idx => $hito) {
+                $_detalle = ($idx + 1);
+                DB::table("pr_proyecto_hitos")->insert([
+                    "id_detalle" => $_detalle,
+                    "id_proyecto" => $_proyecto,
+                    "id_hito" => $hito->id_hito,
+                    "id_empresa" => $usuario->id_empresa,
+                    "id_catalogo" => $hito->id_catalogo,
+                    "id_estado_proceso" => 1,
+                    "id_estado_documentacion" => 2,
+                    "id_responsable" => $hito->id_responsable,
+                    "des_hito" => $hito->des_hito,
+                    "fe_inicio" => $hito->fe_inicio,
+                    "nu_dias" => $hito->nu_dias,
+                    "fe_fin" => $hito->fe_fin,
+                    "id_responsable_usuario" => $hito->id_responsable_usuario
+                ]);
+                DB::statement("insert into pr_proyecto_hitos_campos(id_detalle,id_proyecto,id_hito,id_empresa,id_catalogo,id_campo)
+                    select " . $_detalle . "," . $_proyecto . ",id_hito,id_empresa,id_catalogo,id_campo
+                    from pr_proyecto_hitos_campos where id_detalle = " . $hito->id_detalle . " and id_proyecto = " . $id . " and id_empresa = " . $usuario->id_empresa);
+            }
+            return Response::json([
+                "state" => "success"
             ]);
         }
         return Response::json([

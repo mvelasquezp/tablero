@@ -384,13 +384,17 @@
                     cache: false,
                     processData: false,
                     success: function(data) {
-                        location.reload();
+                        if(data.state == "success") {
+                            setTimeout(function() {},1000);
+                            location.reload();
+                        }
+                        else alert(data.msg);
                     }
                 });
             });
             $("#form-edicion").on("submit", function(event) {
                 event.preventDefault();
-                $("#sv-edicion").hide();
+                $("#btn-sv-edicion").hide();
                 $.ajax({
                     url: "{{ url('ajax/registros/ed-usuario') }}",
                     type: "post",

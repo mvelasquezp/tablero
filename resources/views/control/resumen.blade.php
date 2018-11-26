@@ -157,6 +157,33 @@
         </div>
         <div class="overlay"></div>
         <!-- modals -->
+        <div id="modal-clonar" class="modal fade">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Replicar proyecto</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form>
+                            <input type="hidden" id="cp-id">
+                            <div class="form-group row">
+                                <label for="cp-nombre" class="col-sm-2 col-form-label">Nombre</label>
+                                <div class="col-sm-10">
+                                    <input type="text" id="cp-nombre" class="form-control form-control-sm" placeholder="Ingrese un nombre para el nuevo proyecto">
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-sm btn-primary"><i class="fas fa-save"></i> Replicar ahora</button>
+                    </div>
+                </div>
+            </div>
+        </div>
         <form id="modal-proyecto" class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog">
             <div class="modal-dialog modal-lg" role="document">
                 <div class="modal-content">
@@ -276,7 +303,8 @@
                                     </div>
                                 </form>
                             </div>
-                            <div id="col-atributos" class="col"></div>
+                            <div id="col-atributos-1" class="col"></div>
+                            <div id="col-atributos-2" class="col"></div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -472,14 +500,14 @@
                 }
             }
             function ListarAtributos() {
-                var form = $("<form/>");
+                var forms = [$("<form/>"), $("<form/>")];
                 for(var i in ls_atributos) {
                     var iAtributo = ls_atributos[i];
                     var tipo = parseInt(iAtributo.tipo);
                     switch(tipo) {
                         case 1:
                         case 2:
-                            form.append(
+                            forms[i % 2].append(
                                 $("<div/>").addClass("row mb-2").append(
                                     $("<div/>").addClass("col-6").append(
                                         $("<label/>").addClass("mb-1 text-primary").attr("for","attr-" + iAtributo.campo).html(iAtributo.nombre)
@@ -498,7 +526,7 @@
                             );
                             break;
                         case 3:
-                            form.append(
+                            forms[i % 2].append(
                                 $("<div/>").addClass("row mb-2").append(
                                     $("<div/>").addClass("col").append(
                                         $("<label/>").addClass("mb-1 text-primary").attr("for","attr-" + iAtributo.campo).html(iAtributo.nombre)
@@ -517,7 +545,7 @@
                             );
                             break;
                         case 4:
-                            form.append(
+                            forms[i % 2].append(
                                 $("<div/>").addClass("row mb-2").append(
                                     $("<div/>").addClass("col-6").append(
                                         $("<label/>").addClass("mb-1 text-primary").attr("for","attr-" + iAtributo.campo).html(iAtributo.nombre)
@@ -544,10 +572,10 @@
                             );
                             break;
                         case 5:
-                            form.append(
+                            forms[i % 2].append(
                                 $("<div/>").addClass("row mb-2").append(
                                     $("<div/>").addClass("col-6").append(
-                                        $("<label/>").addClass("mb-1 text-primary").attr("for","attr-" + iAtributo.campo).html(iAtributo.nombre)
+                                        $("<label/>").addClass("mb-1 text-primary").attr("for","attr-" + iAtributo.campo)
                                     ).append(
                                         $("<input/>").attr({
                                             "type": "text",
@@ -564,10 +592,10 @@
                             );
                             break;
                         case 6:
-                            form.append(
+                            forms[i % 2].append(
                                 $("<div/>").addClass("row mb-2").append(
                                     $("<div/>").addClass("col-6").append(
-                                        $("<label/>").addClass("mb-1 text-primary").attr("for","attr-" + iAtributo.campo)
+                                        $("<label/>").addClass("mb-1 text-primary").attr("for","attr-" + iAtributo.campo).html(iAtributo.nombre)
                                     ).append(
                                         $("<input/>").attr({
                                             "type": "checkbox",
@@ -576,7 +604,7 @@
                                             "data-hito": iAtributo.hito,
                                             "data-campo": iAtributo.campo,
                                             "data-detalle": iAtributo.detalle
-                                        }).addClass("form-control form-control-sm form-atributo").prop("checked", iAtributo.value == "S")
+                                        }).addClass("form-atributo d-block").prop("checked", iAtributo.value == "on")
                                     )
                                 )
                             );
@@ -584,9 +612,12 @@
                         default: break;
                     }
                 }
-                $("#col-atributos").empty().append(
+                $("#col-atributos-1").empty().append(
                     $("<p/>").addClass("text-primary mb-2 text-title").html("Atributos del hito")
-                ).append(form);
+                ).append(forms[0]);
+                $("#col-atributos-2").empty().append(
+                    $("<p/>").addClass("text-primary mb-2 text-title").html("&nbsp;")
+                ).append(forms[1]);
             }
             //
             function MuestraHitos(event) {
@@ -700,6 +731,15 @@
                                     }).append(
                                         $("<i/>").addClass("fas fa-edit")
                                     ).append("&nbsp;Editar proyecto").addClass("btn btn-sm btn-warning mb-2")
+                                ).append(
+                                    $("<a/>").attr({
+                                        "href": "#",
+                                        "data-toggle": "modal",
+                                        "data-target": "#modal-clonar",
+                                        "data-id": id
+                                    }).append(
+                                        $("<i/>").addClass("fas fa-clone")
+                                    ).append("&nbsp;Replicar proyecto").addClass("btn btn-sm btn-primary text-light mb-2 ml-2")
                                 ).addClass("col")
                             ).addClass("row")
                         );
@@ -745,13 +785,24 @@
                 var extras = $(".form-atributo");
                 $.each(extras, function() {
                     var ipextra = $(this);
-                    atributos.push({
-                        aproyecto: ipextra.data("proyecto"),
-                        ahito: ipextra.data("hito"),
-                        acampo: ipextra.data("campo"),
-                        adetalle: ipextra.data("detalle"),
-                        avalor: ipextra.val()
-                    });
+                    if(ipextra.attr("type") == "checkbox") {
+                        atributos.push({
+                            aproyecto: ipextra.data("proyecto"),
+                            ahito: ipextra.data("hito"),
+                            acampo: ipextra.data("campo"),
+                            adetalle: ipextra.data("detalle"),
+                            avalor: ipextra.prop("checked") ? "on" : "off"
+                        });
+                    }
+                    else {
+                        atributos.push({
+                            aproyecto: ipextra.data("proyecto"),
+                            ahito: ipextra.data("hito"),
+                            acampo: ipextra.data("campo"),
+                            adetalle: ipextra.data("detalle"),
+                            avalor: ipextra.val()
+                        });
+                    }
                 });
                 var p = {
                     _token: "{{ csrf_token() }}",
@@ -770,6 +821,21 @@
                         $("#modal-actualiza-hito").modal("hide");
                         ListarProyectos();
                         $("#a-" + p.proyecto).trigger("click");
+                    }
+                    else alert(response.msg);
+                }, "json");
+            }
+            function ClonarProyecto(event) {
+                event.preventDefault();
+                var p = {
+                    _token: "{{ csrf_token() }}",
+                    id: document.getElementById("cp-id").value,
+                    nombre: document.getElementById("cp-nombre").value
+                };
+                $.post("{{ url('ajax/control/clona-proyecto') }}", p, function(response) {
+                    if(response.state == "success") {
+                        alert("Proyecto clonado con éxito");
+                        location.reload();
                     }
                     else alert(response.msg);
                 }, "json");
@@ -942,7 +1008,12 @@
                 document.getElementById("sr-proyecto").value = dataset.proyecto;
                 document.getElementById("sr-hito").value = dataset.hito;
             }
+            function ModalClonarOnShow(event) {
+                var dataset = event.relatedTarget.dataset;
+                document.getElementById("cp-id").value = dataset.id;
+                document.getElementById("cp-nombre").value = '';
             //
+            }
             ListarProyectos();
             $("#modal-actualiza-hito").on("show.bs.modal", ModalActualizaHitoOnShow);
             $(".datepicker").datepicker({
@@ -969,6 +1040,7 @@
             }
             //
             $("#modal-actualiza-hito .modal-footer .btn-primary").on("click", ActualizarHito);
+            $("#modal-clonar .modal-footer .btn-primary").on("click", ClonarProyecto);
             $("#fl-atributo option[value=-1]").prop("selected", true);
             $("#fl-atributo").on("change", flAtributoOnChange);
             $("#fl-busca").on("click", BuscarAtributo);
@@ -982,6 +1054,7 @@
             $("#modal-edicion .modal-footer .btn-primary").on("click", ActualizarProyecto);
             $("#modal-responsable").on("show.bs.modal", ModalResponsableOnShow);
             $("#modal-responsable .modal-footer .btn-primary").on("click", ActualizarResponsable);
+            $("#modal-clonar").on("show.bs.modal", ModalClonarOnShow);
             //$("#fl-recepcion").on("keypress", )
             //$("#fl-entrega").on("keypress", FlE);
             var element = document.getElementById('np-expediente');

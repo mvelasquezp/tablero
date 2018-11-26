@@ -23,7 +23,7 @@ class Registros extends Controller {
 
     public function sv_usuario() {
         extract(Request::input());
-        if(isset($apemat, $apepat, $dni, $mail, $nombres, $tpdoc, $cargo, $vigencia)) {
+        if(isset($apemat, $apepat, $dni, $mail, $nombres, $tpdoc, $vigencia)) {
             $usuario = Auth::user();
             $telefono = isset($telefono) ? $telefono : "";
             if(isset($_FILES["foto"]) && $_FILES["foto"]["size"] > 0) {
@@ -61,7 +61,7 @@ class Registros extends Controller {
                 "st_vigente" => $vigencia
             ]);
             //asigna puesto
-            if($cargo != 0) {
+            if(isset($cargo) && $cargo != 0) {
                 DB::table("us_usuario_puesto")->insert([
                     "id_usuario" => $id,
                     "id_empresa" => $usuario->id_empresa,
@@ -318,6 +318,8 @@ class Registros extends Controller {
                 move_uploaded_file($sourcePath, $targetPath);
             }
             //apepat,apemat,nombres,mail,telefono,cargo,foto,vigencia
+            $alias = strtolower(substr($nombres,0,1) . $apepat . substr($apemat,0,1));
+            $password = substr($apepat,0,2) . substr($apemat,0,2) . $dni;
             $edentidad = [
                 "des_nombre_1" => $apepat,
                 "des_nombre_2" => $apemat,
@@ -331,7 +333,8 @@ class Registros extends Controller {
                 "des_email" => $mail,
                 "des_telefono" => $telefono,
                 "st_vigente" => $vigencia,
-                "updated_at" => date("Y-m-d H:i:s")
+                "updated_at" => date("Y-m-d H:i:s"),
+                "password" => \Hash::make($password)
             ];
             DB::table("ma_usuarios")
                 ->where("id_usuario", $uid)
@@ -352,6 +355,23 @@ class Registros extends Controller {
                     "id_puesto" => $cargo
                 ]);
             }
+            //mail
+            $mensaje = DB::table("sys_mensaje")
+                ->where("id_mensaje", 2)
+                ->select("des_titulo as titulo", "des_cuerpo as cuerpo", "des_boton as despedida")
+                ->first();
+            $maildata = [
+                "nombre" => $nombres,
+                "usuario" => $alias,
+                "clave" => $password,
+                "mensaje" => $mensaje,
+            ];
+            \Mail::send("mails.activacion", $maildata, function($message) use($mail, $nombres, $apepat) {
+                $message->to($mail, strtoupper($nombres) . " " . strtoupper($apepat))
+                    ->subject("Bienvenido");
+                $message->from(env("MAIL_FROM"), env("MAIL_NAME"));
+            });
+            //
             return Response::json([
                 "state" => "success"
             ]);
@@ -403,6 +423,10 @@ class Registros extends Controller {
                 ];
             }
             DB::table("sys_permisos")->insert($arrToInsert);
+            //
+            DB::statement("insert into sys_permisos
+                select distinct id_ancestro, 'S', 'Vigente', current_timestamp, null, " . $usuario . ", " . $user->id_empresa . "
+                from ma_menu where id_item in (" . implode(",", $accesos) . ")");
             return Response::json([
                 "state" => "success",
                 "data" => [
