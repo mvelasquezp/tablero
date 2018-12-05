@@ -64,6 +64,7 @@ Route::middleware("auth")->namespace("Ajax")->prefix("ajax")->group(function() {
 		Route::post("dt-puesto", "Registros@dt_puesto");
 		Route::post("ed-puesto", "Registros@ed_puesto");
 		Route::post("sv-mensaje", "Registros@sv_mensaje");
+		Route::post("sv-oficina", "Registros@sv_oficina");
 	});
 	//modulo de estandarizacion de procesos
 	Route::prefix("estandarizacion")->group(function() {

@@ -78,7 +78,7 @@ class Registros extends Controller {
                 "me.des_nombre_1 as apepat",
                 "me.des_nombre_2 as apemat",
                 "me.des_nombre_3 as nombres",
-                DB::raw("date_format(mu.fe_ingreso,'%Y-%m-%d') as fingreso"),
+                DB::raw("date_format(mu.created_at,'%Y-%m-%d') as fingreso"),
                 "mu.des_alias as alias",
                 "mp.des_puesto as puesto",
                 "mo.des_oficina as oficina",

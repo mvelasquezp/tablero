@@ -28,7 +28,7 @@
                 <div class="container-fluid">
                     <div class="row">
                         <div class="col">
-                            <table id="tabla-usuarios" class="table table-sm table-striped">
+                            <table id="tabla-usuarios" class="table table-sm table-striped table-hover">
                                 <thead>
                                     <tr>
                                         <th></th>

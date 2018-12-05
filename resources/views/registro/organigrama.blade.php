@@ -72,6 +72,12 @@
                                         </select>
                                     </div>
                                 </div>
+                                <div class="row">
+                                    <div class="col"></div>
+                                    <div class="col">
+                                        <a href="javascript:nueva()" class="btn btn-success btn-sm mt-2 text-light"><i class="fas fa-plus"></i> Nueva oficina</a>
+                                    </div>
+                                </div>
                             </form>
                         </div>
                     <div class="modal-footer">
@@ -144,6 +150,33 @@
             CargarAncestros();
             CargarOficinas();
             CargarDatosPuestos();
+
+            function nueva() {
+                const nombre = prompt("Ingrese nombre de la nueva oficina");
+                if(nombre != '') {
+                    const p = {
+                        _token: "{{ csrf_token() }}",
+                        nombre: nombre
+                    };
+                    $.post("{{ url('ajax/registros/sv-oficina') }}", p, (response) => {
+                        if(response.state == "success") {
+                            const ls_oficinas = response.data.oficinas;
+                            const select = $("#reg-oficina");
+                            select.empty().append(
+                                $("<option/>").val(0).html("- Seleccione -").prop("selected", true).prop("disabled", true)
+                            );
+                            for(var i in ls_oficinas) {
+                                const iOficina = ls_oficinas[i];
+                                select.append(
+                                    $("<option/>").val(iOficina.value).html(iOficina.text)
+                                );
+                            }
+                            $("#reg-oficina option[value=" + response.data.id + "]").prop("selected", true);
+                        }
+                        else alert(response.msg);
+                    }, "json");
+                }
+            }
             
             function CargarDatosPuestos() {
                 var p = { _token:"{{ csrf_token() }}" };

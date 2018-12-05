@@ -231,6 +231,8 @@
                 ctHitos.empty();
                 tbody.empty();
                 var idx = 1;
+var sTipo = $("#np-catalogo option:selected").html().toUpperCase();
+console.log(sTipo);
                 for(var i in ls_hitos) {
                     var iHito = ls_hitos[i];
                     if(iHito.id == id_pago) {
@@ -240,12 +242,14 @@
                             ).addClass("form-control form-control-sm np-hito").attr({
                                 "data-hito": iHito.id,
                                 "data-pos": idx
-                            });
+                            }).on("change", CheckCombos);
                             for(var z in ls_cargos) {
                                 var zCargo = ls_cargos[z];
-                                select.append(
-                                    $("<option/>").attr("data-usuario", zCargo.usuario).val(zCargo.value).html(zCargo.text)
-                                );
+                                if(zCargo.text == null || zCargo.text.indexOf("ANALISTA") == -1 || zCargo.text.indexOf(sTipo) > -1) {
+                                    select.append(
+                                        $("<option/>").attr("data-usuario", zCargo.usuario).val(zCargo.value).html(zCargo.text)
+                                    );
+                                }
                             }
                             ctHitos.append(
                                 $("<li/>").append(
@@ -257,7 +261,7 @@
                                 )
                             );
                             tbody.append(
-                                $("<tr/>").append(
+                                $("<tr/>").attr("data-idx", idx).append(
                                     $("<td/>").html(idx)
                                 ).append(
                                     $("<td/>").html(iHito.hito + " " + k)
@@ -274,12 +278,14 @@
                         ).addClass("form-control form-control-sm np-hito").attr({
                             "data-hito": iHito.id,
                             "data-pos": idx
-                        });
+                        }).on("change", CheckCombos);
                         for(var z in ls_cargos) {
                             var zCargo = ls_cargos[z];
-                            select.append(
-                                $("<option/>").val(zCargo.value).html(zCargo.text).attr("data-usuario", zCargo.usuario)
-                            );
+                            if(zCargo.text == null || zCargo.text.indexOf("ANALISTA") == -1 || zCargo.text.indexOf(sTipo) > -1) {
+                                select.append(
+                                    $("<option/>").attr("data-usuario", zCargo.usuario).val(zCargo.value).html(zCargo.text)
+                                );
+                            }
                         }
                         ctHitos.append(
                             $("<li/>").append(
@@ -291,7 +297,7 @@
                             )
                         );
                         tbody.append(
-                            $("<tr/>").append(
+                            $("<tr/>").attr("data-idx", idx).append(
                                 $("<td/>").html(idx)
                             ).append(
                                 $("<td/>").html(iHito.hito)
@@ -304,6 +310,17 @@
                 }
             }
             //listeners
+            function CheckCombos() {
+                var idx = parseInt($(this).data("pos"));
+                var id = $(this).children("option:selected").data("usuario");
+                var trs = $("#table-responsables tbody tr");
+                $.each(trs, function() {
+                    var tr = $(this);
+                    if(parseInt(tr.data("idx")) > idx) {
+                        tr.children("td").eq(2).children("select").children("option[data-usuario=" + id + "]").prop("selected", true);
+                    }
+                });
+            }
             function NpCatalogoOnChange(event) {
                 var catalogo = $(this).val();
                 var combo = $("#np-tporden");

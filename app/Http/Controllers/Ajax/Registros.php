@@ -136,6 +136,7 @@ class Registros extends Controller {
                 "mp.st_vigente as vigencia"
             )
             ->orderBy("mp.des_puesto", "asc")
+            ->distinct()
             ->get();
         return Response::json($puestos);
     }
@@ -330,6 +331,7 @@ class Registros extends Controller {
                 ->where("cod_entidad", $dni)
                 ->update($edentidad);
             $edusuario = [
+                "des_alias" => $alias,
                 "des_email" => $mail,
                 "des_telefono" => $telefono,
                 "st_vigente" => $vigencia,
@@ -540,7 +542,7 @@ class Registros extends Controller {
         ]);
     }
 
-    function sv_mensaje() {
+    public function sv_mensaje() {
         extract(Request::input());
         if(isset($saludo, $cuerpo, $boton)) {
             DB::table("sys_mensaje")
@@ -554,6 +556,36 @@ class Registros extends Controller {
             return Response::json([
                 "state" => "success",
                 "data" => []
+            ]);
+        }
+        return Response::json([
+            "state" => "error",
+            "msg" => "Parámetros incorrectos"
+        ]);
+    }
+
+    public function sv_oficina() {
+        extract(Request::input());
+        if(isset($nombre)) {
+            $usuario = Auth::user();
+            $id = DB::table("ma_oficina")->insertGetId([
+                "id_empresa" => $usuario->id_empresa,
+                "des_oficina" => $nombre,
+                "num_jerarquia" => 1
+            ]);
+            //carga nueva lista de oficinas
+            $oficinas = DB::table("ma_oficina")
+                ->where("id_empresa", $usuario->id_empresa)
+                ->where("st_vigente", "Vigente")
+                ->select("id_oficina as value", "des_oficina as text")
+                ->orderBy("des_oficina", "asc")
+                ->get();
+            return Response::json([
+                "state" => "success",
+                "data" => [
+                    "oficinas" => $oficinas,
+                    "id" => $id
+                ]
             ]);
         }
         return Response::json([
