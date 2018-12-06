@@ -55,8 +55,8 @@ Route::middleware("auth")->namespace("Ajax")->prefix("ajax")->group(function() {
 	Route::prefix("registros")->group(function() {
 		Route::post("sv-usuario", "Registros@sv_usuario");
 		Route::post("dt-usuario", "Registros@dt_usuario");
-		Route::any("ls-puestos", "Registros@ls_puestos");
-		Route::any("ls-combo-puestos", "Registros@ls_combo_puestos");
+		Route::post("ls-puestos", "Registros@ls_puestos");
+		Route::post("ls-combo-puestos", "Registros@ls_combo_puestos");
 		Route::post("ed-usuario", "Registros@ed_usuario");
 		Route::post("sv-puesto", "Registros@sv_puesto");
 		Route::post("ls-permisos", "Registros@ls_permisos");
@@ -68,7 +68,7 @@ Route::middleware("auth")->namespace("Ajax")->prefix("ajax")->group(function() {
 	});
 	//modulo de estandarizacion de procesos
 	Route::prefix("estandarizacion")->group(function() {
-		Route::any("ls-interfaz", "Estandarizacion@ls_interfaz");
+		Route::post("ls-interfaz", "Estandarizacion@ls_interfaz");
 		Route::post("ls-campos-hito", "Estandarizacion@ls_campos_hito");
 		Route::post("sv-campo", "Estandarizacion@sv_campo");
 		Route::post("upd-obligat-campo", "Estandarizacion@upd_obligat_campo");
@@ -81,6 +81,7 @@ Route::middleware("auth")->namespace("Ajax")->prefix("ajax")->group(function() {
 		Route::post("sv-elimina-campo", "Estandarizacion@sv_elimina_campo");
 		Route::post("sv-elimina-hito", "Estandarizacion@sv_elimina_hito");
 		Route::post("sv-elimina-estado", "Estandarizacion@sv_elimina_estado");
+		Route::post("upd-dias-disparador", "Estandarizacion@upd_dias_disparador");
 		//
 		Route::post("ls-hitos-proyecto", "Estandarizacion@ls_hitos_proyecto");
 		Route::post("upd-retira-hito", "Estandarizacion@ls_retira_hito");

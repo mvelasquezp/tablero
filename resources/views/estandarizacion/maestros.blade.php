@@ -619,6 +619,19 @@
                     );
                 }
             }
+            //
+            function ActualizaDisparadorHito(event) {
+                event.preventDefault();
+                const id = $(this).data("id");
+                do {
+                    var selection = parseInt(window.prompt("Ingrese nuevo número de días para el disparador", ""), 10);
+                } while(isNaN(selection) || selection > 100 || selection < 1);
+                const p = {
+                    _token: "{{ csrf_token() }}"
+                };
+                console.log(selection);
+            }
+            //
             function EscribirListaHitos() {
                 var tbody = $("#hitos-tbody");
                 tbody.empty();
@@ -632,7 +645,12 @@
                         ).append(
                             $("<td/>").html(ihito.hito)
                         ).append(
-                            $("<td/>").html(ihito.dias + " días").addClass("text-right")
+                            $("<td/>").append(
+                                $("<a/>").attr({
+                                    "href": "#",
+                                    "data-id": ihito.id
+                                }).addClass("btn btn-xs btn-warning").html(ihito.dias + " días").on("click", ActualizaDisparadorHito)
+                            ).addClass("text-right")
                         ).append(
                             $("<td/>").html(ihito.fecha)
                         ).append(

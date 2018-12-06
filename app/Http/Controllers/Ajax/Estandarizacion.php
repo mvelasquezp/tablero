@@ -1173,4 +1173,8 @@ class Estandarizacion extends Controller {
         ]);
     }
 
+    public function upd_dias_disparador() {
+        extract(Request::input());
+    }
+
 }
