@@ -103,6 +103,7 @@ Route::middleware("auth")->namespace("Ajax")->prefix("ajax")->group(function() {
 		Route::post("ed-organo", "Estandarizacion@ed_organo");
 		Route::post("ed-direccion", "Estandarizacion@ed_direccion");
 		Route::post("ed-area", "Estandarizacion@ed_area");
+		Route::post("upd-dias-disparador", "Estandarizacion@upd_dias_disparador");
 	});
 	//modulo de control de proyectos
 	Route::prefix("control")->group(function() {

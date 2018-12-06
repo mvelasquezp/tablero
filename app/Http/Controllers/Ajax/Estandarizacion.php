@@ -1175,6 +1175,22 @@ class Estandarizacion extends Controller {
 
     public function upd_dias_disparador() {
         extract(Request::input());
+        if(isset($hito, $disparador)) {
+            $usuario = Auth::user();
+            DB::table("ma_hitos_control")
+                ->where("id_hito", $hito)
+                ->where("id_empresa", $usuario->id_empresa)
+                ->update([
+                    "nu_dias_disparador" => $disparador
+                ]);
+            return Response::json([
+                "state" => "success"
+            ]);
+        }
+        return Response::json([
+            "state" => "error",
+            "msg" => "Parámetros incorrectos"
+        ]);
     }
 
 }

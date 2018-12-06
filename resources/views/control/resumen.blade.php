@@ -677,6 +677,7 @@
                                             "data-proyecto": id,
                                             "data-hito": iHito.hid,
                                             "data-id": iHito.id,
+                                            "data-responsable": iHito.nombre,
                                             "data-toggle": "modal",
                                             "data-target": "#modal-responsable"
                                         }).addClass("btn btn-primary btn-xs text-light")
@@ -1004,6 +1005,7 @@
             function ModalResponsableOnShow(event) {
                 var dataset = event.relatedTarget.dataset;
                 $("#sr-responsable option[value=-1]").prop("selected", true);
+                $("#modal-responsable .modal-title").html(dataset.responsable);
                 document.getElementById("sr-detalle").value = dataset.id;
                 document.getElementById("sr-proyecto").value = dataset.proyecto;
                 document.getElementById("sr-hito").value = dataset.hito;

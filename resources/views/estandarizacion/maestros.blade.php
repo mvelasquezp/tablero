@@ -622,14 +622,26 @@
             //
             function ActualizaDisparadorHito(event) {
                 event.preventDefault();
-                const id = $(this).data("id");
+                const span = $(this);
+                const id = span.data("id");
+                var disparador;
                 do {
-                    var selection = parseInt(window.prompt("Ingrese nuevo número de días para el disparador", ""), 10);
-                } while(isNaN(selection) || selection > 100 || selection < 1);
+                    disparador = parseInt(window.prompt("Ingrese nuevo número de días para el disparador", ""), 10);
+                } while(isNaN(disparador) || disparador > 100 || disparador < 1);
+                span.fadeOut(150);
                 const p = {
-                    _token: "{{ csrf_token() }}"
+                    _token: "{{ csrf_token() }}",
+                    hito: id,
+                    disparador: disparador
                 };
-                console.log(selection);
+                $.post("{{ url('ajax/estandarizacion/upd-dias-disparador') }}", p, (response) => {
+                    if(response.state == "success") {
+                        span.html(disparador + " días");
+                    }
+                    else alert(response.msg);
+                }, "json").always(() => {
+                    span.fadeIn(150);
+                });
             }
             //
             function EscribirListaHitos() {
