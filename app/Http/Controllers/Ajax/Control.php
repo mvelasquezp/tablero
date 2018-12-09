@@ -113,7 +113,7 @@ class Control extends Controller {
                 $disparador = DB::table("ma_hitos_control")->where("id_hito", $hid)->where("id_empresa", $user->id_empresa)->select("nu_dias_disparador as dias")->first();
                 $f_fin = date("Y-m-d H:i:s", strtotime($inicio . " + " . $disparador->dias . " days"));
                 $dataToInsert = [
-                    "id_detalle" => ($idx+ 1),
+                    "id_detalle" => ($idx + 1),
                     "id_proyecto" => $id,
                     "id_hito" => $hid,
                     "id_empresa" => $user->id_empresa,
@@ -544,7 +544,8 @@ class Control extends Controller {
                     "des_proyecto as descripcion",
                     "num_dias as plazo",
                     "des_contratista as contratista",
-                    "num_valor as valor"
+                    "num_valor as valor",
+                    "num_armadas as pagos"
                 )
                 ->first();
             if(isset($proyecto)) return Response::json([
@@ -566,18 +567,81 @@ class Control extends Controller {
 
     function upd_proyecto() {
         extract(Request::input());
-        if(isset($id, $expediente, $frecepcion, $descripcion, $plazo, $contratista, $valor)) {
+        if(isset($id, $expediente, $frecepcion, $armadas)) {
             $usuario = Auth::user();
+            $arrToUpdate = [
+                "des_expediente" => $expediente,
+                "fe_inicio" => $frecepcion,
+            ];
+            //
+            if(isset($descripcion)) $arrToUpdate["des_proyecto"] = $descripcion;
+            if(isset($plazo)) $arrToUpdate["num_dias"] = $plazo;
+            if(isset($contratista)) $arrToUpdate["des_contratista"] = $contratista;
+            if(isset($valor)) $arrToUpdate["num_valor"] = $valor;
+            //
+            $old_armadas = DB::table("pr_proyecto")
+                ->where("id_proyecto", $id)
+                ->where("id_empresa", $usuario->id_empresa)
+                ->select("num_armadas as armadas")
+                ->first();
+            $nuevos = $armadas - $old_armadas->armadas;
+            if($nuevos > 0) $arrToUpdate["num_armadas"] = $armadas;
             DB::table("pr_proyecto")
                 ->where("id_proyecto", $id)
-                ->update([
-                    "des_expediente" => $expediente,
-                    "fe_inicio" => $frecepcion,
-                    "des_proyecto" => $descripcion,
-                    "num_dias" => $plazo,
-                    "des_contratista" => $contratista,
-                    "num_valor" => $valor
-                ]);
+                ->update($arrToUpdate);
+            if($nuevos > 0)  {
+                $pagos_id = DB::table("ma_hitos_control")->where("des_hito",env("APP_HITOS_PAGO"))->select("id_hito as id")->first();
+                $max_detalle = DB::table("pr_proyecto_hitos")
+                    ->where("id_proyecto", $id)
+                    //->where("id_hito", $pagos_id->id)
+                    ->max("id_detalle");
+                $nro_pagos = DB::table("pr_proyecto_hitos")
+                    ->where("id_proyecto", $id)
+                    ->where("id_hito", $pagos_id->id)
+                    ->count();
+                $hito = DB::table("pr_proyecto_hitos")
+                    ->where("id_proyecto", $id)
+                    ->where("id_hito", $pagos_id->id)
+                    ->where("id_empresa", $usuario->id_empresa)
+                    ->select("id_detalle as detalle", "id_catalogo as catalogo", "id_responsable as responsable", "fe_inicio as inicio", "nu_dias as dias", "fe_fin as fin")
+                    ->first();
+                $campos = DB::table("pr_proyecto_hitos_campos")
+                    ->where("id_proyecto", $id)
+                    ->where("id_detalle", $hito->detalle)
+                    ->select("id_campo as campo")
+                    ->get();
+                //agrega los nuevos hitos
+                for($i = 1; $i <= $nuevos; $i++) {
+                    $nvo_detalle = $max_detalle + $i;
+                    DB::table("pr_proyecto_hitos")->insert([
+                        "id_detalle" => $nvo_detalle,
+                        "id_proyecto" => $id,
+                        "id_hito" => $pagos_id->id,
+                        "id_empresa" => $usuario->id_empresa,
+                        "id_catalogo" => $hito->catalogo,
+                        "id_estado_proceso" => 1,
+                        "id_estado_documentacion" => 2,
+                        "id_responsable" => $hito->responsable,
+                        "fe_inicio" => $hito->inicio,
+                        "nu_dias" => $hito->dias,
+                        "fe_fin" => $hito->fin,
+                        "des_hito" => "Pago " . ($nro_pagos + $i)
+                    ]);
+                    //agrega los campos
+                    foreach($campos as $campo) {
+                        DB::table("pr_proyecto_hitos_campos")->insert([
+                            "id_detalle" => $nvo_detalle,
+                            "id_proyecto" => $id,
+                            "id_hito" => $pagos_id->id,
+                            "id_empresa" => $usuario->id_empresa,
+                            "id_catalogo" => $hito->catalogo,
+                            "id_campo" => $campo->campo
+                        ]);
+                    }
+                }
+                //modifica el formulario para que acepte un nuevo numero de armadas
+                //muestra un select que cargue numeros mayores al numero de armadas
+            }
             $proyectos = DB::table("pr_proyecto as pp")
                 ->join("pr_catalogo_proyecto as pcp", "pp.id_catalogo", "=", "pcp.id_catalogo")
                 ->join("ma_area_usuaria as mau", function($join) {

@@ -365,6 +365,12 @@
                                             <input type="text" id="np-valor" class="form-control form-control-sm" placeholder="Asigne el valor del proyecto">
                                         </div>
                                     </div>
+                                    <div class="row mb-3">
+                                        <div class="col">
+                                            <label class="mb-1" for="np-armadas">Nro. armadas</label>
+                                            <select class="form-control form-control-sm" id="np-armadas"></select>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </form>
@@ -949,7 +955,8 @@
                     descripcion: document.getElementById("np-descripcion").value,
                     plazo: document.getElementById("np-plazo").value,
                     contratista: document.getElementById("np-contratista").value,
-                    valor: document.getElementById("np-valor").value
+                    valor: document.getElementById("np-valor").value,
+                    armadas: document.getElementById("np-armadas").value
                 };
                 $.post("{{ url('ajax/control/upd-proyecto') }}", p, function(response) {
                     if(response.state == "success") {
@@ -968,6 +975,7 @@
                     _token: "{{ csrf_token() }}",
                     id: id
                 };
+                $("#np-armadas").empty();
                 $.post("{{ url('ajax/control/dt-proyecto') }}", p, function(response) {
                     if(response.state == "success") {
                         var proyecto = response.data.proyecto;
@@ -979,6 +987,14 @@
                         document.getElementById("np-plazo").value = proyecto.plazo;
                         document.getElementById("np-contratista").value = proyecto.contratista;
                         document.getElementById("np-valor").value = proyecto.valor;
+                        //oliboli
+                        const oarmadas = proyecto.pagos;
+                        for(var i = oarmadas; i <= 10; i++) {
+                            $("#np-armadas").append(
+                                $("<option/>").val(i).html(i + " pagos")
+                            );
+                        }
+                        $("#np-armadas option[value=" + oarmadas + "]").prop("selected", true);
                     }
                 }, "json");
             }
