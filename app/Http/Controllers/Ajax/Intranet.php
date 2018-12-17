@@ -32,6 +32,12 @@ class Intranet extends Controller {
                     "des_email" => $email,
                     "des_telefono" => $telefono
                 ]);
+            $usuario = Auth::user();
+            DB::table("ma_control_cambios")->insert([
+                "id_usuario" => $yUsuario,
+                "id_empresa" => $usuario->id_empresa,
+                "des_accion" => "Actualizó sus datos de contacto"
+            ]);
             return Response::json([
                 "state" => "success"
             ]);
@@ -52,6 +58,12 @@ class Intranet extends Controller {
                 ->update([
                     "password" => \Hash::make($nclave)
                 ]);
+            $usuario = Auth::user();
+            DB::table("ma_control_cambios")->insert([
+                "id_usuario" => $yUsuario,
+                "id_empresa" => $usuario->id_empresa,
+                "des_accion" => "Actualizó sus contraseña"
+            ]);
             return Response::json([
                 "state" => "success"
             ]);
@@ -71,6 +83,12 @@ class Intranet extends Controller {
                 $imgpath = implode(DIRECTORY_SEPARATOR, [env("APP_STORAGE_PATH"), $yDni . ".jpg"]);
                 if(file_exists($imgpath)) unlink($imgpath);
                 file_put_contents($imgpath, $b64);
+                $usuario = Auth::user();
+                DB::table("ma_control_cambios")->insert([
+                    "id_usuario" => $yUsuario,
+                    "id_empresa" => $usuario->id_empresa,
+                    "des_accion" => "Actualizó su imagen de perfil"
+                ]);
                 return redirect("perfil");
             }
             return "Por favor, seleccione una imagen para actualizar la foto de perfil";

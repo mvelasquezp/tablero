@@ -56,7 +56,7 @@ class Control extends Controller {
                 ->select(
                     "mp.id_puesto as value",
                     "uup.id_usuario as usuario",
-                    DB::raw("if(uup.id_usuario is null,concat(mp.des_puesto, ' (sin asignar)'),concat(mp.des_puesto,' | ',me.des_nombre_1,' ',me.des_nombre_2,' ',me.des_nombre_3)) as text")
+                    DB::raw("if(uup.id_usuario is null,concat(mp.des_puesto, ' (sin asignar)'),concat(mp.des_puesto,' | ',ifnull(me.des_nombre_1,''),' ',ifnull(me.des_nombre_2,''),' ',ifnull(me.des_nombre_3,''))) as text")
                 )
                 ->where("mp.st_vigente", "Vigente")
                 ->orderBy("mp.des_puesto", "asc")
@@ -104,6 +104,7 @@ class Control extends Controller {
             if(isset($contratista)) $arrToInsert["des_contratista"] = $contratista;
             if(isset($valor)) $arrToInsert["num_valor"] = $valor;
             $id = DB::table("pr_proyecto")->insertGetId($arrToInsert);
+            $descripcion = isset($descripcion) ? $descripcion : " con ID = $id";
             //inserta los hitos
             $count = 0;
             $pagos_id = DB::table("ma_hitos_control")->where("des_hito",env("APP_HITOS_PAGO"))->select("id_hito")->first();
@@ -185,6 +186,12 @@ class Control extends Controller {
                 ];
             }
             DB::table("pr_proyecto_hitos_campos")->insert($arr_pphc);
+            //registra en el historial
+            DB::table("ma_control_cambios")->insert([
+                "id_usuario" => $user->id_usuario,
+                "id_empresa" => $user->id_empresa,
+                "des_accion" => "Creó el proyecto " . $descripcion
+            ]);
             return Response::json([
                 "state" => "success"
             ]);
@@ -331,6 +338,11 @@ class Control extends Controller {
                     "des_observaciones" => isset($observaciones) ? $observaciones : ""
                 ]);
             //actualiza los atributos adicionales
+            $dproyecto = DB::table("pr_proyecto")
+                ->where("id_proyecto", $proyecto)
+                ->where("id_empresa", $usuario->id_empresa)
+                ->select(DB::raw("ifnull(des_proyecto, concat('con ID = ',id_proyecto)) as nombre"))
+                ->first();
             foreach($atributos as $atributo) {
                 extract($atributo);
                 DB::table("pr_proyecto_hitos_campos")
@@ -344,6 +356,12 @@ class Control extends Controller {
                         "des_valor" => $avalor
                     ]);
             }
+            //registra en el historial
+            DB::table("ma_control_cambios")->insert([
+                "id_usuario" => $usuario->id_usuario,
+                "id_empresa" => $usuario->id_empresa,
+                "des_accion" => "Actualizó el hito " . $detalle . " del proyecto " . $dproyecto->nombre . " a " . $avalor
+            ]);
             //carga la lista de proyectos
             $proyectos = DB::table("pr_proyecto as pp")
                 ->join("pr_catalogo_proyecto as pcp", "pp.id_catalogo", "=", "pcp.id_catalogo")
@@ -409,7 +427,7 @@ class Control extends Controller {
                     ->leftJoin("ma_entidad as me", "mu.cod_entidad", "=", "me.cod_entidad")
                     ->select(
                         DB::raw("ifnull(pph.des_hito, mhc.des_hito) as hito"),
-                        DB::raw("if(me.cod_entidad is null, mp.des_puesto, concat(me.des_nombre_1,' ',me.des_nombre_2,' ',me.des_nombre_3)) as responsable"),
+                        DB::raw("if(me.cod_entidad is null, mp.des_puesto, concat(ifnull(me.des_nombre_1,''),' ',ifnull(me.des_nombre_2,''),' ',ifnull(me.des_nombre_3,''))) as responsable"),
                         "pph.des_observaciones as observaciones",
                         DB::raw("if(pph.id_estado_proceso = 3,(if(datediff(current_timestamp, pph.fe_fin) > 1,'danger',if(datediff(current_timestamp, pph.fe_fin) < -1 * mhc.nu_dias_disparador,'success','warning'))),'secondary') as indicador"),
                         DB::raw("if(datediff(current_timestamp,pph.fe_fin) < 0,0,datediff(current_timestamp,pph.fe_fin)) as diasvence")
@@ -717,7 +735,7 @@ class Control extends Controller {
                     ->leftJoin("ma_entidad as me", "mu.cod_entidad", "=", "me.cod_entidad")
                     ->select(
                         DB::raw("ifnull(pph.des_hito, mhc.des_hito) as hito"),
-                        DB::raw("if(me.cod_entidad is null, mp.des_puesto, concat(me.des_nombre_1,' ',me.des_nombre_2,' ',me.des_nombre_3)) as responsable"),
+                        DB::raw("if(me.cod_entidad is null, mp.des_puesto, concat(ifnull(me.des_nombre_1,''),' ',ifnull(me.des_nombre_2,''),' ',ifnull(me.des_nombre_3,''))) as responsable"),
                         "pph.des_observaciones as observaciones",
                         DB::raw("if(pph.id_estado_proceso = 3,(if(datediff(current_timestamp, pph.fe_fin) > 1,'danger',if(datediff(current_timestamp, pph.fe_fin) < -1 * mhc.nu_dias_disparador,'success','warning'))),'secondary') as indicador"),
                         DB::raw("if(datediff(current_timestamp,pph.fe_fin) < 0,0,datediff(current_timestamp,pph.fe_fin)) as diasvence")
@@ -743,6 +761,17 @@ class Control extends Controller {
                     $proyectos[$idx]->diasvence = 0;
                 }
             }
+            //registra en el historial
+            $dproyecto = DB::table("pr_proyecto")
+                ->where("id_proyecto", $id)
+                ->where("id_empresa", $usuario->id_empresa)
+                ->select(DB::raw("ifnull(des_proyecto, concat('con ID = ',id_proyecto)) as nombre"))
+                ->first();
+            DB::table("ma_control_cambios")->insert([
+                "id_usuario" => $usuario->id_usuario,
+                "id_empresa" => $usuario->id_empresa,
+                "des_accion" => "Actualizó el proyecto " . $dproyecto->nombre
+            ]);
             return Response::json([
                 "state" => "success",
                 "data" => [
@@ -759,6 +788,7 @@ class Control extends Controller {
     function upd_responsable_proyecto() {
         extract(Request::input());
         if(isset($id, $proyecto, $hito, $responsable)) {
+            $id_proyecto = $proyecto;
             $user = Auth::user();
             $arrToUpdate = [
                 "id_responsable" => $responsable,
@@ -846,7 +876,7 @@ class Control extends Controller {
                     ->leftJoin("ma_entidad as me", "mu.cod_entidad", "=", "me.cod_entidad")
                     ->select(
                         DB::raw("ifnull(pph.des_hito, mhc.des_hito) as hito"),
-                        DB::raw("if(me.cod_entidad is null, mp.des_puesto, concat(me.des_nombre_1,' ',me.des_nombre_2,' ',me.des_nombre_3)) as responsable"),
+                        DB::raw("if(me.cod_entidad is null, mp.des_puesto, concat(ifnull(me.des_nombre_1,''),' ',ifnull(me.des_nombre_2,''),' ',ifnull(me.des_nombre_3,''))) as responsable"),
                         "pph.des_observaciones as observaciones",
                         DB::raw("if(pph.id_estado_proceso = 3,(if(datediff(current_timestamp, pph.fe_fin) > 1,'danger',if(datediff(current_timestamp, pph.fe_fin) < -1 * mhc.nu_dias_disparador,'success','warning'))),'secondary') as indicador"),
                         DB::raw("if(datediff(current_timestamp,pph.fe_fin) < 0,0,datediff(current_timestamp,pph.fe_fin)) as diasvence")
@@ -872,6 +902,27 @@ class Control extends Controller {
                     $proyectos[$idx]->diasvence = 0;
                 }
             }
+            //registra en el historial
+            if(isset($usuario)) {
+                $dusuario = DB::table("ma_usuarios as mu")
+                    ->join("ma_entidad as me", "mu.cod_entidad", "=", "me.cod_entidad")
+                    ->select(
+                        DB::raw("concat(ifnull(me.des_nombre_1,''),' ',ifnull(me.des_nombre_2,''),' ',ifnull(me.des_nombre_3,'')) as nombre")
+                    )
+                    ->where("mu.id_usuario", $usuario)
+                    ->first();
+            }
+            $dhito = DB::table("ma_hitos_control")->where("id_hito", $hito)->select("des_hito as nombre")->first();
+            $dproyecto = DB::table("pr_proyecto")
+                ->where("id_proyecto", $id_proyecto)
+                ->where("id_empresa", $user->id_empresa)
+                ->select(DB::raw("ifnull(des_proyecto, concat('con ID = ',id_proyecto)) as nombre"))
+                ->first();
+            DB::table("ma_control_cambios")->insert([
+                "id_usuario" => $user->id_usuario,
+                "id_empresa" => $user->id_empresa,
+                "des_accion" => isset($usuario) ? ("Asignó a " . $dusuario->nombre . " como responsable del hito " . $dhito->nombre. ", proyecto " . $dproyecto->nombre) : ("Retiró al responsable del proyecto " . $dproyecto->nombre)
+            ]);
             return Response::json([
                 "state" => "success",
                 "data" => [
@@ -903,6 +954,12 @@ class Control extends Controller {
                 ->where("id_empresa", $usuario->id_empresa)
                 ->select("id_area as value", "des_area as text")
                 ->get();
+            //registra en el historial
+            DB::table("ma_control_cambios")->insert([
+                "id_usuario" => $usuario->id_usuario,
+                "id_empresa" => $usuario->id_empresa,
+                "des_accion" => "Registró el área " . $area
+            ]);
             return Response::json([
                 "state" => "success",
                 "data" => [
@@ -923,7 +980,7 @@ class Control extends Controller {
             $old = DB::table("pr_proyecto")
                 ->where("id_proyecto", $id)
                 ->where("id_empresa", $usuario->id_empresa)
-                ->select("id_catalogo", "tp_orden", "des_expediente", "num_valor", "des_observaciones", "fe_inicio", "num_dias", "fe_fin", "st_vigente", "id_area", "id_direccion", "id_organo", "des_contratista", "num_armadas")
+                ->select("id_catalogo", "tp_orden", "des_expediente", "num_valor", "des_observaciones", "fe_inicio", "num_dias", "fe_fin", "st_vigente", "id_area", "id_direccion", "id_organo", "des_contratista", "num_armadas", "des_proyecto")
                 ->first();
             $hoy = date("Y-m-d H:i:s");
             $_proyecto = DB::table("pr_proyecto")->insertGetId([
@@ -965,8 +1022,49 @@ class Control extends Controller {
                     select " . $_detalle . "," . $_proyecto . ",id_hito,id_empresa,id_catalogo,id_campo
                     from pr_proyecto_hitos_campos where id_detalle = " . $hito->id_detalle . " and id_proyecto = " . $id . " and id_empresa = " . $usuario->id_empresa);
             }
+            //registra en el historial
+            DB::table("ma_control_cambios")->insert([
+                "id_usuario" => $usuario->id_usuario,
+                "id_empresa" => $usuario->id_empresa,
+                "des_accion" => "Duplicó el proyecto " . $old->des_proyecto
+            ]);
             return Response::json([
                 "state" => "success"
+            ]);
+        }
+        return Response::json([
+            "state" => "error",
+            "msg" => "Parámetros incorrectos"
+        ]);
+    }
+
+    public function ls_historial_acciones() {
+        extract(Request::input());
+        if(isset($desde, $hasta, $usuario)) {
+            $acciones = DB::table("ma_control_cambios as mcc")
+                ->leftJoin("ma_usuarios as mu", function($join) {
+                    $join->on("mcc.id_usuario", "=", "mu.id_usuario")
+                        ->on("mcc.id_empresa", "=", "mu.id_empresa");
+                })
+                ->leftJoin("ma_entidad as me", "mu.cod_entidad", "=", "me.cod_entidad")
+                ->select(
+                    "mcc.created_at as fecha",
+                    "mcc.des_accion as accion",
+                    DB::raw("concat(ifnull(me.des_nombre_1,''),' ',ifnull(me.des_nombre_2,''),' ',ifnull(me.des_nombre_3,'')) as usuario")
+                )
+                ->where(function($sql) use($usuario) {
+                    $sql->where("mcc.id_usuario", $usuario)
+                        ->orWhere(DB::raw("0"), "=", $usuario);
+                })
+                ->where("mcc.created_at", ">=", $desde . " 00:00:00")
+                ->where("mcc.created_at", "<=", $hasta . " 23:59:59")
+                ->orderBy("mcc.created_at", "desc")
+                ->get();
+            return Response::json([
+                "state" => "success",
+                "data" => [
+                    "acciones" => $acciones
+                ]
             ]);
         }
         return Response::json([

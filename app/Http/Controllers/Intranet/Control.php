@@ -143,7 +143,7 @@ class Control extends Controller {
                 ->leftJoin("ma_entidad as me", "mu.cod_entidad", "=", "me.cod_entidad")
                 ->select(
                     DB::raw("ifnull(pph.des_hito, mhc.des_hito) as hito"),
-                    DB::raw("if(me.cod_entidad is null, mp.des_puesto, concat(me.des_nombre_1,' ',me.des_nombre_2,' ',me.des_nombre_3)) as responsable"),
+                    DB::raw("if(me.cod_entidad is null, mp.des_puesto, concat(ifnull(me.des_nombre_1,''),' ',ifnull(me.des_nombre_2,''),' ',ifnull(me.des_nombre_3,''))) as responsable"),
                     "pph.des_observaciones as observaciones",
                     DB::raw("if(pph.id_estado_proceso = 3,(if(datediff(current_timestamp, pph.fe_fin) > 1,'danger',if(datediff(current_timestamp, pph.fe_fin) < -1 * mhc.nu_dias_disparador,'success','warning'))),'secondary') as indicador"),
                     DB::raw("if(datediff(current_timestamp,pph.fe_fin) < 0,0,datediff(current_timestamp,pph.fe_fin)) as diasvence")
@@ -184,7 +184,7 @@ class Control extends Controller {
             ->select(
                 "mp.id_puesto as value",
                 "uup.id_usuario as usuario",
-                DB::raw("if(uup.id_usuario is null,concat(mp.des_puesto, ' (sin asignar)'),concat(mp.des_puesto,' | ',me.des_nombre_1,' ',me.des_nombre_2,' ',me.des_nombre_3)) as text")
+                DB::raw("if(uup.id_usuario is null,concat(mp.des_puesto, ' (sin asignar)'),concat(mp.des_puesto,' | ',ifnull(me.des_nombre_1,''),' ',ifnull(me.des_nombre_2,''),' ',ifnull(me.des_nombre_3,''))) as text")
             )
             ->where("mp.st_vigente", "Vigente")
             ->orderBy("mp.des_puesto", "asc")
@@ -258,6 +258,46 @@ class Control extends Controller {
             "mensaje" => $mensaje,
         ];
         return view("control.alertas")->with($arr_data);
+    }
+
+    public function control_cambios() {
+        $usuario = Auth::user();
+        $menu = $this->ObtenerMenu($usuario);
+        $usuarios = DB::table("ma_usuarios as mu")
+            ->join("ma_entidad as me", "mu.cod_entidad", "=", "me.cod_entidad")
+            ->leftJoin("us_usuario_puesto as uup", function($join) {
+                $join->on("mu.id_empresa", "=", "uup.id_empresa")
+                    ->on("mu.id_usuario", "=", "uup.id_usuario")
+                    ->on("uup.st_vigente", "=", DB::raw("'Vigente'"));
+            })
+            ->leftJoin("ma_puesto as mp", function($join) {
+                $join->on("uup.id_empresa", "=", "mp.id_empresa")
+                    ->on("uup.id_puesto", "=", "mp.id_puesto");
+            })
+            ->leftJoin("ma_oficina as mo", function($join) {
+                $join->on("mp.id_oficina", "=", "mo.id_oficina")
+                    ->on("mp.id_empresa", "=", "mo.id_empresa");
+            })
+            ->select(
+                "mu.id_usuario as id",
+                "mu.cod_entidad as dni",
+                DB::raw("concat(ifnull(me.des_nombre_1,''),' ',ifnull(me.des_nombre_2,''),' ',ifnull(me.des_nombre_3,'')) as nombre"),
+                DB::raw("ifnull(mp.des_puesto,'(sin asignar)') as puesto")
+            )
+            ->where("mu.id_empresa", $usuario->id_empresa)
+            ->orderBy("nombre", "asc")
+            ->get();
+        $inicio = date("Y-m-") . "01";
+        $fin = date("Y-m-d", strtotime($inicio . " +1 month -1 day"));
+        //
+        $arr_data = [
+            "usuario" => $usuario,
+            "menu" => $menu,
+            "usuarios" => $usuarios,
+            "inicio" => $inicio,
+            "fin" => $fin,
+        ];
+        return view("control.cambios")->with($arr_data);
     }
 
 }

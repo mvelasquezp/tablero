@@ -133,6 +133,12 @@ class Estandarizacion extends Controller {
 	        	)
 	        	->orderBy("id", "asc")
 	            ->get();
+            //registra en el historial
+            DB::table("ma_control_cambios")->insert([
+                "id_usuario" => $usuario->id_usuario,
+                "id_empresa" => $usuario->id_empresa,
+                "des_accion" => "Registró el campo " . $nombre
+            ]);
             return Response::json([
                 "state" => "success",
                 "data" => [
@@ -202,6 +208,12 @@ class Estandarizacion extends Controller {
 		    	)
 		    	->orderBy("id", "asc")
 		    	->get();
+            //registra en el historial
+            DB::table("ma_control_cambios")->insert([
+                "id_usuario" => $usuario->id_usuario,
+                "id_empresa" => $usuario->id_empresa,
+                "des_accion" => "Registró el hito " . $nombre
+            ]);
             return Response::json([
                 "state" => "success",
                 "data" => [
@@ -218,6 +230,7 @@ class Estandarizacion extends Controller {
     public function sv_eproceso() {
     	extract(Request::input());
     	if(isset($estado, $codigo)) {
+            $usuario = Auth::user();
     		DB::table("sys_estados")->insert([
     			"des_estado" => $estado,
     			"cod_estado" => $codigo,
@@ -234,6 +247,12 @@ class Estandarizacion extends Controller {
 	    		)
 	    		->orderBy("id", "asc")
 	    		->get();
+            //registra en el historial
+            DB::table("ma_control_cambios")->insert([
+                "id_usuario" => $usuario->id_usuario,
+                "id_empresa" => $usuario->id_empresa,
+                "des_accion" => "Registró el estado de proceso " . $estado
+            ]);
             return Response::json([
                 "state" => "success",
                 "data" => [
@@ -250,6 +269,7 @@ class Estandarizacion extends Controller {
     public function sv_econtrol() {
     	extract(Request::input());
     	if(isset($estado, $codigo)) {
+            $usuario = Auth::user();
     		DB::table("sys_estados")->insert([
     			"des_estado" => $estado,
     			"cod_estado" => $codigo,
@@ -266,6 +286,12 @@ class Estandarizacion extends Controller {
 	    		)
 	    		->orderBy("id", "asc")
 	    		->get();
+            //registra en el historial
+            DB::table("ma_control_cambios")->insert([
+                "id_usuario" => $usuario->id_usuario,
+                "id_empresa" => $usuario->id_empresa,
+                "des_accion" => "Registró el estado de control " . $estado
+            ]);
             return Response::json([
                 "state" => "success",
                 "data" => [
@@ -342,6 +368,14 @@ class Estandarizacion extends Controller {
                     "mc.st_obligatorio as obligatorio"
                 )
                 ->get();
+            //registra en el historial
+            $dcampo = DB::table("ma_campos")->where("id_campo", $campo)->select("des_campo")->first();
+            $dhito = DB::table("ma_hitos_control")->where("id_hito", $hito)->select("des_hito")->first();
+            DB::table("ma_control_cambios")->insert([
+                "id_usuario" => $usuario->id_usuario,
+                "id_empresa" => $usuario->id_empresa,
+                "des_accion" => "Asignó el campo " . $dcampo->des_campo . " al hito de control " . $dhito->des_hito
+            ]);
     		return Response::json([
     			"state" => "success",
                 "data" => [
@@ -381,6 +415,14 @@ class Estandarizacion extends Controller {
                     "mc.st_obligatorio as obligatorio"
                 )
                 ->get();
+            //registra en el historial
+            $dcampo = DB::table("ma_campos")->where("id_campo", $campo)->select("des_campo")->first();
+            $dhito = DB::table("ma_hitos_control")->where("id_hito", $hito)->select("des_hito")->first();
+            DB::table("ma_control_cambios")->insert([
+                "id_usuario" => $usuario->id_usuario,
+                "id_empresa" => $usuario->id_empresa,
+                "des_accion" => "Retiró el campo " . $dcampo->des_campo . " del hito de control " . $dhito->des_hito
+            ]);
     		return Response::json([
     			"state" => "success",
                 "data" => [
@@ -716,6 +758,12 @@ class Estandarizacion extends Controller {
             $puntajes = DB::table("pr_valoracion")
                 ->select("id_estado_p as pest", "id_estado_c as cest", "num_puntaje as puntaje")
                 ->get();
+            //registra en el historial
+            DB::table("ma_control_cambios")->insert([
+                "id_usuario" => $usuario->id_usuario,
+                "id_empresa" => $usuario->id_empresa,
+                "des_accion" => "Actualizó la matriz de valoración"
+            ]);
             return Response::json([
                 "state" => "success",
                 "data" => [
@@ -748,6 +796,12 @@ class Estandarizacion extends Controller {
                 )
                 ->orderBy("des_organo", "asc")
                 ->get();
+            //registra en el historial
+            DB::table("ma_control_cambios")->insert([
+                "id_usuario" => $usuario->id_usuario,
+                "id_empresa" => $usuario->id_empresa,
+                "des_accion" => "Registró el órgano central " . $nombre
+            ]);
             return Response::json([
                 "state" => "success",
                 "data" => [
@@ -771,6 +825,12 @@ class Estandarizacion extends Controller {
                 "des_direccion" => $nombre,
                 "des_abreviatura" => $abrev
             ]);
+            //registra en el historial
+            DB::table("ma_control_cambios")->insert([
+                "id_usuario" => $usuario->id_usuario,
+                "id_empresa" => $usuario->id_empresa,
+                "des_accion" => "Registró la dirección general " . $nombre
+            ]);
             //
             $direcciones = DB::table("ma_direccion_central as mdc")
                 ->join("ma_organo_control as moc", function($join) {
@@ -784,6 +844,44 @@ class Estandarizacion extends Controller {
                     "mdc.des_abreviatura as abrev"
                 )
                 ->orderBy("mdc.des_direccion", "asc")
+                ->get();
+            return Response::json([
+                "state" => "success",
+                "data" => [
+                    "direcciones" => $direcciones
+                ]
+            ]);
+        }
+        return Response::json([
+            "state" => "error",
+            "msg" => "Parámetros incorrectos"
+        ]);
+    }
+
+    public function sv_direccion_2() {
+        extract(Request::input());
+        if(isset($organo, $nombre, $abrev)) {
+            $usuario = Auth::user();
+            DB::table("ma_direccion_central")->insert([
+                "id_empresa" => $usuario->id_empresa,
+                "id_organo" => $organo,
+                "des_direccion" => $nombre,
+                "des_abreviatura" => $abrev
+            ]);
+            //registra en el historial
+            DB::table("ma_control_cambios")->insert([
+                "id_usuario" => $usuario->id_usuario,
+                "id_empresa" => $usuario->id_empresa,
+                "des_accion" => "Registró la dirección general " . $nombre
+            ]);
+            //
+            $direcciones = DB::table("ma_direccion_central")
+                ->where("id_organo", $organo)
+                ->select(
+                    "id_direccion as value",
+                    "des_direccion as text"
+                )
+                ->orderBy("des_direccion", "asc")
                 ->get();
             return Response::json([
                 "state" => "success",
@@ -831,6 +929,12 @@ class Estandarizacion extends Controller {
                 "id_empresa" => $usuario->id_empresa,
                 "des_area" => $nombre,
                 "des_abreviatura" => $abrev
+            ]);
+            //registra en el historial
+            DB::table("ma_control_cambios")->insert([
+                "id_usuario" => $usuario->id_usuario,
+                "id_empresa" => $usuario->id_empresa,
+                "des_accion" => "Registró el área usuaria " . $nombre
             ]);
             $areas = DB::table("ma_area_usuaria as mau")
                 ->join("ma_direccion_central as mdc", function($join) {
@@ -933,6 +1037,13 @@ class Estandarizacion extends Controller {
                 ->update([
                     "st_vigente" => "Retirado"
                 ]);
+            //registra en el historial
+            $dhito = DB::table("ma_hitos_control")->where("id_hito", $id)->select("des_hito")->first();
+            DB::table("ma_control_cambios")->insert([
+                "id_usuario" => $usuario->id_usuario,
+                "id_empresa" => $usuario->id_empresa,
+                "des_accion" => "Eliminó el hito " . $dhito->des_hito
+            ]);
             //
             $hitos = DB::table("ma_hitos_control as mhc")
                 ->where("mhc.id_empresa", $usuario->id_empresa)
@@ -1073,6 +1184,13 @@ class Estandarizacion extends Controller {
                 )
                 ->orderBy("des_organo", "asc")
                 ->get();
+            //registra en el historial
+            $dorgano = DB::table("ma_organo_control")->where("id_organo", $id)->select("des_organo as nombre")->first();
+            DB::table("ma_control_cambios")->insert([
+                "id_usuario" => $usuario->id_usuario,
+                "id_empresa" => $usuario->id_empresa,
+                "des_accion" => "Actualizó el órgano central  " . $dorgano->nombre
+            ]);
             return Response::json([
                 "state" => "success",
                 "data" => [
@@ -1112,6 +1230,13 @@ class Estandarizacion extends Controller {
                 ->orderBy("moc.des_organo", "asc")
                 ->orderBy("mdc.des_direccion", "asc")
                 ->get();
+            //registra en el historial
+            $ddireccion = DB::table("ma_direccion_central")->where("id_direccion", $id)->select("des_direccion as nombre")->first();
+            DB::table("ma_control_cambios")->insert([
+                "id_usuario" => $usuario->id_usuario,
+                "id_empresa" => $usuario->id_empresa,
+                "des_accion" => "Actualizó el órgano central  " . $ddireccion->nombre
+            ]);
             return Response::json([
                 "state" => "success",
                 "data" => [
@@ -1160,6 +1285,13 @@ class Estandarizacion extends Controller {
                 ->orderBy("mdc.des_direccion", "asc")
                 ->orderBy("mau.des_area", "asc")
                 ->get();
+            //registra en el historial
+            $darea = DB::table("ma_area_usuaria")->where("id_area", $id)->select("des_area as nombre")->first();
+            DB::table("ma_control_cambios")->insert([
+                "id_usuario" => $usuario->id_usuario,
+                "id_empresa" => $usuario->id_empresa,
+                "des_accion" => "Actualizó el área usuaria  " . $darea->nombre
+            ]);
             return Response::json([
                 "state" => "success",
                 "data" => [
@@ -1183,6 +1315,12 @@ class Estandarizacion extends Controller {
                 ->update([
                     "nu_dias_disparador" => $disparador
                 ]);
+            $dhito = DB::table("ma_hitos_control")->where("id_hito", $hito)->select("des_hito")->first();
+            DB::table("ma_control_cambios")->insert([
+                "id_usuario" => $usuario->id_usuario,
+                "id_empresa" => $usuario->id_empresa,
+                "des_accion" => "Actualizó el disparador del hito " . $dhito->des_hito . " en " . $disparador . " días"
+            ]);
             return Response::json([
                 "state" => "success"
             ]);

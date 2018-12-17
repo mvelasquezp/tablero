@@ -35,6 +35,7 @@ Route::middleware("auth")->namespace("Intranet")->group(function() {
 			Route::get("resumen", "Control@resumen");
 			Route::get("crea-proyecto", "Control@crear");
 			Route::get("alertas", "Control@alertas");
+			Route::get("control-cambios", "Control@control_cambios");
 		});
 		//modulo de informes
 		Route::prefix("reportes")->group(function() {
@@ -104,6 +105,9 @@ Route::middleware("auth")->namespace("Ajax")->prefix("ajax")->group(function() {
 		Route::post("ed-direccion", "Estandarizacion@ed_direccion");
 		Route::post("ed-area", "Estandarizacion@ed_area");
 		Route::post("upd-dias-disparador", "Estandarizacion@upd_dias_disparador");
+		//
+		Route::post("ls-combo-organos", "Estandarizacion@ls_combo_organos");
+		Route::post("sv-direccion-2", "Estandarizacion@sv_direccion_2");
 	});
 	//modulo de control de proyectos
 	Route::prefix("control")->group(function() {
@@ -119,6 +123,7 @@ Route::middleware("auth")->namespace("Ajax")->prefix("ajax")->group(function() {
 		Route::post("fl-busca-campo", "Control@fl_busca_campo");
 		Route::post("sv-mensaje", "Control@sv_mensaje");
 		Route::post("clona-proyecto", "Control@clona_proyecto");
+		Route::post("ls-historial-acciones", "Control@ls_historial_acciones");
 	});
 	//opciones generales
 	Route::prefix("intranet")->group(function() {

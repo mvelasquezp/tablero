@@ -83,6 +83,7 @@
                                     <label class="mb-1" for="np-organo">Órgano central</label>
                                     <select class="form-control form-control-sm" id="np-organo">
                                         <option value="0" selected disabled>- Seleccione -</option>
+                                        <option class="text-success" value="888">Nuevo órgano central</option>
                                         @foreach($organos as $organo)
                                         <option value="{{ $organo->value }}">{{ $organo->text }}</option>
                                         @endforeach
@@ -102,10 +103,10 @@
                                         <option value="0" selected disabled>- Seleccione -</option>
                                     </select>
                                 </div>
-                                <div class="col-2">
+                                <!--div class="col-2">
                                     <label class="mb-1">&nbsp;</label>
                                     <a id="bt-nuevo" href="#" data-toggle="modal" data-target="#modal-nuevo" class="btn btn-sm btn-primary text-light" style="display:none;"><i class="fas fa-plus"></i> Nuevo</a>
-                                </div>
+                                </div-->
                             </div>
                             <div class="row mb-3">
                                 <div class="col">
@@ -203,6 +204,72 @@
                                 <div class="col">
                                     <label for="na-abrev">Abreviatura</label>
                                     <input type="text" class="form-control form-control-sm" placeholder="Abreviatura" id="na-abrev">
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-primary"><i class="fas fa-save"></i> Guardar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- modals -->
+        <div id="modal-nuevo-organo" class="modal fade" tabindex="-1" role="dialog">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Nuevo órgano central</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form>
+                            <div class="form-row mb-3">
+                                <div class="col">
+                                    <label for="no-organo">Nombre</label>
+                                    <input type="text" class="form-control form-control-sm" placeholder="Nombre de la dirección" id="no-organo">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="col">
+                                    <label for="no-abrev">Abreviatura</label>
+                                    <input type="text" class="form-control form-control-sm" placeholder="Abreviatura" id="no-abrev">
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-primary"><i class="fas fa-save"></i> Guardar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- modals -->
+        <div id="modal-nueva-direccion" class="modal fade" tabindex="-1" role="dialog">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Nueva dirección general</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form>
+                            <div class="form-row mb-3">
+                                <div class="col">
+                                    <label for="nd-direccion">Nombre</label>
+                                    <input type="text" class="form-control form-control-sm" placeholder="Nombre dirección central" id="nd-direccion">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="col">
+                                    <label for="nd-abrev">Abreviatura</label>
+                                    <input type="text" class="form-control form-control-sm" placeholder="Abreviatura" id="nd-abrev">
                                 </div>
                             </div>
                         </form>
@@ -354,50 +421,72 @@ console.log(sTipo);
                 }, "json");
             }
             function NpOrganoOnChange(event) {
-                var p = {
-                    _token: "{{ csrf_token() }}",
-                    organo: $(this).val()
-                };
-                $.post("{{ url('ajax/estandarizacion/ls-combo-direcciones') }}", p, function(response) {
-                    if(response.state == "success") {
-                        var cmb_direcciones = response.data.direcciones;
-                        var combo = $("#np-direccion");
-                        combo.empty().append(
-                            $("<option/>").val(0).html("- Seleccione -").prop("selected", true).prop("disabled", true)
-                        );
-                        for(var k in cmb_direcciones) {
-                            var kdireccion = cmb_direcciones[k];
-                            combo.append(
-                                $("<option/>").val(kdireccion.value).html(kdireccion.text)
+                const cOrgano = $(this).val();
+                if(cOrgano == 888) {
+                    $("#modal-nuevo-organo").modal("show");
+                }
+                else {
+                    const p = {
+                        _token: "{{ csrf_token() }}",
+                        organo: cOrgano
+                    };
+                    $.post("{{ url('ajax/estandarizacion/ls-combo-direcciones') }}", p, function(response) {
+                        if(response.state == "success") {
+                            var cmb_direcciones = response.data.direcciones;
+                            var combo = $("#np-direccion");
+                            combo.empty().append(
+                                $("<option/>").val(0).html("- Seleccione -").prop("selected", true).prop("disabled", true)
+                            ).append(
+                                $("<option/>").val(888).html("Nueva dirección general").addClass("text-success")
                             );
+                            for(var k in cmb_direcciones) {
+                                var kdireccion = cmb_direcciones[k];
+                                combo.append(
+                                    $("<option/>").val(kdireccion.value).html(kdireccion.text)
+                                );
+                            }
                         }
-                    }
-                    else alert(response.msg);
-                }, "json");
+                        else alert(response.msg);
+                    }, "json");
+                }
             }
             function NpDireccionOnChange(event) {
-                var p = {
-                    _token: "{{ csrf_token() }}",
-                    organo: document.getElementById("np-organo").value,
-                    direccion: $(this).val()
-                };
-                $("#bt-nuevo").fadeIn(150);
-                $.post("{{ url('ajax/estandarizacion/ls-combo-areas') }}", p, function(response) {
-                    if(response.state == "success") {
-                        var cmb_direcciones = response.data.areas;
-                        var combo = $("#np-area");
-                        combo.empty().append(
-                            $("<option/>").val(0).html("- Seleccione -").prop("selected", true).prop("disabled", true)
-                        );
-                        for(var k in cmb_direcciones) {
-                            var kdireccion = cmb_direcciones[k];
-                            combo.append(
-                                $("<option/>").val(kdireccion.value).html(kdireccion.text)
+                const cDireccion = $(this).val();
+                if(cDireccion == 888) {
+                    $("#modal-nueva-direccion").modal("show");
+                }
+                else {
+                    var p = {
+                        _token: "{{ csrf_token() }}",
+                        organo: document.getElementById("np-organo").value,
+                        direccion: cDireccion
+                    };
+                    $("#bt-nuevo").fadeIn(150);
+                    $.post("{{ url('ajax/estandarizacion/ls-combo-areas') }}", p, function(response) {
+                        if(response.state == "success") {
+                            var cmb_direcciones = response.data.areas;
+                            var combo = $("#np-area");
+                            combo.empty().append(
+                                $("<option/>").val(0).html("- Seleccione -").prop("selected", true).prop("disabled", true)
+                            ).append(
+                                $("<option/>").val(888).html("Nueva área usuaria").addClass("text-success")
                             );
+                            for(var k in cmb_direcciones) {
+                                var kdireccion = cmb_direcciones[k];
+                                combo.append(
+                                    $("<option/>").val(kdireccion.value).html(kdireccion.text)
+                                );
+                            }
                         }
-                    }
-                    else alert(response.msg);
-                }, "json");
+                        else alert(response.msg);
+                    }, "json");
+                }
+            }
+            function NpAreaOnChange() {
+                const cArea = $(this).val();
+                if(cArea == 888) {
+                    $("#modal-nuevo").modal("show");
+                }
             }
             function GuardarProyecto(event) {
                 event.preventDefault();
@@ -567,10 +656,87 @@ console.log(sTipo);
                     $("<option/>").val(0).html("Seleccione")
                 );
             }
+            function ModalNuevoOrganoOnShow(event) {
+                $("#no-organo").val("");
+                $("#no-abrev").val("");
+            }
+            function ModalNuevaDireccionOnShow(event) {
+                $("#nd-direccion").val("");
+                $("#nd-abrev").val("");
+            }
+            function GuardarOrgano(event) {
+                event.preventDefault();
+                //
+                const p = {
+                    _token: "{{ csrf_token() }}",
+                    nombre: document.getElementById("no-organo").value,
+                    abrev: document.getElementById("no-abrev").value
+                }
+                $.post("{{ url('ajax/estandarizacion/sv-organo') }}", p, (response) => {
+                    if(response.state == "success") {
+                        $("#modal-nuevo-organo").modal("hide");
+                        const select = $("#np-organo");
+                        select.empty().append(
+                            $("<option/>").val(0).html("- Seleccione -").prop("selected", true).prop("disabled", true)
+                        ).append(
+                            $("<option/>").val(888).html("Nuevo órgano de control").addClass("text-success")
+                        );
+                        const organos = response.data.organos;
+                        for(var i in organos) {
+                            const iOrgano = organos[i];
+                            select.append(
+                                $("<option/>").val(iOrgano.id).html(iOrgano.organo)
+                            );
+                        }
+                        //resetea los combos siguientes
+                        $("#np-direccion").empty().append(
+                            $("<option/>").val(0).html("- Seleccione -").prop("selected", true).prop("disabled", true)
+                        );
+                        $("#np-area").empty().append(
+                            $("<option/>").val(0).html("- Seleccione -").prop("selected", true).prop("disabled", true)
+                        );
+                    }
+                    else alert(response.msg);
+                }, "json");
+            }
+            function GuardarDireccion(event) {
+                event.preventDefault();
+                //
+                const p = {
+                    _token: "{{ csrf_token() }}",
+                    nombre: document.getElementById("nd-direccion").value,
+                    abrev: document.getElementById("nd-abrev").value,
+                    organo: document.getElementById("np-organo").value
+                }
+                $.post("{{ url('ajax/estandarizacion/sv-direccion-2') }}", p, (response) => {
+                    if(response.state == "success") {
+                        $("#modal-nueva-direccion").modal("hide");
+                        const select = $("#np-direccion");
+                        select.empty().append(
+                            $("<option/>").val(0).html("- Seleccione -").prop("selected", true).prop("disabled", true)
+                        ).append(
+                            $("<option/>").val(888).html("Nueva área usuaria").addClass("text-success")
+                        );
+                        const direcciones = response.data.direcciones;
+                        for(var i in direcciones) {
+                            const iDireccion = direcciones[i];
+                            select.append(
+                                $("<option/>").val(iDireccion.value).html(iDireccion.text)
+                            );
+                        }
+                        //resetea los combos siguientes
+                        $("#np-area").empty().append(
+                            $("<option/>").val(0).html("- Seleccione -").prop("selected", true).prop("disabled", true)
+                        );
+                    }
+                    else alert(response.msg);
+                }, "json");
+            }
             //
             $("#np-catalogo").on("change", NpCatalogoOnChange);
             $("#np-organo").on("change", NpOrganoOnChange);
             $("#np-direccion").on("change", NpDireccionOnChange);
+            $("#np-area").on("change", NpAreaOnChange);
             $("#np-armadas").on("change", MuestraHitosControl);
             $("#modal-responsables").on("show.bs.modal", ModalResponsablesOnShow);
             $("#modal-responsables .modal-footer .btn-primary").on("click", GuardarProyecto);
@@ -578,6 +744,11 @@ console.log(sTipo);
             $("#modal-nuevo .modal-footer .btn-primary").on("click", GuardarAreaUsuaria);
             $("#np-valor").on("keydown", ValidarNumeroDecimal);
             $("#np-plazo").on("keydown", ValidarNumeroEntero);
+            //
+            $("#modal-nuevo-organo").on("show.bs.modal", ModalNuevoOrganoOnShow);
+            $("#modal-nuevo-organo .modal-footer .btn-primary").on("click", GuardarOrgano);
+            $("#modal-nueva-direccion").on("show.bs.modal", ModalNuevaDireccionOnShow);
+            $("#modal-nueva-direccion .modal-footer .btn-primary").on("click", GuardarDireccion);
             //
             var element = document.getElementById('np-expediente');
             var maskOptions = {

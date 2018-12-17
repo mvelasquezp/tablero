@@ -74,6 +74,12 @@ class Registros extends Controller {
                 ->where("id_mensaje", 2)
                 ->select("des_titulo as titulo", "des_cuerpo as cuerpo", "des_boton as despedida")
                 ->first();
+            //registra en el historial
+            DB::table("ma_control_cambios")->insert([
+                "id_usuario" => $usuario->id_usuario,
+                "id_empresa" => $usuario->id_empresa,
+                "des_accion" => "Registró al usuario " . $nombres . " " . $apepat . " " . $apemat
+            ]);
             //envia el mail
             $maildata = [
                 "nombre" => $nombres,
@@ -245,6 +251,12 @@ class Registros extends Controller {
                 $nuevoPuesto["id_oficina"] = $oficina;
             }
             DB::table("ma_puesto")->insert($nuevoPuesto);
+            //registra en el historial
+            DB::table("ma_control_cambios")->insert([
+                "id_usuario" => $usuario->id_usuario,
+                "id_empresa" => $usuario->id_empresa,
+                "des_accion" => "Registró el cargo " . $nombre
+            ]);
             //carga datos
             $puestos = DB::table("ma_puesto as mp")
                 ->leftJoin("us_usuario_puesto as uup", function($join) {
@@ -357,6 +369,12 @@ class Registros extends Controller {
                     "id_puesto" => $cargo
                 ]);
             }
+            //registra en el historial
+            DB::table("ma_control_cambios")->insert([
+                "id_usuario" => $usuario->id_usuario,
+                "id_empresa" => $usuario->id_empresa,
+                "des_accion" => "Actualizó al usuario " . $nombres . " " . $apepat . " " . $apemat
+            ]);
             //mail
             $mensaje = DB::table("sys_mensaje")
                 ->where("id_mensaje", 2)
@@ -488,6 +506,12 @@ class Registros extends Controller {
             DB::table("ma_puesto")
                 ->where("id_puesto", $id)
                 ->update($arrUpd);
+            //registra en el historial
+            DB::table("ma_control_cambios")->insert([
+                "id_usuario" => $usuario->id_usuario,
+                "id_empresa" => $usuario->id_empresa,
+                "des_accion" => "Actualizó el puesto " . $nombre
+            ]);
             //carga datos
             $puestos = DB::table("ma_puesto as mp")
                 ->leftJoin("us_usuario_puesto as uup", function($join) {
@@ -572,6 +596,12 @@ class Registros extends Controller {
                 "id_empresa" => $usuario->id_empresa,
                 "des_oficina" => $nombre,
                 "num_jerarquia" => 1
+            ]);
+            //registra en el historial
+            DB::table("ma_control_cambios")->insert([
+                "id_usuario" => $usuario->id_usuario,
+                "id_empresa" => $usuario->id_empresa,
+                "des_accion" => "Registró la oficina " . $nombre
             ]);
             //carga nueva lista de oficinas
             $oficinas = DB::table("ma_oficina")
